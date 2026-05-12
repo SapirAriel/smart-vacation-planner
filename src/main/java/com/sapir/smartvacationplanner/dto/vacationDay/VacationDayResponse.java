@@ -1,0 +1,51 @@
+package com.sapir.smartvacationplanner.dto.vacationDay;
+import java.time.LocalDate;
+import com.sapir.smartvacationplanner.entity.enums.DayType;
+
+public class VacationDayResponse {
+    private Integer id;
+    private Integer vacationId;
+    private LocalDate date;
+    private Integer dayNumber;
+    private DayType dayType;
+
+    public Integer getId() {
+        return id;
+    }
+    public Integer getVacationId() {
+        return vacationId;
+    }
+    public LocalDate getDate() {
+        return date;
+    }
+    public Integer getDayNumber() {
+        return dayNumber;
+    }
+    public DayType getDayType() {
+        return dayType;
+    }
+    public void setId(Integer id) {
+        this.id = id;
+    }
+    public void setVacationId(Integer vacationId) {
+        this.vacationId = vacationId;
+    }
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+    public void setDayNumber(Integer dayNumber) {
+        this.dayNumber = dayNumber;
+    }
+    public void setDayType(DayType dayType) {
+        this.dayType = dayType;
+    }
+    public String toString() {
+        return "VacationDayResponse{" +
+            "id=" + id +
+            ", vacationId=" + vacationId +
+            ", date=" + date +
+            ", dayNumber=" + dayNumber +
+            ", dayType=" + dayType +
+            '}';
+    }
+}
