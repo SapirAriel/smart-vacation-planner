@@ -9,17 +9,27 @@ import com.sapir.smartvacationplanner.repository.VacationDayRepository;
 import com.sapir.smartvacationplanner.repository.VacationRepository;
 import com.sapir.smartvacationplanner.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import com.sapir.smartvacationplanner.entity.Activity;
+import com.sapir.smartvacationplanner.repository.ActivityRepository;
+import java.time.temporal.ChronoUnit;
+
+/**
+ * VacationDayServiceImpl is a service implementation for the VacationDay entity.
+ * It is used to perform CRUD operations on the VacationDay entity.
+ */
 
 @Service
 public class VacationDayServiceImpl implements VacationDayService {
 
     private final VacationDayRepository vacationDayRepository;
     private final VacationRepository vacationRepository;
+    private final ActivityRepository activityRepository;
 
     public VacationDayServiceImpl(VacationDayRepository vacationDayRepository,
-            VacationRepository vacationRepository) {
+            VacationRepository vacationRepository, ActivityRepository activityRepository) {
         this.vacationDayRepository = vacationDayRepository;
         this.vacationRepository = vacationRepository;
+        this.activityRepository = activityRepository;
     }
 
     @Override
@@ -83,6 +93,11 @@ public class VacationDayServiceImpl implements VacationDayService {
     }
 
     @Override
+    public List<Activity> getActivities(Integer vacationDayId) {
+        return activityRepository.findByVacationDay_Id(vacationDayId);
+    }
+
+    @Override
     public void deleteVacationDay(Integer vacationId, Integer id) {
         getVacationDayById(vacationId, id);        
         vacationDayRepository.deleteById(id);
@@ -98,7 +113,9 @@ public class VacationDayServiceImpl implements VacationDayService {
         && vacationDay.getDate().isAfter(vacationDay.getVacation().getEndDate())) {
             throw new IllegalArgumentException("date must be on or before vacation endDate");}
 
-        if (vacationDay.getDayNumber() < 1) {
-            throw new IllegalArgumentException("day number must be greater than 0");}
+        long vacationDuration = ChronoUnit.DAYS.between(vacationDay.getVacation().getStartDate(), vacationDay.getVacation().getEndDate());
+        if (vacationDay.getDayNumber() > vacationDuration) {
+            throw new IllegalArgumentException("day number must be less than or equal to vacation duration");}
+
     }
 }

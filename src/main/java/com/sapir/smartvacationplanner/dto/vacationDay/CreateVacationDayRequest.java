@@ -2,12 +2,19 @@ package com.sapir.smartvacationplanner.dto.vacationDay;
 import java.time.LocalDate;
 import jakarta.validation.constraints.NotNull;
 import com.sapir.smartvacationplanner.entity.enums.DayType;
+import jakarta.validation.constraints.Positive;
+
+/**
+ * CreateVacationDayRequest is a DTO for creating a new vacation day.
+ * It is used to validate the request body for the create vacation day endpoint.
+ */
 
 public class CreateVacationDayRequest {
 
     @NotNull(message = "Date is required")
     private LocalDate date;
 
+    @Positive(message = "Day number must be greater than 0")
     @NotNull(message = "Day number is required")
     private Integer dayNumber;
 
@@ -35,4 +42,4 @@ public class CreateVacationDayRequest {
         this.dayType = dayType;
     }
 
-}
+} //CreateVacationDayRequest

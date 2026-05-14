@@ -7,6 +7,11 @@ import com.sapir.smartvacationplanner.repository.VacationDayRepository;
 import com.sapir.smartvacationplanner.exception.ResourceNotFoundException;
 import com.sapir.smartvacationplanner.entity.VacationDay;
 
+/**
+ * VacationServiceImpl is a service implementation for the Vacation entity.
+ * It is used to perform CRUD operations on the Vacation entity.
+ */
+
 @Service
 public class VacationServiceImpl implements VacationService {
 
@@ -33,23 +38,13 @@ public class VacationServiceImpl implements VacationService {
     @Override
     public Vacation createVacation(Vacation vacation) {
         
-        if (vacation.getStartDate() != null && vacation.getEndDate() != null
-             && vacation.getEndDate().isBefore(vacation.getStartDate())) {
-            throw new IllegalArgumentException("endDate must be after or equal to startDate");}
-
+        validateVacationConstraints(vacation);
         return vacationRepository.save(vacation);
     }
 
     @Override
 
     public Vacation updateVacation(Integer id, Vacation vacation) {
-        if (vacation == null) {
-            throw new IllegalArgumentException("Vacation cannot be null");
-        }
-
-        if (vacation.getStartDate() != null && vacation.getEndDate() != null
-            && vacation.getEndDate().isBefore(vacation.getStartDate())) {
-            throw new IllegalArgumentException("endDate must be after or equal to startDate");}
 
         Vacation existingVacation = getVacationById(id);
 
@@ -61,6 +56,8 @@ public class VacationServiceImpl implements VacationService {
         existingVacation.setTravelerType(vacation.getTravelerType());
         existingVacation.setBudget(vacation.getBudget());
         existingVacation.setPace(vacation.getPace());
+    
+        validateVacationConstraints(existingVacation);
         return vacationRepository.save(existingVacation);
     }
 
@@ -106,5 +103,11 @@ public class VacationServiceImpl implements VacationService {
         if (existingVacation == null) {
             throw new IllegalArgumentException("Vacation not found with id: " + id);}
         vacationRepository.delete(existingVacation);
+    }
+
+    private void validateVacationConstraints(Vacation vacation) {
+        if (vacation.getStartDate() != null && vacation.getEndDate() != null
+            && vacation.getEndDate().isBefore(vacation.getStartDate())) {
+            throw new IllegalArgumentException("endDate must be after or equal to startDate");}
     }
 }

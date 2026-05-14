@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.List;
 import com.sapir.smartvacationplanner.entity.VacationDay;
 import com.sapir.smartvacationplanner.service.VacationDayService;
@@ -19,6 +18,10 @@ import com.sapir.smartvacationplanner.dto.vacationDay.VacationDayResponse;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 
+/**
+ * VacationDayController is a controller for the VacationDay entity.
+ * It is used to perform CRUD operations on the VacationDay entity.
+ */
 
 @RestController
 @RequestMapping("/api/v1/vacations/{vacationId}/days")

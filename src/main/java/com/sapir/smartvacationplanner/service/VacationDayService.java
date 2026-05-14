@@ -4,6 +4,12 @@ import com.sapir.smartvacationplanner.entity.VacationDay;
 import com.sapir.smartvacationplanner.dto.vacationDay.CreateVacationDayRequest;
 import com.sapir.smartvacationplanner.dto.vacationDay.UpdateVacationDayRequest;
 import com.sapir.smartvacationplanner.dto.vacationDay.PatchVacationDayRequest;
+import com.sapir.smartvacationplanner.entity.Activity;
+
+/**
+ * VacationDayService is a service interface for the VacationDay entity.
+ * It is used to perform CRUD operations on the VacationDay entity.
+ */
 
 public interface VacationDayService {
 
@@ -16,6 +22,8 @@ public interface VacationDayService {
     VacationDay updateVacationDay(Integer vacationId, Integer id, UpdateVacationDayRequest request);
 
     VacationDay patchVacationDay(Integer vacationId, Integer id, PatchVacationDayRequest request);
+
+    List<Activity> getActivities(Integer vacationDayId);
 
     void deleteVacationDay(Integer vacationId,Integer id);
 }

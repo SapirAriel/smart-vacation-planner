@@ -2,6 +2,14 @@ package com.sapir.smartvacationplanner.entity;
 import java.time.LocalDate;
 import jakarta.persistence.*;
 import com.sapir.smartvacationplanner.entity.enums.DayType;
+import java.util.List;
+import java.util.ArrayList;
+
+/**
+ * VacationDay entity represents a day of a vacation.
+ * It is a nested resource of Vacation.
+ * It is used to store the day details such as date, day number, and day type.
+ */
 
 @Entity
 @Table(name = "vacation_days")
@@ -27,15 +35,27 @@ private int dayNumber;
 @Enumerated(EnumType.STRING)
 private DayType dayType;
 
+@OneToMany(mappedBy = "vacationDay")
+private List<Activity> activities = new ArrayList<>();
+
 public VacationDay() {
 }
 
 public VacationDay(Vacation vacation, LocalDate date, int dayNumber, DayType dayType) {
+    
     this.vacation = vacation;
     this.date = date;
     this.dayNumber = dayNumber;
     this.dayType = dayType;
-}           
+}     
+
+public VacationDay(Vacation vacation, LocalDate date, int dayNumber, DayType dayType, List<Activity> activities) {
+    this.vacation = vacation;
+    this.date = date;
+    this.dayNumber = dayNumber;
+    this.dayType = dayType;
+    this.activities = activities;
+}
 
 public int getId() {
     return id;
@@ -52,6 +72,9 @@ public int getDayNumber() {
 }
 public DayType getDayType() {
     return dayType;
+}
+public List<Activity> getActivities() {
+    return activities;
 }
 
 public void setId(int id) {
@@ -70,6 +93,9 @@ public void setDayNumber(int dayNumber) {
 public void setDayType(DayType dayType) {
     this.dayType = dayType;
 }
+public void setActivities(List<Activity> activities) {
+    this.activities = activities;
+}
 
 @Override
 public String toString() {
@@ -79,6 +105,7 @@ public String toString() {
         ", date=" + date +
         ", dayNumber=" + dayNumber +
         ", dayType='" + dayType + '\'' +
+        ", activities=" + activities +
         '}';
 }
 

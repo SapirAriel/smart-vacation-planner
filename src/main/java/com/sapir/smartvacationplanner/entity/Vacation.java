@@ -7,6 +7,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Vacation entity represents a vacation.
+ * It is used to store the vacation details such as name, country, city, start date, end date, traveler type, budget, pace, and vacation days.
+ */ 
+
 @Entity
 @Table(name = "vacations")
 public class Vacation {

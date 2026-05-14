@@ -4,6 +4,11 @@ import com.sapir.smartvacationplanner.entity.enums.TravelerType;
 import com.sapir.smartvacationplanner.entity.enums.Pace;
 import java.math.BigDecimal;
 
+/**
+ * VacationResponse is a DTO for returning a vacation.
+ * It is used to return the vacation details to the client.
+ */
+
 public class VacationResponse {
 
     private int id;
@@ -44,7 +49,6 @@ public Pace getPace() {
     return pace;
 }
 
-
 public void setId(int id) {
     this.id = id;
 }
@@ -71,6 +75,20 @@ public void setBudget(BigDecimal budget) {
 }
 public void setPace(Pace pace) {
     this.pace = pace;
+}
+
+public String toString() {
+    return "VacationResponse{" +
+        "id=" + id +
+        ", name=" + name +
+        ", country=" + country +
+        ", city=" + city +
+        ", startDate=" + startDate +
+        ", endDate=" + endDate +
+        ", travelerType=" + travelerType +
+        ", budget=" + budget +
+        ", pace=" + pace +
+        '}';
 }
 
 } //VacationResponse

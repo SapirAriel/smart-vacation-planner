@@ -2,6 +2,12 @@ package com.sapir.smartvacationplanner.dto.vacationDay;
 import java.time.LocalDate;
 import jakarta.validation.constraints.NotNull;
 import com.sapir.smartvacationplanner.entity.enums.DayType;
+import jakarta.validation.constraints.Positive;
+
+/**
+ * UpdateVacationDayRequest is a DTO for updating a vacation day.
+ * It is used to validate the request body for the update vacation day endpoint.
+ */
 
 
 public class UpdateVacationDayRequest {
@@ -9,6 +15,7 @@ public class UpdateVacationDayRequest {
     @NotNull(message = "Date is required")
     private LocalDate date;
 
+    @Positive(message = "Day number must be greater than 0")
     @NotNull(message = "Day number is required")
     private Integer dayNumber;
 
@@ -36,4 +43,4 @@ public class UpdateVacationDayRequest {
         this.dayType = dayType;
     }
 
-}
+} //UpdateVacationDayRequest

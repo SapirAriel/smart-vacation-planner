@@ -3,6 +3,11 @@ import java.util.List;
 import com.sapir.smartvacationplanner.entity.Vacation;
 import com.sapir.smartvacationplanner.entity.VacationDay;
 
+/**
+ * VacationService is a service interface for the Vacation entity.
+ * It is used to perform CRUD operations on the Vacation entity.
+ */
+
 public interface VacationService {
 
     List<Vacation> getAllVacations();

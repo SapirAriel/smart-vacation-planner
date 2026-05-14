@@ -18,6 +18,10 @@ import com.sapir.smartvacationplanner.dto.vacation.VacationResponse;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 
+/**
+ * VacationController is a controller for the Vacation entity.
+ * It is used to perform CRUD operations on the Vacation entity.
+ */
 
 @RestController
 @RequestMapping("/api/v1/vacations")

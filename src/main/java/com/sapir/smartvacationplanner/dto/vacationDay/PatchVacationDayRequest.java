@@ -1,12 +1,19 @@
 package com.sapir.smartvacationplanner.dto.vacationDay;
 import java.time.LocalDate;
 import com.sapir.smartvacationplanner.entity.enums.DayType;
+import jakarta.validation.constraints.Positive;
+
+/**
+ * PatchVacationDayRequest is a DTO for patching a vacation day.
+ * It is used to validate the request body for the patch vacation day endpoint.
+ */
 
 
 public class PatchVacationDayRequest {
 
     private LocalDate date;
 
+    @Positive(message = "Day number must be greater than 0")
     private Integer dayNumber;
 
     private DayType dayType;
@@ -31,4 +38,4 @@ public class PatchVacationDayRequest {
         this.dayType = dayType;
     }
 
-}
+} //PatchVacationDayRequest

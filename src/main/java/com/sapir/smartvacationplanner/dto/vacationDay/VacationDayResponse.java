@@ -2,6 +2,11 @@ package com.sapir.smartvacationplanner.dto.vacationDay;
 import java.time.LocalDate;
 import com.sapir.smartvacationplanner.entity.enums.DayType;
 
+/**
+ * VacationDayResponse is a DTO for returning a vacation day.
+ * It is used to return the vacation day details to the client.
+ */
+
 public class VacationDayResponse {
     private Integer id;
     private Integer vacationId;
@@ -24,6 +29,7 @@ public class VacationDayResponse {
     public DayType getDayType() {
         return dayType;
     }
+
     public void setId(Integer id) {
         this.id = id;
     }
@@ -39,6 +45,7 @@ public class VacationDayResponse {
     public void setDayType(DayType dayType) {
         this.dayType = dayType;
     }
+    
     public String toString() {
         return "VacationDayResponse{" +
             "id=" + id +
@@ -48,4 +55,4 @@ public class VacationDayResponse {
             ", dayType=" + dayType +
             '}';
     }
-}
+} //VacationDayResponse

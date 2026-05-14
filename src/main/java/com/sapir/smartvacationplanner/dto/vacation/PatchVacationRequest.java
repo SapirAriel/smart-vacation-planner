@@ -3,6 +3,12 @@ import java.time.LocalDate;
 import com.sapir.smartvacationplanner.entity.enums.TravelerType;
 import com.sapir.smartvacationplanner.entity.enums.Pace;
 import java.math.BigDecimal;
+import jakarta.validation.constraints.Positive;
+
+/**
+ * PatchVacationRequest is a DTO for patching a vacation.
+ * It is used to validate the request body for the patch vacation endpoint.
+ */
 
 public class PatchVacationRequest {
    
@@ -18,6 +24,7 @@ public class PatchVacationRequest {
    
     private TravelerType travelerType;
 
+    @Positive(message = "Budget must be greater than 0")
     private BigDecimal budget;
 
     private Pace pace;

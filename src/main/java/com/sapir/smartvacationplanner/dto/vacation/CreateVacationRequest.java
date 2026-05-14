@@ -7,6 +7,11 @@ import com.sapir.smartvacationplanner.entity.enums.TravelerType;
 import com.sapir.smartvacationplanner.entity.enums.Pace;
 import java.math.BigDecimal;
 
+/**
+ * CreateVacationRequest is a DTO for creating a new vacation.
+ * It is used to validate the request body for the create vacation endpoint.
+ */
+
 public class CreateVacationRequest {
    
     @NotBlank(message = "Name is required")

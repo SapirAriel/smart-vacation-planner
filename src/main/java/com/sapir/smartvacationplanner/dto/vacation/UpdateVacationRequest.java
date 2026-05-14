@@ -5,6 +5,12 @@ import jakarta.validation.constraints.NotNull;
 import com.sapir.smartvacationplanner.entity.enums.TravelerType;
 import com.sapir.smartvacationplanner.entity.enums.Pace;
 import java.math.BigDecimal;
+import jakarta.validation.constraints.Positive;
+
+/**
+ * UpdateVacationRequest is a DTO for updating a vacation.
+ * It is used to validate the request body for the update vacation endpoint.
+ */
 
 public class UpdateVacationRequest {
 
@@ -26,6 +32,7 @@ public class UpdateVacationRequest {
     @NotNull(message = "Traveler type is required")
     private TravelerType travelerType;
 
+    @Positive(message = "Budget must be greater than 0")
     @NotNull(message = "Budget is required")
     private BigDecimal budget;
 
