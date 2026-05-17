@@ -16,7 +16,13 @@ import com.sapir.smartvacationplanner.dto.vacationDay.UpdateVacationDayRequest;
 import com.sapir.smartvacationplanner.dto.vacationDay.PatchVacationDayRequest;
 import com.sapir.smartvacationplanner.dto.vacationDay.VacationDayResponse;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
+import org.springframework.web.bind.annotation.RequestParam;
+import com.sapir.smartvacationplanner.entity.enums.DayType;
+import java.time.LocalDate;
 
 /**
  * VacationDayController is a controller for the VacationDay entity.
@@ -35,44 +41,55 @@ public class VacationDayController {
 
     @GetMapping
     public List<VacationDayResponse> getAllVacationDays(@PathVariable Integer vacationId) {
-        List<VacationDay> vacationDays = vacationDayService.getAllVacationDays(vacationId);
-        List<VacationDayResponse> vacationDayResponse = new ArrayList<>();
-        for (VacationDay vacationDay : vacationDays) {
-            vacationDayResponse.add(toResponse(vacationDay));
-        }
-        return vacationDayResponse;
+     
+        return vacationDayService.getAllVacationDays(vacationId).stream().map(this::toResponse).toList();
+    }
+
+    @GetMapping("/page")
+    public Page<VacationDayResponse> searchVacationDays(@RequestParam(required = false) DayType dayType, 
+    @RequestParam(required = false) LocalDate date,
+    @RequestParam(required = false) Integer dayNumber,
+    @PathVariable Integer vacationId, 
+        @PageableDefault(page = 0, size = 5, sort = "date", direction = Sort.Direction.DESC) Pageable pageable) {
+        return vacationDayService.searchVacationDays(vacationId, dayType, date, dayNumber, pageable).map(this::toResponse);
     }
 
     @GetMapping("/{id}")
     public VacationDayResponse getVacationDayById(@PathVariable Integer vacationId, @PathVariable int id) {
-        VacationDay vacationDay = vacationDayService.getVacationDayById(vacationId, id);
-        return toResponse(vacationDay);
+        
+        return toResponse(vacationDayService.getVacationDayById(vacationId, id));
     }
+    
 
     @PostMapping
     public VacationDayResponse createVacationDay(@PathVariable Integer vacationId, 
     @Valid @RequestBody CreateVacationDayRequest vacationDayRequest) {
+        
         return toResponse(vacationDayService.createVacationDay(vacationId, vacationDayRequest));
     }
 
     @PutMapping("/{id}")
     public VacationDayResponse updateVacationDay(@PathVariable Integer vacationId, @PathVariable int id,
             @Valid @RequestBody UpdateVacationDayRequest vacationDayRequest) {
+        
         return toResponse(vacationDayService.updateVacationDay(vacationId, id, vacationDayRequest));
     }
 
     @PatchMapping("/{id}")
     public VacationDayResponse patchVacationDay(@PathVariable Integer vacationId, @PathVariable int id,
             @Valid @RequestBody PatchVacationDayRequest vacationDayRequest) {
+
         return toResponse(vacationDayService.patchVacationDay(vacationId, id, vacationDayRequest));
     }
 
     @DeleteMapping("/{id}")
     public void deleteVacationDay(@PathVariable Integer vacationId ,@PathVariable int id) {
+
         vacationDayService.deleteVacationDay(vacationId, id);
     }
 
     private VacationDayResponse toResponse(VacationDay vacationDay) {
+
         VacationDayResponse vacationDayResponse = new VacationDayResponse();
         vacationDayResponse.setId(vacationDay.getId());
         vacationDayResponse.setVacationId(vacationDay.getVacation().getId());

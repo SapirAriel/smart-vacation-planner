@@ -2,6 +2,12 @@ package com.sapir.smartvacationplanner.service;
 import java.util.List;
 import com.sapir.smartvacationplanner.entity.Vacation;
 import com.sapir.smartvacationplanner.entity.VacationDay;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import java.time.LocalDate;
+import com.sapir.smartvacationplanner.entity.enums.TravelerType;
+import com.sapir.smartvacationplanner.entity.enums.Pace;
+import java.math.BigDecimal;
 
 /**
  * VacationService is a service interface for the Vacation entity.
@@ -11,6 +17,8 @@ import com.sapir.smartvacationplanner.entity.VacationDay;
 public interface VacationService {
 
     List<Vacation> getAllVacations();
+
+    Page<Vacation> searchVacations(String country, String city, LocalDate startDate, LocalDate endDate, TravelerType travelerType, BigDecimal budget, Pace pace, Pageable pageable);
 
     Vacation getVacationById(Integer id);
 

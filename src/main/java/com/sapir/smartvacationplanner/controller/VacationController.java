@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import com.sapir.smartvacationplanner.entity.Vacation;
@@ -16,7 +17,14 @@ import com.sapir.smartvacationplanner.dto.vacation.UpdateVacationRequest;
 import com.sapir.smartvacationplanner.dto.vacation.PatchVacationRequest;
 import com.sapir.smartvacationplanner.dto.vacation.VacationResponse;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
+import java.time.LocalDate;
+import com.sapir.smartvacationplanner.entity.enums.TravelerType;
+import com.sapir.smartvacationplanner.entity.enums.Pace;
+import java.math.BigDecimal;
 
 /**
  * VacationController is a controller for the Vacation entity.
@@ -34,17 +42,26 @@ public VacationController(VacationService vacationService) {
 }
 
     @GetMapping
+    
     public List<VacationResponse> getAllVacations() {
-
-        List<Vacation> vacations =vacationService.getAllVacations();
-        List<VacationResponse> vacationResponse =  new ArrayList<>();
-
-        for (Vacation vacation : vacations) {
-            vacationResponse.add(toResponse(vacation));}
-
-        return vacationResponse;
+        return vacationService.getAllVacations().stream().map(this::toResponse).toList();
 
     }
+
+    @GetMapping("/page")
+    
+    public Page<VacationResponse> searchVacations(@RequestParam(required = false) String country,
+        @RequestParam(required = false) String city,
+        @RequestParam(required = false) LocalDate startDate,
+        @RequestParam(required = false) LocalDate endDate,
+        @RequestParam(required = false) TravelerType travelerType,
+        @RequestParam(required = false) BigDecimal budget,
+        @RequestParam(required = false) Pace pace,
+        @PageableDefault(page = 0, size = 5, sort = "startDate", direction = Sort.Direction.DESC) Pageable pageable) {
+        return vacationService.searchVacations(country, city, startDate, endDate, travelerType, budget, pace, pageable).map(this::toResponse);
+
+    }
+    
 
     @GetMapping("/{id}")
     public VacationResponse getVacationById(@PathVariable int id) {

@@ -4,7 +4,9 @@ import com.sapir.smartvacationplanner.entity.Activity;
 import com.sapir.smartvacationplanner.dto.activity.CreateActivityRequest;
 import com.sapir.smartvacationplanner.dto.activity.UpdateActivityRequest;
 import com.sapir.smartvacationplanner.dto.activity.PatchActivityRequest;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.sapir.smartvacationplanner.entity.enums.ActivityType;
 
 /**
  * ActivityService is a service interface for the Activity entity.
@@ -14,10 +16,17 @@ import com.sapir.smartvacationplanner.dto.activity.PatchActivityRequest;
 public interface ActivityService {
 
     List<Activity> getAllActivities(Integer vacationId, Integer vacationDayId);
+
+    Page<Activity> searchActivities(Integer vacationId, Integer vacationDayId, String name, ActivityType activityType, String location, Integer durationMinutes, String openingHours, Integer minimumAge, String notes, Pageable pageable);
+
     Activity getActivityById(Integer vacationId, Integer vacationDayId, Integer id);
+    
     Activity createActivity(Integer vacationId,Integer vacationDayId, CreateActivityRequest request);
+    
     Activity updateActivity(Integer vacationId, Integer vacationDayId, Integer id, UpdateActivityRequest request);
+    
     Activity patchActivity(Integer vacationId, Integer vacationDayId, Integer id, PatchActivityRequest request);
+    
     void deleteActivity(Integer vacationId, Integer vacationDayId, Integer id);
     
 }

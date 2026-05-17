@@ -10,6 +10,9 @@ import com.sapir.smartvacationplanner.repository.VacationDayRepository;
 import java.util.List;
 import com.sapir.smartvacationplanner.entity.VacationDay;
 import com.sapir.smartvacationplanner.repository.VacationRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.sapir.smartvacationplanner.entity.enums.ActivityType;
 
 /**
  * ActivityServiceImpl is a service implementation for the Activity entity.
@@ -36,6 +39,12 @@ public class ActivityServiceImpl implements ActivityService {
         VacationDay vacationDay = vacationDayRepository.findById(vacationDayId).orElseThrow(() 
         -> new ResourceNotFoundException("Vacation day not found with id: " + vacationDayId));
         return activityRepository.findByVacationDay(vacationDay);
+    }
+
+    @Override
+    public Page<Activity> searchActivities(Integer vacationId, Integer vacationDayId, String name, ActivityType activityType, String location, Integer durationMinutes, String openingHours, Integer minimumAge, String notes, Pageable pageable) {
+        
+        return activityRepository.searchActivities(vacationDayId, vacationId, name, activityType, location, durationMinutes, openingHours, minimumAge, notes, pageable);
     }
 
     @Override

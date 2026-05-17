@@ -6,6 +6,12 @@ import com.sapir.smartvacationplanner.repository.VacationRepository;
 import com.sapir.smartvacationplanner.repository.VacationDayRepository;
 import com.sapir.smartvacationplanner.exception.ResourceNotFoundException;
 import com.sapir.smartvacationplanner.entity.VacationDay;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import java.time.LocalDate;
+import com.sapir.smartvacationplanner.entity.enums.TravelerType;
+import com.sapir.smartvacationplanner.entity.enums.Pace;
+import java.math.BigDecimal;
 
 /**
  * VacationServiceImpl is a service implementation for the Vacation entity.
@@ -27,6 +33,12 @@ public class VacationServiceImpl implements VacationService {
     @Override
     public List<Vacation> getAllVacations() {
         return vacationRepository.findAll();
+    }
+
+    @Override
+    public Page<Vacation> searchVacations(String country, String city, LocalDate startDate, LocalDate endDate, TravelerType travelerType, BigDecimal budget, Pace pace, Pageable pageable) {
+    
+        return vacationRepository.searchVacations(country, city, startDate, endDate, travelerType, budget, pace, pageable);
     }
 
     @Override

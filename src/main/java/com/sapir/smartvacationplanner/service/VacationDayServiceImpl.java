@@ -12,6 +12,11 @@ import org.springframework.stereotype.Service;
 import com.sapir.smartvacationplanner.entity.Activity;
 import com.sapir.smartvacationplanner.repository.ActivityRepository;
 import java.time.temporal.ChronoUnit;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.sapir.smartvacationplanner.entity.enums.DayType;
+import java.time.LocalDate;
+
 
 /**
  * VacationDayServiceImpl is a service implementation for the VacationDay entity.
@@ -38,6 +43,12 @@ public class VacationDayServiceImpl implements VacationDayService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Vacation not found with id: " + vacationId));
         return vacationDayRepository.findByVacation(vacation);
+    }
+
+    @Override
+    public Page<VacationDay> searchVacationDays(Integer vacationId, DayType dayType, LocalDate date, Integer dayNumber, Pageable pageable) {
+     
+        return vacationDayRepository.searchVacationDays(vacationId, dayType, date, dayNumber, pageable);
     }
 
     @Override

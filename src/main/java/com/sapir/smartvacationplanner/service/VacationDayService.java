@@ -5,6 +5,10 @@ import com.sapir.smartvacationplanner.dto.vacationDay.CreateVacationDayRequest;
 import com.sapir.smartvacationplanner.dto.vacationDay.UpdateVacationDayRequest;
 import com.sapir.smartvacationplanner.dto.vacationDay.PatchVacationDayRequest;
 import com.sapir.smartvacationplanner.entity.Activity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.sapir.smartvacationplanner.entity.enums.DayType;
+import java.time.LocalDate;
 
 /**
  * VacationDayService is a service interface for the VacationDay entity.
@@ -14,6 +18,8 @@ import com.sapir.smartvacationplanner.entity.Activity;
 public interface VacationDayService {
 
     List<VacationDay> getAllVacationDays(Integer vacationId);
+
+    Page<VacationDay> searchVacationDays(Integer vacationId, DayType dayType, LocalDate date, Integer dayNumber, Pageable pageable);
 
     VacationDay getVacationDayById(Integer vacationId, Integer id);
 
