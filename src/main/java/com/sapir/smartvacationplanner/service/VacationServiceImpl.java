@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import com.sapir.smartvacationplanner.entity.Vacation;
 import com.sapir.smartvacationplanner.repository.VacationRepository;
 import com.sapir.smartvacationplanner.repository.VacationDayRepository;
-import com.sapir.smartvacationplanner.exception.ResourceNotFoundException;
 import com.sapir.smartvacationplanner.entity.VacationDay;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +11,8 @@ import java.time.LocalDate;
 import com.sapir.smartvacationplanner.entity.enums.TravelerType;
 import com.sapir.smartvacationplanner.entity.enums.Pace;
 import java.math.BigDecimal;
+import com.sapir.smartvacationplanner.entity.User;
+import com.sapir.smartvacationplanner.entity.enums.Role;
 
 /**
  * VacationServiceImpl is a service implementation for the Vacation entity.
@@ -23,34 +24,46 @@ public class VacationServiceImpl implements VacationService {
 
     private final VacationRepository vacationRepository;
     private final VacationDayRepository vacationDayRepository;
+    private final AuthorizationService authorizationService;
 
     public VacationServiceImpl(VacationRepository vacationRepository,
-            VacationDayRepository vacationDayRepository) {
+            VacationDayRepository vacationDayRepository, AuthorizationService authorizationService) {
         this.vacationRepository = vacationRepository;
         this.vacationDayRepository = vacationDayRepository;
+        this.authorizationService = authorizationService;
     }   
 
     @Override
     public List<Vacation> getAllVacations() {
-        return vacationRepository.findAll();
+        User currentUser = authorizationService.getCurrentUser();
+        // if the current user is an admin, return all vacations
+        if (currentUser.getRole() == Role.ADMIN) {
+            return vacationRepository.findAll();
+        }
+        return vacationRepository.findByUserId(currentUser.getId());
     }
 
     @Override
     public Page<Vacation> searchVacations(String country, String city, LocalDate startDate, LocalDate endDate, TravelerType travelerType, BigDecimal budget, Pace pace, Pageable pageable) {
-    
-        return vacationRepository.searchVacations(country, city, startDate, endDate, travelerType, budget, pace, pageable);
+        User currentUser = authorizationService.getCurrentUser();
+        // if the current user is an admin, return all vacations
+        if (currentUser.getRole() == Role.ADMIN) {
+            return vacationRepository.searchVacations(country, city, startDate, endDate, travelerType, budget, pace, pageable);
+        }
+        return vacationRepository.searchVacationsByUserId(currentUser.getId(), country, city, startDate, endDate, travelerType, budget, pace, pageable);
     }
 
     @Override
     public Vacation getVacationById(Integer id) {
-        return vacationRepository.findById(id).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation not found with id: " + id));
+        return authorizationService.getVacationForCurrentUser(id);
     }
 
     @Override
     public Vacation createVacation(Vacation vacation) {
         
         validateVacationConstraints(vacation);
+        User currentUser = authorizationService.getCurrentUser();
+        vacation.setUser(currentUser);
         return vacationRepository.save(vacation);
     }
 
@@ -65,7 +78,6 @@ public class VacationServiceImpl implements VacationService {
         existingVacation.setCity(vacation.getCity());
         existingVacation.setStartDate(vacation.getStartDate());
         existingVacation.setEndDate(vacation.getEndDate());
-        existingVacation.setTravelerType(vacation.getTravelerType());
         existingVacation.setBudget(vacation.getBudget());
         existingVacation.setPace(vacation.getPace());
     
@@ -122,4 +134,5 @@ public class VacationServiceImpl implements VacationService {
             && vacation.getEndDate().isBefore(vacation.getStartDate())) {
             throw new IllegalArgumentException("endDate must be after or equal to startDate");}
     }
+
 }

@@ -18,7 +18,7 @@ public class VacationDay {
 @Id
 @GeneratedValue(strategy = GenerationType.IDENTITY)
 @Column(name = "id")
-private int id;
+private Integer id;
 
 //foreign key to the Vacation entity
 @ManyToOne
@@ -57,7 +57,7 @@ public VacationDay(Vacation vacation, LocalDate date, int dayNumber, DayType day
     this.activities = activities;
 }
 
-public int getId() {
+public Integer getId() {
     return id;
 }
 public Vacation getVacation() {
@@ -77,7 +77,7 @@ public List<Activity> getActivities() {
     return activities;
 }
 
-public void setId(int id) {
+public void setId(Integer id) {
     this.id = id;
 }
 public void setVacation(Vacation vacation) {

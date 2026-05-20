@@ -6,7 +6,6 @@ import com.sapir.smartvacationplanner.dto.vacationDay.UpdateVacationDayRequest;
 import com.sapir.smartvacationplanner.entity.Vacation;
 import com.sapir.smartvacationplanner.entity.VacationDay;
 import com.sapir.smartvacationplanner.repository.VacationDayRepository;
-import com.sapir.smartvacationplanner.repository.VacationRepository;
 import com.sapir.smartvacationplanner.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import com.sapir.smartvacationplanner.entity.Activity;
@@ -17,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import com.sapir.smartvacationplanner.entity.enums.DayType;
 import java.time.LocalDate;
 
-
 /**
  * VacationDayServiceImpl is a service implementation for the VacationDay entity.
  * It is used to perform CRUD operations on the VacationDay entity.
@@ -27,58 +25,44 @@ import java.time.LocalDate;
 public class VacationDayServiceImpl implements VacationDayService {
 
     private final VacationDayRepository vacationDayRepository;
-    private final VacationRepository vacationRepository;
     private final ActivityRepository activityRepository;
+    private final AuthorizationService authorizationService;
 
     public VacationDayServiceImpl(VacationDayRepository vacationDayRepository,
-            VacationRepository vacationRepository, ActivityRepository activityRepository) {
+            ActivityRepository activityRepository, AuthorizationService authorizationService) {
         this.vacationDayRepository = vacationDayRepository;
-        this.vacationRepository = vacationRepository;
         this.activityRepository = activityRepository;
+        this.authorizationService = authorizationService;
     }
 
     @Override
     public List<VacationDay> getAllVacationDays(Integer vacationId) {
-        Vacation vacation = vacationRepository.findById(vacationId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Vacation not found with id: " + vacationId));
+        Vacation vacation = authorizationService.getVacationForCurrentUser(vacationId);
         return vacationDayRepository.findByVacation(vacation);
     }
 
     @Override
     public Page<VacationDay> searchVacationDays(Integer vacationId, DayType dayType, LocalDate date, Integer dayNumber, Pageable pageable) {
-     
-        return vacationDayRepository.searchVacationDays(vacationId, dayType, date, dayNumber, pageable);
+        Vacation vacation = authorizationService.getVacationForCurrentUser(vacationId);
+        return vacationDayRepository.searchVacationDays(vacation, dayType, date, dayNumber, pageable);
     }
 
     @Override
     public VacationDay getVacationDayById(Integer vacationId, Integer id) {
-        VacationDay vacationDay = vacationDayRepository.findById(id).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation day not found with id: " + id));
-        if (vacationDay.getVacation().getId() != vacationId) {
-            throw new IllegalArgumentException("Vacation day not found with id: " + id);
-        }
-        return vacationDay;
+        return getVacationDayForCurrentUser(vacationId, id);
     }
 
     @Override
     public VacationDay createVacationDay(Integer vacationId, CreateVacationDayRequest request) {
-        Vacation vacation = vacationRepository.findById(vacationId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Vacation not found with id: " + vacationId));
-        VacationDay vacationDay = new VacationDay();
-        vacationDay.setVacation(vacation);
-        vacationDay.setDate(request.getDate());
-        vacationDay.setDayNumber(request.getDayNumber());
-        vacationDay.setDayType(request.getDayType());
+        Vacation vacation = authorizationService.getVacationForCurrentUser(vacationId);
+        VacationDay vacationDay = new VacationDay(vacation, request.getDate(), request.getDayNumber(), request.getDayType());
         validateVacationDayConstraints(vacationDay);
         return vacationDayRepository.save(vacationDay);
     }
 
     @Override
     public VacationDay updateVacationDay(Integer vacationId, Integer id, UpdateVacationDayRequest request) {
-        VacationDay existing = getVacationDayById(vacationId, id);
-
+        VacationDay existing = getVacationDayForCurrentUser(vacationId, id);
         existing.setDate(request.getDate());
         existing.setDayNumber(request.getDayNumber());
         existing.setDayType(request.getDayType());
@@ -88,7 +72,7 @@ public class VacationDayServiceImpl implements VacationDayService {
 
     @Override
     public VacationDay patchVacationDay(Integer vacationId, Integer id, PatchVacationDayRequest request) {
-        VacationDay existing = getVacationDayById(vacationId, id);
+        VacationDay existing = getVacationDayForCurrentUser(vacationId, id);
         
         if (request.getDate() != null) {
             existing.setDate(request.getDate());
@@ -104,14 +88,15 @@ public class VacationDayServiceImpl implements VacationDayService {
     }
 
     @Override
-    public List<Activity> getActivities(Integer vacationDayId) {
-        return activityRepository.findByVacationDay_Id(vacationDayId);
+    public List<Activity> getActivities(Integer vacationId, Integer vacationDayId) {
+        VacationDay vacationDay = getVacationDayForCurrentUser(vacationId, vacationDayId);
+        return activityRepository.findByVacationDay(vacationDay);
     }
 
     @Override
     public void deleteVacationDay(Integer vacationId, Integer id) {
-        getVacationDayById(vacationId, id);        
-        vacationDayRepository.deleteById(id);
+        VacationDay vacationDay = getVacationDayForCurrentUser(vacationId, id);        
+        vacationDayRepository.delete(vacationDay);
     }
 
     private void validateVacationDayConstraints(VacationDay vacationDay) {
@@ -124,9 +109,15 @@ public class VacationDayServiceImpl implements VacationDayService {
         && vacationDay.getDate().isAfter(vacationDay.getVacation().getEndDate())) {
             throw new IllegalArgumentException("date must be on or before vacation endDate");}
 
-        long vacationDuration = ChronoUnit.DAYS.between(vacationDay.getVacation().getStartDate(), vacationDay.getVacation().getEndDate());
+        long vacationDuration = 1+ChronoUnit.DAYS.between(vacationDay.getVacation().getStartDate(), vacationDay.getVacation().getEndDate());
         if (vacationDay.getDayNumber() > vacationDuration) {
             throw new IllegalArgumentException("day number must be less than or equal to vacation duration");}
 
+    }
+
+    private VacationDay getVacationDayForCurrentUser (Integer vacationId, Integer vacationDayId) {
+        Vacation vacation = authorizationService.getVacationForCurrentUser(vacationId);
+        return vacationDayRepository.findByVacationAndId(vacation, vacationDayId).orElseThrow(() 
+        -> new ResourceNotFoundException("Vacation day not found with id: " + vacationDayId));
     }
 }

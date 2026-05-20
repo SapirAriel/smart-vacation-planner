@@ -15,7 +15,7 @@ public class Activity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private int id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "vacation_day_id", nullable = false)
@@ -59,7 +59,7 @@ public class Activity {
         this.notes = notes;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
     public VacationDay getVacationDay() {
@@ -87,7 +87,7 @@ public class Activity {
         return notes;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
     public void setVacationDay(VacationDay vacationDay) {
@@ -113,5 +113,20 @@ public class Activity {
     }
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    @Override
+    public String toString() {
+        return "Activity{" +
+            "id=" + id +
+            ", vacationDay=" + vacationDay +
+            ", name=" + name +
+            ", activityType=" + activityType +
+            ", location=" + location +
+            ", durationMinutes=" + durationMinutes +
+            ", openingHours=" + openingHours +
+            ", minimumAge=" + minimumAge +
+            ", notes=" + notes +
+            '}';
     }
 }

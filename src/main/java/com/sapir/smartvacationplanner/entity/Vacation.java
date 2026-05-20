@@ -6,6 +6,8 @@ import com.sapir.smartvacationplanner.entity.enums.Pace;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.ArrayList;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 
 /**
  * Vacation entity represents a vacation.
@@ -19,7 +21,11 @@ public class Vacation {
 @Id
 @GeneratedValue(strategy = GenerationType.IDENTITY)
 @Column(name = "id")
-private int id;
+private Integer id;
+
+@ManyToOne
+@JoinColumn(name = "user_id")
+private User user;
 
 @Column(name = "name", nullable = false, unique = true)
 private String name; 
@@ -80,8 +86,12 @@ public Vacation( String name, String country, String city, LocalDate startDate,
     this.vacationDays = vacationDays;
 }   
 
-public int getId() {
+public Integer getId() {
     return id;
+}
+
+public User getUser() {
+    return user;
 }
 
 public String getName() {
@@ -113,8 +123,11 @@ public List<VacationDay> getVacationDays() {
     return vacationDays;
 }
 
-public void setId(int id) {
+public void setId(Integer id) {
     this.id = id;
+}
+public void setUser(User user) {
+    this.user = user;
 }
 public void setName(String name) {
     this.name = name;
@@ -148,6 +161,7 @@ public void setVacationDays(List<VacationDay> vacationDays) {
 public String toString() {
     return "Vacation{" +
         "id=" + id +
+        ", user=" + user +
         ", name='" + name + '\'' +
         ", country='" + country + '\'' +
         ", city='" + city + '\'' +

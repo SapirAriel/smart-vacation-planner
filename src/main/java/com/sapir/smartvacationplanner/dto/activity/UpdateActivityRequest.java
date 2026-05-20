@@ -27,7 +27,6 @@ public class UpdateActivityRequest {
     @NotBlank(message = "Opening hours is required")
     private String openingHours;
 
-    @Positive(message = "Minimum age must be greater than 0")
     @NotNull(message = "Minimum age is required")
     private Integer minimumAge;
 

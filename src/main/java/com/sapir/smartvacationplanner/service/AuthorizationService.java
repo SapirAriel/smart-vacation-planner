@@ -1,0 +1,78 @@
+package com.sapir.smartvacationplanner.service;
+
+import org.springframework.stereotype.Service;
+import com.sapir.smartvacationplanner.repository.UserRepository;
+import com.sapir.smartvacationplanner.repository.VacationRepository;
+import com.sapir.smartvacationplanner.entity.User;
+import com.sapir.smartvacationplanner.entity.Vacation;
+import com.sapir.smartvacationplanner.exception.ResourceNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
+import com.sapir.smartvacationplanner.entity.enums.Role;
+import com.sapir.smartvacationplanner.repository.VacationDayRepository;
+import com.sapir.smartvacationplanner.repository.ActivityRepository;
+import com.sapir.smartvacationplanner.entity.VacationDay;
+import com.sapir.smartvacationplanner.entity.Activity;
+
+/**
+ * Handles access checks for resources that belong to the current authenticated user.
+ */
+
+@Service
+public class AuthorizationService {
+
+    private final UserRepository userRepository;
+    private final VacationRepository vacationRepository;
+    private final VacationDayRepository vacationDayRepository;
+    private final ActivityRepository activityRepository;
+
+    public AuthorizationService(UserRepository userRepository, VacationRepository vacationRepository, 
+        VacationDayRepository vacationDayRepository, ActivityRepository activityRepository) {
+
+        this.userRepository = userRepository;
+        this.vacationRepository = vacationRepository;
+        this.vacationDayRepository = vacationDayRepository;
+        this.activityRepository = activityRepository;
+    }
+   
+    public User getCurrentUser() {
+        // get the current user from the security context
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+    
+        String email = authentication.getName();
+    
+        return userRepository.findByEmail(email);
+    }
+
+    public Vacation getVacationForCurrentUser(Integer id) {
+        
+        User currentUser = getCurrentUser();
+        Vacation vacation = vacationRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Vacation not found with id: " + id));
+
+        if (currentUser.getRole() != Role.ADMIN &&
+        !vacation.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("Access denied for vacation with id: " + id);
+        }
+
+        return vacation;
+    }
+
+    public VacationDay getVacationDayForCurrentUser (Integer vacationId, Integer vacationDayId) {
+
+        Vacation vacation = getVacationForCurrentUser(vacationId);
+        return vacationDayRepository.findByVacationAndId(vacation, vacationDayId).orElseThrow(() 
+        -> new ResourceNotFoundException("Vacation day not found with id: " + vacationDayId));
+    }
+
+
+    public Activity getActivityForCurrentUser(Integer vacationId, Integer vacationDayId, Integer activityId) {
+        
+        VacationDay vacationDay = getVacationDayForCurrentUser(vacationId,vacationDayId);
+        return activityRepository.findByVacationDayAndId(vacationDay, activityId).orElseThrow(() 
+        -> new ResourceNotFoundException("Activity not found with id: " + activityId));
+    }
+
+}

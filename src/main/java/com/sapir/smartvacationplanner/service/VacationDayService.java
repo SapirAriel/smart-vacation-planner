@@ -29,7 +29,7 @@ public interface VacationDayService {
 
     VacationDay patchVacationDay(Integer vacationId, Integer id, PatchVacationDayRequest request);
 
-    List<Activity> getActivities(Integer vacationDayId);
+    List<Activity> getActivities(Integer vacationId, Integer vacationDayId);
 
-    void deleteVacationDay(Integer vacationId,Integer id);
+    void deleteVacationDay(Integer vacationId, Integer id);
 }

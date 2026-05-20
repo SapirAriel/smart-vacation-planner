@@ -12,7 +12,8 @@ class VacationServiceImplTest {
 
     private static VacationServiceImpl createService(VacationRepository repo) {
         VacationDayRepository dayRepo = Mockito.mock(VacationDayRepository.class);
-        return new VacationServiceImpl(repo, dayRepo);
+        AuthorizationService authService = Mockito.mock(AuthorizationService.class);
+        return new VacationServiceImpl(repo, dayRepo, authService);
     }
 
     @Test

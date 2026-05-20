@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.security.access.AccessDeniedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -68,6 +69,19 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(Instant.now().toString());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(
+            AccessDeniedException exc,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse errorResponse = new ApiErrorResponse();
+        errorResponse.setMessage(exc.getMessage());
+        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setStatus(HttpStatus.FORBIDDEN.value());
+        errorResponse.setTimestamp(Instant.now().toString());
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(Exception.class)

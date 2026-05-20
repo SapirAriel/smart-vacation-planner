@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import com.sapir.smartvacationplanner.entity.enums.ActivityType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.Optional;
 
 public interface ActivityRepository extends JpaRepository<Activity, Integer> {
 
@@ -17,13 +18,10 @@ public interface ActivityRepository extends JpaRepository<Activity, Integer> {
 
     List<Activity> findByVacationDay_Id(Integer vacationDayId);
 
-    Page<Activity> findByVacationDay_IdAndVacationDay_Vacation_IdAndActivityType(Integer vacationDayId, Integer vacationId, ActivityType activityType, Pageable pageable);
-
     @Query("""
         select a 
         from Activity a
-        where a.vacationDay.id = :vacationDayId
-          and a.vacationDay.vacation.id = :vacationId
+        where a.vacationDay = :vacationDay
           and (:name is null or lower(a.name) like lower(concat('%', :name, '%')))
           and (:activityType is null or a.activityType = :activityType)
           and (:location is null or lower(a.location) like lower(concat('%', :location, '%')))
@@ -33,8 +31,7 @@ public interface ActivityRepository extends JpaRepository<Activity, Integer> {
           and (:notes is null or lower(a.notes) like lower(concat('%', :notes, '%')))
     """)
     Page<Activity> searchActivities(
-        @Param("vacationDayId") Integer vacationDayId,
-        @Param("vacationId") Integer vacationId,
+        @Param("vacationDay") VacationDay vacationDay,
         @Param("name") String name,
         @Param("activityType") ActivityType activityType,
         @Param("location") String location,
@@ -42,5 +39,8 @@ public interface ActivityRepository extends JpaRepository<Activity, Integer> {
         @Param("openingHours") String openingHours,
         @Param("minimumAge") Integer minimumAge,
         @Param("notes") String notes, Pageable pageable);
+
+
+        Optional<Activity> findByVacationDayAndId(VacationDay vacationDay, Integer id);
 
 }

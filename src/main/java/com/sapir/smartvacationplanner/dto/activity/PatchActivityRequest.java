@@ -20,7 +20,6 @@ public class PatchActivityRequest {
 
     private String openingHours;
 
-    @Positive(message = "Minimum age must be greater than 0")
     private Integer minimumAge;
 
     private String notes;

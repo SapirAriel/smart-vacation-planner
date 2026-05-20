@@ -9,6 +9,7 @@ import com.sapir.smartvacationplanner.entity.enums.DayType;
 import java.time.LocalDate;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.Optional;
 
 public interface VacationDayRepository extends JpaRepository<VacationDay, Integer> {
 
@@ -18,19 +19,21 @@ public interface VacationDayRepository extends JpaRepository<VacationDay, Intege
 
     List<VacationDay> findByVacation_Id(Integer vacationId);
 
+    Optional<VacationDay> findByVacationAndId(Vacation vacation, Integer id);
+
     Page<VacationDay> findByVacation_IdAndDayType(Integer vacationId, DayType dayType, Pageable pageable);
 
     @Query("""
         select vd 
         from VacationDay vd
-        where vd.vacation.id = :vacationId
+        where vd.vacation = :vacation
           and (:dayType is null or vd.dayType = :dayType)
           and (:date is null or vd.date = :date)
           and (:dayNumber is null or vd.dayNumber = :dayNumber)
     """)
    
     Page<VacationDay> searchVacationDays(
-        @Param("vacationId") Integer vacationId,
+        @Param("vacation") Vacation vacation,
         @Param("dayType") DayType dayType, 
         @Param("date") LocalDate date, 
         @Param("dayNumber") Integer dayNumber, 

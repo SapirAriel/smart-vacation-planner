@@ -5,11 +5,8 @@ import com.sapir.smartvacationplanner.dto.activity.CreateActivityRequest;
 import com.sapir.smartvacationplanner.dto.activity.UpdateActivityRequest;
 import com.sapir.smartvacationplanner.dto.activity.PatchActivityRequest;
 import com.sapir.smartvacationplanner.repository.ActivityRepository;
-import com.sapir.smartvacationplanner.exception.ResourceNotFoundException;
-import com.sapir.smartvacationplanner.repository.VacationDayRepository;
 import java.util.List;
 import com.sapir.smartvacationplanner.entity.VacationDay;
-import com.sapir.smartvacationplanner.repository.VacationRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.sapir.smartvacationplanner.entity.enums.ActivityType;
@@ -23,118 +20,83 @@ import com.sapir.smartvacationplanner.entity.enums.ActivityType;
 public class ActivityServiceImpl implements ActivityService {
 
     private final ActivityRepository activityRepository;
-    private final VacationDayRepository vacationDayRepository;
-    private final VacationRepository vacationRepository;
+    private final AuthorizationService authorizationService;
 
-    public ActivityServiceImpl(ActivityRepository activityRepository, VacationDayRepository vacationDayRepository, VacationRepository vacationRepository) {
+    public ActivityServiceImpl(ActivityRepository activityRepository, AuthorizationService authorizationService) {
         this.activityRepository = activityRepository;
-        this.vacationDayRepository = vacationDayRepository;
-        this.vacationRepository = vacationRepository;
+        this.authorizationService = authorizationService;
     }
 
     @Override
     public List<Activity> getAllActivities(Integer vacationId, Integer vacationDayId) {
-        vacationRepository.findById(vacationId).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation not found with id: " + vacationId));
-        VacationDay vacationDay = vacationDayRepository.findById(vacationDayId).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation day not found with id: " + vacationDayId));
+
+        VacationDay vacationDay = authorizationService.getVacationDayForCurrentUser(vacationId, vacationDayId);
         return activityRepository.findByVacationDay(vacationDay);
     }
 
     @Override
     public Page<Activity> searchActivities(Integer vacationId, Integer vacationDayId, String name, ActivityType activityType, String location, Integer durationMinutes, String openingHours, Integer minimumAge, String notes, Pageable pageable) {
         
-        return activityRepository.searchActivities(vacationDayId, vacationId, name, activityType, location, durationMinutes, openingHours, minimumAge, notes, pageable);
+        VacationDay vacationDay = authorizationService.getVacationDayForCurrentUser(vacationId, vacationDayId);
+        return activityRepository.searchActivities(vacationDay, name, activityType, location, durationMinutes, openingHours, minimumAge, notes, pageable);
     }
 
     @Override
     public Activity getActivityById(Integer vacationId, Integer vacationDayId, Integer id) {
-        vacationRepository.findById(vacationId).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation not found with id: " + vacationId));
-        vacationDayRepository.findById(vacationDayId).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation day not found with id: " + vacationDayId));
-        Activity activity = activityRepository.findById(id).orElseThrow(() 
-        -> new ResourceNotFoundException("Activity not found with id: " + id));
-        if (activity.getVacationDay().getId() != vacationDayId) {
-            throw new IllegalArgumentException("Activity not found with id: " + id);
-        }
-        return activity;
+        return authorizationService.getActivityForCurrentUser(vacationId, vacationDayId, id);   
     }
 
     @Override
     public Activity createActivity(Integer vacationId, Integer vacationDayId, CreateActivityRequest request) {
-        vacationRepository.findById(vacationId).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation not found with id: " + vacationId));
-        VacationDay vacationDay = vacationDayRepository.findById(vacationDayId).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation day not found with id: " + vacationDayId));
-        Activity activity = new Activity();
-        activity.setVacationDay(vacationDay);
-        activity.setName(request.getName());
-        activity.setActivityType(request.getActivityType());
-        activity.setLocation(request.getLocation());
-        activity.setDurationMinutes(request.getDurationMinutes());
-        activity.setOpeningHours(request.getOpeningHours());
-        activity.setMinimumAge(request.getMinimumAge());
-        activity.setNotes(request.getNotes());
+        VacationDay vacationDay = authorizationService.getVacationDayForCurrentUser(vacationId, vacationDayId);
+        Activity activity = new Activity(vacationDay, request.getName(), request.getActivityType(), request.getLocation(), request.getDurationMinutes(), request.getOpeningHours(), request.getMinimumAge(), request.getNotes());
         return activityRepository.save(activity);
     }
 
     @Override
     public Activity updateActivity(Integer vacationId, Integer vacationDayId, Integer id, UpdateActivityRequest request) {
-        vacationRepository.findById(vacationId).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation not found with id: " + vacationId));
-        vacationDayRepository.findById(vacationDayId).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation day not found with id: " + vacationDayId));
-        Activity existing = getActivityById(vacationId, vacationDayId, id);
+        Activity existing = authorizationService.getActivityForCurrentUser(vacationId, vacationDayId, id);
         existing.setName(request.getName());
         existing.setActivityType(request.getActivityType());
-        existing.setLocation(request.getLocation());
+        existing.setLocation(request.getLocation());  
         existing.setDurationMinutes(request.getDurationMinutes());
         existing.setOpeningHours(request.getOpeningHours());
-        existing.setMinimumAge(request.getMinimumAge());
+        existing.setMinimumAge(request.getMinimumAge()); 
         existing.setNotes(request.getNotes());
         return activityRepository.save(existing);
     }
 
     @Override
     public Activity patchActivity(Integer vacationId, Integer vacationDayId, Integer id, PatchActivityRequest request) {
-        vacationRepository.findById(vacationId).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation not found with id: " + vacationId));
-        vacationDayRepository.findById(vacationDayId).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation day not found with id: " + vacationDayId));
-        Activity existing = getActivityById(vacationId, vacationDayId, id);
+        Activity existing = authorizationService.getActivityForCurrentUser(vacationId, vacationDayId, id);
         if (request.getName() != null) {
-        existing.setName(request.getName());
+            existing.setName(request.getName());
         }
         if (request.getActivityType() != null) {
-        existing.setActivityType(request.getActivityType());
+            existing.setActivityType(request.getActivityType());
         }
         if (request.getLocation() != null) {
-        existing.setLocation(request.getLocation());
+            existing.setLocation(request.getLocation());
         }   
         if (request.getDurationMinutes() != null) {
-        existing.setDurationMinutes(request.getDurationMinutes());
+            existing.setDurationMinutes(request.getDurationMinutes());
         }
         if (request.getOpeningHours() != null) {
-        existing.setOpeningHours(request.getOpeningHours());
+            existing.setOpeningHours(request.getOpeningHours());
         }
         if (request.getMinimumAge() != null) {
-        existing.setMinimumAge(request.getMinimumAge());
+            existing.setMinimumAge(request.getMinimumAge());
         }
         if (request.getNotes() != null) {
-        existing.setNotes(request.getNotes());
+            existing.setNotes(request.getNotes());
         }
         return activityRepository.save(existing);
     }
 
     @Override
     public void deleteActivity(Integer vacationId, Integer vacationDayId, Integer id) {
-        vacationRepository.findById(vacationId).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation not found with id: " + vacationId));
-        vacationDayRepository.findById(vacationDayId).orElseThrow(() 
-        -> new ResourceNotFoundException("Vacation day not found with id: " + vacationDayId));
-        Activity existing = getActivityById(vacationId, vacationDayId, id);
-        activityRepository.delete(existing);
+        Activity activity = authorizationService.getActivityForCurrentUser(vacationId, vacationDayId, id);
+        activityRepository.delete(activity);
     }
 
     
