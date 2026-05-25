@@ -1,6 +1,6 @@
 package com.sapir.smartvacationplanner.dto.activity;
 import com.sapir.smartvacationplanner.entity.enums.ActivityType;
-
+import java.time.LocalTime;
 /**
  * ActivityResponse is a DTO for returning an activity.
  * It is used to return the activity details to the client.
@@ -14,7 +14,8 @@ public class ActivityResponse {
     private ActivityType activityType;
     private String location;
     private int durationMinutes;
-    private String openingHours;
+    private LocalTime openingTime;
+    private LocalTime closingTime;
     private int minimumAge;
     private String notes;
 
@@ -36,8 +37,11 @@ public class ActivityResponse {
     public int getDurationMinutes() {
         return durationMinutes;
     }
-    public String getOpeningHours() {
-        return openingHours;
+    public LocalTime getOpeningTime() {
+        return openingTime;
+    }
+    public LocalTime getClosingTime() {
+        return closingTime;
     }
     public int getMinimumAge() {
         return minimumAge;
@@ -64,8 +68,11 @@ public class ActivityResponse {
     public void setDurationMinutes(int durationMinutes) {
         this.durationMinutes = durationMinutes;
     }
-    public void setOpeningHours(String openingHours) {
-        this.openingHours = openingHours;
+    public void setOpeningTime(LocalTime openingTime) {
+        this.openingTime = openingTime;
+    }
+    public void setClosingTime(LocalTime closingTime) {
+        this.closingTime = closingTime;
     }
     public void setMinimumAge(int minimumAge) {
         this.minimumAge = minimumAge;
@@ -82,7 +89,8 @@ public class ActivityResponse {
             ", activityType=" + activityType +
             ", location=" + location +
             ", durationMinutes=" + durationMinutes +
-            ", openingHours=" + openingHours +
+            ", openingTime=" + openingTime +
+            ", closingTime=" + closingTime +
             ", minimumAge=" + minimumAge +
             ", notes=" + notes +
             '}';

@@ -10,6 +10,7 @@ import com.sapir.smartvacationplanner.entity.VacationDay;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.sapir.smartvacationplanner.entity.enums.ActivityType;
+import java.time.LocalTime;
 
 /**
  * ActivityServiceImpl is a service implementation for the Activity entity.
@@ -35,10 +36,10 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public Page<Activity> searchActivities(Integer vacationId, Integer vacationDayId, String name, ActivityType activityType, String location, Integer durationMinutes, String openingHours, Integer minimumAge, String notes, Pageable pageable) {
+    public Page<Activity> searchActivities(Integer vacationId, Integer vacationDayId, String name, ActivityType activityType, String location, Integer durationMinutes, LocalTime openingTime, LocalTime closingTime, Integer minimumAge, String notes, Pageable pageable) {
         
         VacationDay vacationDay = authorizationService.getVacationDayForCurrentUser(vacationId, vacationDayId);
-        return activityRepository.searchActivities(vacationDay, name, activityType, location, durationMinutes, openingHours, minimumAge, notes, pageable);
+        return activityRepository.searchActivities(vacationDay, name, activityType, location, durationMinutes, openingTime, closingTime, minimumAge, notes, pageable);
     }
 
     @Override
@@ -49,7 +50,7 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public Activity createActivity(Integer vacationId, Integer vacationDayId, CreateActivityRequest request) {
         VacationDay vacationDay = authorizationService.getVacationDayForCurrentUser(vacationId, vacationDayId);
-        Activity activity = new Activity(vacationDay, request.getName(), request.getActivityType(), request.getLocation(), request.getDurationMinutes(), request.getOpeningHours(), request.getMinimumAge(), request.getNotes());
+        Activity activity = new Activity(vacationDay, request.getName(), request.getActivityType(), request.getLocation(), request.getDurationMinutes(), request.getOpeningTime(), request.getClosingTime(), request.getMinimumAge(), request.getNotes());
         return activityRepository.save(activity);
     }
 
@@ -60,7 +61,8 @@ public class ActivityServiceImpl implements ActivityService {
         existing.setActivityType(request.getActivityType());
         existing.setLocation(request.getLocation());  
         existing.setDurationMinutes(request.getDurationMinutes());
-        existing.setOpeningHours(request.getOpeningHours());
+        existing.setOpeningTime(request.getOpeningTime());
+        existing.setClosingTime(request.getClosingTime());
         existing.setMinimumAge(request.getMinimumAge()); 
         existing.setNotes(request.getNotes());
         return activityRepository.save(existing);
@@ -81,8 +83,11 @@ public class ActivityServiceImpl implements ActivityService {
         if (request.getDurationMinutes() != null) {
             existing.setDurationMinutes(request.getDurationMinutes());
         }
-        if (request.getOpeningHours() != null) {
-            existing.setOpeningHours(request.getOpeningHours());
+        if (request.getOpeningTime() != null) {
+            existing.setOpeningTime(request.getOpeningTime());
+        }
+        if (request.getClosingTime() != null) {
+            existing.setClosingTime(request.getClosingTime());
         }
         if (request.getMinimumAge() != null) {
             existing.setMinimumAge(request.getMinimumAge());

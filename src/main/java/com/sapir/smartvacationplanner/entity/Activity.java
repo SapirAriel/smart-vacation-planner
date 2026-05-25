@@ -1,6 +1,7 @@
 package com.sapir.smartvacationplanner.entity;
 import jakarta.persistence.*;
 import com.sapir.smartvacationplanner.entity.enums.ActivityType;
+import java.time.LocalTime;
 
 /**
  * Activity entity represents an activity that a traveler can do on a vacation day.
@@ -34,8 +35,11 @@ public class Activity {
     @Column(name = "duration_minutes", nullable = false)
     private int durationMinutes;
 
-    @Column(name = "opening_hours", nullable = false)
-    private String openingHours;
+    @Column(name = "opening_time", nullable = false)
+    private LocalTime openingTime;
+
+    @Column(name = "closing_time", nullable = false)
+    private LocalTime closingTime;
 
     @Column(name = "minimum_age", nullable = false)
     private int minimumAge;
@@ -47,14 +51,15 @@ public class Activity {
     }
 
     public Activity(VacationDay vacationDay, String name, ActivityType activityType, String location, 
-        int durationMinutes, String openingHours, int minimumAge, String notes) {
+        int durationMinutes, LocalTime openingTime, LocalTime closingTime, int minimumAge, String notes) {
 
         this.vacationDay = vacationDay;
         this.name = name;
         this.activityType = activityType;
         this.location = location;
         this.durationMinutes = durationMinutes;
-        this.openingHours = openingHours;
+        this.openingTime = openingTime;
+        this.closingTime = closingTime;
         this.minimumAge = minimumAge;
         this.notes = notes;
     }
@@ -77,8 +82,11 @@ public class Activity {
     public int getDurationMinutes() {
         return durationMinutes;
     }
-    public String getOpeningHours() {
-        return openingHours;
+    public LocalTime getOpeningTime() {
+        return openingTime;
+    }
+    public LocalTime getClosingTime() {
+        return closingTime;
     }
     public int getMinimumAge() {
         return minimumAge;
@@ -105,8 +113,11 @@ public class Activity {
     public void setDurationMinutes(int durationMinutes) {
         this.durationMinutes = durationMinutes;
     }
-    public void setOpeningHours(String openingHours) {
-        this.openingHours = openingHours;
+    public void setOpeningTime(LocalTime openingTime) {
+        this.openingTime = openingTime;
+    }
+    public void setClosingTime(LocalTime closingTime) {
+        this.closingTime = closingTime;
     }
     public void setMinimumAge(int minimumAge) {
         this.minimumAge = minimumAge;
@@ -124,7 +135,8 @@ public class Activity {
             ", activityType=" + activityType +
             ", location=" + location +
             ", durationMinutes=" + durationMinutes +
-            ", openingHours=" + openingHours +
+            ", openingTime=" + openingTime +
+            ", closingTime=" + closingTime +
             ", minimumAge=" + minimumAge +
             ", notes=" + notes +
             '}';

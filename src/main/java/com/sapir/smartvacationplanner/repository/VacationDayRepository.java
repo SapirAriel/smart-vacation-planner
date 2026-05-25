@@ -21,6 +21,8 @@ public interface VacationDayRepository extends JpaRepository<VacationDay, Intege
 
     Optional<VacationDay> findByVacationAndId(Vacation vacation, Integer id);
 
+    Optional<VacationDay> findByVacationAndDate(Vacation vacation, LocalDate date);
+
     Page<VacationDay> findByVacation_IdAndDayType(Integer vacationId, DayType dayType, Pageable pageable);
 
     @Query("""

@@ -22,6 +22,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.sapir.smartvacationplanner.entity.enums.ActivityType;
+import java.time.LocalTime;
 
 
 @RestController
@@ -46,13 +47,14 @@ public class ActivityController {
         @RequestParam(required = false) ActivityType activityType,
         @RequestParam(required = false) String location,
         @RequestParam(required = false) Integer durationMinutes,
-        @RequestParam(required = false) String openingHours,
+        @RequestParam(required = false) LocalTime openingTime,
+        @RequestParam(required = false) LocalTime closingTime,
         @RequestParam(required = false) Integer minimumAge,
         @RequestParam(required = false) String notes,
         @PathVariable Integer vacationDayId, @PathVariable Integer vacationId, 
         @PageableDefault(page = 0, size = 5, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
         
-        return activityService.searchActivities(vacationId, vacationDayId, name, activityType, location, durationMinutes, openingHours, minimumAge, notes, pageable).map(this::toResponse);
+        return activityService.searchActivities(vacationId, vacationDayId, name, activityType, location, durationMinutes, openingTime, closingTime, minimumAge, notes, pageable).map(this::toResponse);
     }
 
     @GetMapping("/{id}")
@@ -94,7 +96,8 @@ public class ActivityController {
         activityResponse.setActivityType(activity.getActivityType());
         activityResponse.setLocation(activity.getLocation());
         activityResponse.setDurationMinutes(activity.getDurationMinutes());
-        activityResponse.setOpeningHours(activity.getOpeningHours());
+        activityResponse.setOpeningTime(activity.getOpeningTime());
+        activityResponse.setClosingTime(activity.getClosingTime());
         activityResponse.setMinimumAge(activity.getMinimumAge());
         activityResponse.setNotes(activity.getNotes());
         return activityResponse;

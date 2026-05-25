@@ -9,12 +9,16 @@ import com.sapir.smartvacationplanner.entity.enums.ActivityType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.Optional;
+import java.time.LocalTime;
+import org.springframework.data.domain.Sort;
 
 public interface ActivityRepository extends JpaRepository<Activity, Integer> {
 
     List<Activity> findByVacationDay(VacationDay vacationDay);
 
     Page<Activity> findByVacationDay(VacationDay vacationDay, Pageable pageable);
+    
+    List<Activity> findByVacationDay(VacationDay vacationDay, Sort sort);
 
     List<Activity> findByVacationDay_Id(Integer vacationDayId);
 
@@ -26,7 +30,8 @@ public interface ActivityRepository extends JpaRepository<Activity, Integer> {
           and (:activityType is null or a.activityType = :activityType)
           and (:location is null or lower(a.location) like lower(concat('%', :location, '%')))
           and (:durationMinutes is null or a.durationMinutes <= :durationMinutes)
-          and (:openingHours is null or lower(a.openingHours) like lower(concat('%', :openingHours, '%')))
+          and (:openingTime is null or a.openingTime = :openingTime)
+          and (:closingTime is null or a.closingTime = :closingTime)
           and (:minimumAge is null or a.minimumAge <= :minimumAge)
           and (:notes is null or lower(a.notes) like lower(concat('%', :notes, '%')))
     """)
@@ -36,7 +41,8 @@ public interface ActivityRepository extends JpaRepository<Activity, Integer> {
         @Param("activityType") ActivityType activityType,
         @Param("location") String location,
         @Param("durationMinutes") Integer durationMinutes,
-        @Param("openingHours") String openingHours,
+        @Param("openingTime") LocalTime openingTime,
+        @Param("closingTime") LocalTime closingTime,
         @Param("minimumAge") Integer minimumAge,
         @Param("notes") String notes, Pageable pageable);
 

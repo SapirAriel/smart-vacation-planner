@@ -14,6 +14,9 @@ import com.sapir.smartvacationplanner.repository.VacationDayRepository;
 import com.sapir.smartvacationplanner.repository.ActivityRepository;
 import com.sapir.smartvacationplanner.entity.VacationDay;
 import com.sapir.smartvacationplanner.entity.Activity;
+import java.util.List;
+import org.springframework.data.domain.Sort;
+import java.time.LocalDate;
 
 /**
  * Handles access checks for resources that belong to the current authenticated user.
@@ -67,12 +70,27 @@ public class AuthorizationService {
         -> new ResourceNotFoundException("Vacation day not found with id: " + vacationDayId));
     }
 
+    public VacationDay getVacationDayForCurrentUser(Integer vacationId, LocalDate date) {
+        Vacation vacation = getVacationForCurrentUser(vacationId);
+        return vacationDayRepository.findByVacationAndDate(vacation, date).orElseThrow(() 
+        -> new ResourceNotFoundException("Vacation day not found with date: " + date));
+    }
+
+    public List<VacationDay> getVacationDaysForCurrentUser(Integer vacationId) {
+        Vacation vacation = getVacationForCurrentUser(vacationId);
+        return vacationDayRepository.findByVacation(vacation);
+    }
 
     public Activity getActivityForCurrentUser(Integer vacationId, Integer vacationDayId, Integer activityId) {
         
         VacationDay vacationDay = getVacationDayForCurrentUser(vacationId,vacationDayId);
         return activityRepository.findByVacationDayAndId(vacationDay, activityId).orElseThrow(() 
         -> new ResourceNotFoundException("Activity not found with id: " + activityId));
+    }
+
+    public List<Activity> getActivitiesForCurrentUser(Integer vacationId, Integer vacationDayId, Sort sort) {
+        VacationDay vacationDay = getVacationDayForCurrentUser(vacationId, vacationDayId);
+        return activityRepository.findByVacationDay(vacationDay, sort);
     }
 
 }

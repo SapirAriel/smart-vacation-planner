@@ -1,6 +1,7 @@
 package com.sapir.smartvacationplanner.dto.activity;
 import com.sapir.smartvacationplanner.entity.enums.ActivityType;
 import jakarta.validation.constraints.Positive;
+import java.time.LocalTime;
 
 /**
  * PatchActivityRequest is a DTO for patching an activity.
@@ -18,7 +19,9 @@ public class PatchActivityRequest {
     @Positive(message = "Duration minutes must be greater than 0")
     private Integer durationMinutes;
 
-    private String openingHours;
+    private LocalTime openingTime;
+
+    private LocalTime closingTime;
 
     private Integer minimumAge;
 
@@ -37,8 +40,11 @@ public class PatchActivityRequest {
     public Integer getDurationMinutes() {
         return durationMinutes;
     }
-    public String getOpeningHours() {
-        return openingHours;
+    public LocalTime getOpeningTime() {
+        return openingTime;
+    }
+    public LocalTime getClosingTime() {
+        return closingTime;
     }
     public Integer getMinimumAge() {
         return minimumAge;
@@ -59,8 +65,11 @@ public class PatchActivityRequest {
     public void setDurationMinutes(Integer durationMinutes) {
         this.durationMinutes = durationMinutes;
     }
-    public void setOpeningHours(String openingHours) {
-        this.openingHours = openingHours;
+    public void setOpeningTime(LocalTime openingTime) {
+        this.openingTime = openingTime;
+    }
+    public void setClosingTime(LocalTime closingTime) {
+        this.closingTime = closingTime;
     }
     public void setMinimumAge(Integer minimumAge) {
         this.minimumAge = minimumAge;

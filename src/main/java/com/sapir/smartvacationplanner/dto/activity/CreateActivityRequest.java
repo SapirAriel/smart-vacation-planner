@@ -3,6 +3,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import com.sapir.smartvacationplanner.entity.enums.ActivityType;
 import jakarta.validation.constraints.Positive;
+import java.time.LocalTime;
 
 /**
  * CreateActivityRequest is a DTO for creating a new activity.
@@ -24,8 +25,11 @@ public class CreateActivityRequest {
     @NotNull(message = "Duration minutes is required")
     private Integer durationMinutes;
 
-    @NotBlank(message = "Opening hours is required")
-    private String openingHours;
+    @NotNull(message = "Opening time is required")
+    private LocalTime openingTime;
+
+    @NotNull(message = "Closing time is required")
+    private LocalTime closingTime;
 
     @NotNull(message = "Minimum age is required")
     private Integer minimumAge;
@@ -45,8 +49,11 @@ public class CreateActivityRequest {
     public Integer getDurationMinutes() {
         return durationMinutes;
     }
-    public String getOpeningHours() {
-        return openingHours;
+    public LocalTime getOpeningTime() {
+        return openingTime;
+    }
+    public LocalTime getClosingTime() {
+        return closingTime;
     }
     public Integer getMinimumAge() {
         return minimumAge;
@@ -67,8 +74,11 @@ public class CreateActivityRequest {
     public void setDurationMinutes(Integer durationMinutes) {
         this.durationMinutes = durationMinutes;
     }
-    public void setOpeningHours(String openingHours) {
-        this.openingHours = openingHours;
+    public void setOpeningTime(LocalTime openingTime) {
+        this.openingTime = openingTime;
+    }
+    public void setClosingTime(LocalTime closingTime) {
+        this.closingTime = closingTime;
     }
     public void setMinimumAge(Integer minimumAge) {
         this.minimumAge = minimumAge;
