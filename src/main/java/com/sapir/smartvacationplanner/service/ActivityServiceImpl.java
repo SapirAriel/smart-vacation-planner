@@ -11,6 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.sapir.smartvacationplanner.entity.enums.ActivityType;
 import java.time.LocalTime;
+import com.sapir.smartvacationplanner.integration.google.GooglePlacesClient;
+import com.sapir.smartvacationplanner.integration.google.dto.PlaceResult;
+
 
 /**
  * ActivityServiceImpl is a service implementation for the Activity entity.
@@ -22,10 +25,12 @@ public class ActivityServiceImpl implements ActivityService {
 
     private final ActivityRepository activityRepository;
     private final AuthorizationService authorizationService;
+    private final GooglePlacesClient googlePlacesClient;
 
-    public ActivityServiceImpl(ActivityRepository activityRepository, AuthorizationService authorizationService) {
+    public ActivityServiceImpl(ActivityRepository activityRepository, AuthorizationService authorizationService, GooglePlacesClient googlePlacesClient) {
         this.activityRepository = activityRepository;
         this.authorizationService = authorizationService;
+        this.googlePlacesClient = googlePlacesClient;
     }
 
     @Override
@@ -50,13 +55,29 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public Activity createActivity(Integer vacationId, Integer vacationDayId, CreateActivityRequest request) {
         VacationDay vacationDay = authorizationService.getVacationDayForCurrentUser(vacationId, vacationDayId);
-        Activity activity = new Activity(vacationDay, request.getName(), request.getActivityType(), request.getLocation(), request.getDurationMinutes(), request.getOpeningTime(), request.getClosingTime(), request.getMinimumAge(), request.getNotes());
+        System.out.println("Calling Google for location: " + request.getLocation());
+        PlaceResult placeResult = googlePlacesClient.searchPlace(request.getLocation());
+        System.out.println("PlaceResult: " + placeResult);
+        Activity activity = new Activity(vacationDay, request.getName(), request.getActivityType(), request.getLocation(),
+        request.getDurationMinutes(), request.getOpeningTime(), request.getClosingTime(), request.getMinimumAge(),
+        request.getNotes(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.latitude(), placeResult.longitude());
         return activityRepository.save(activity);
     }
 
     @Override
     public Activity updateActivity(Integer vacationId, Integer vacationDayId, Integer id, UpdateActivityRequest request) {
+
         Activity existing = authorizationService.getActivityForCurrentUser(vacationId, vacationDayId, id);
+        
+        if (!existing.getLocation().equals(request.getLocation())) {
+            System.out.println("Calling Google for location: " + request.getLocation());
+            PlaceResult placeResult = googlePlacesClient.searchPlace(request.getLocation());
+            System.out.println("PlaceResult: " + placeResult);
+            existing.setPlaceId(placeResult.placeId());
+            existing.setFormattedAddress(placeResult.formattedAddress());
+            existing.setLatitude(placeResult.latitude());
+            existing.setLongitude(placeResult.longitude());
+        }
         existing.setName(request.getName());
         existing.setActivityType(request.getActivityType());
         existing.setLocation(request.getLocation());  
@@ -71,15 +92,24 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public Activity patchActivity(Integer vacationId, Integer vacationDayId, Integer id, PatchActivityRequest request) {
         Activity existing = authorizationService.getActivityForCurrentUser(vacationId, vacationDayId, id);
+
         if (request.getName() != null) {
             existing.setName(request.getName());
         }
         if (request.getActivityType() != null) {
             existing.setActivityType(request.getActivityType());
         }
-        if (request.getLocation() != null) {
-            existing.setLocation(request.getLocation());
-        }   
+        if (request.getLocation() != null && !existing.getLocation().equals(request.getLocation())) {
+                existing.setLocation(request.getLocation());
+                System.out.println("Calling Google for location: " + request.getLocation());
+                PlaceResult placeResult = googlePlacesClient.searchPlace(request.getLocation());
+                System.out.println("PlaceResult: " + placeResult);
+                existing.setPlaceId(placeResult.placeId());
+                existing.setFormattedAddress(placeResult.formattedAddress());
+                existing.setLatitude(placeResult.latitude());
+                existing.setLongitude(placeResult.longitude());
+            }// new location, update the place details
+          
         if (request.getDurationMinutes() != null) {
             existing.setDurationMinutes(request.getDurationMinutes());
         }

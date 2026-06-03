@@ -32,6 +32,21 @@ public class Activity {
     @Column(name = "location", nullable = false)
     private String location;
 
+    // Google Maps API place details
+
+    @Column(name = "place_id")
+    private String placeId;
+
+    @Column(name = "formatted_address")
+    private String formattedAddress;
+
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
+
     @Column(name = "duration_minutes", nullable = false)
     private int durationMinutes;
 
@@ -51,7 +66,7 @@ public class Activity {
     }
 
     public Activity(VacationDay vacationDay, String name, ActivityType activityType, String location, 
-        int durationMinutes, LocalTime openingTime, LocalTime closingTime, int minimumAge, String notes) {
+        int durationMinutes, LocalTime openingTime, LocalTime closingTime, int minimumAge, String notes, String placeId, String formattedAddress, Double latitude, Double longitude) {
 
         this.vacationDay = vacationDay;
         this.name = name;
@@ -95,6 +110,19 @@ public class Activity {
         return notes;
     }
 
+    public String getPlaceId() {
+        return placeId;
+    }
+    public String getFormattedAddress() {
+        return formattedAddress;
+    }
+    public Double getLatitude() {
+        return latitude;
+    }
+    public Double getLongitude() {
+        return longitude;
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }
@@ -126,6 +154,19 @@ public class Activity {
         this.notes = notes;
     }
 
+    public void setPlaceId(String placeId) {
+        this.placeId = placeId;
+    }
+    public void setFormattedAddress(String formattedAddress) {
+        this.formattedAddress = formattedAddress;
+    }
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
     @Override
     public String toString() {
         return "Activity{" +
@@ -139,6 +180,10 @@ public class Activity {
             ", closingTime=" + closingTime +
             ", minimumAge=" + minimumAge +
             ", notes=" + notes +
+            ", placeId=" + placeId +
+            ", formattedAddress=" + formattedAddress +
+            ", latitude=" + latitude +
+            ", longitude=" + longitude +
             '}';
     }
 }
