@@ -9,18 +9,18 @@ public class ScheduledActivityResponse {
     private ActivityType activityType;
     private LocalTime plannedStartTime;
     private LocalTime plannedEndTime;
-    private String location;
+    private String placeName;
 
     public ScheduledActivityResponse() {
     }
 
-    public ScheduledActivityResponse(Integer activityId, String activityName, ActivityType activityType, LocalTime plannedStartTime, LocalTime plannedEndTime, String location) {
+    public ScheduledActivityResponse(Integer activityId, String activityName, ActivityType activityType, LocalTime plannedStartTime, LocalTime plannedEndTime, String placeName) {
         this.activityId = activityId;
         this.activityName = activityName;
         this.activityType = activityType;
         this.plannedStartTime = plannedStartTime;
         this.plannedEndTime = plannedEndTime;
-        this.location = location;
+        this.placeName = placeName;
     } 
     
     public Integer getActivityId() {
@@ -38,8 +38,8 @@ public class ScheduledActivityResponse {
     public LocalTime getPlannedEndTime() {
         return plannedEndTime;
     }
-    public String getLocation() {
-        return location;
+    public String getPlaceName() {
+        return placeName;
     }
     
     public void setActivityId(Integer activityId) {
@@ -57,8 +57,8 @@ public class ScheduledActivityResponse {
     public void setPlannedEndTime(LocalTime plannedEndTime) {
         this.plannedEndTime = plannedEndTime;
     }
-    public void setLocation(String location) {
-        this.location = location;
+    public void setPlaceName(String placeName) {
+        this.placeName = placeName;
     }
     
     public String toString() {
@@ -68,7 +68,7 @@ public class ScheduledActivityResponse {
             ", activityType=" + activityType +
             ", plannedStartTime=" + plannedStartTime +
             ", plannedEndTime=" + plannedEndTime +
-            ", location=" + location +
+            ", placeName=" + placeName +
             '}';
     }
 }

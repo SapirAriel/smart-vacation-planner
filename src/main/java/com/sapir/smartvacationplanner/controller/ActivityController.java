@@ -25,6 +25,7 @@ import com.sapir.smartvacationplanner.entity.enums.ActivityType;
 import java.time.LocalTime;
 
 
+
 @RestController
 @RequestMapping("/api/v1/vacations/{vacationId}/days/{vacationDayId}/activities")
 public class ActivityController {
@@ -45,7 +46,7 @@ public class ActivityController {
     @GetMapping("/page")
     public Page<ActivityResponse> searchActivities(@RequestParam(required = false) String name,
         @RequestParam(required = false) ActivityType activityType,
-        @RequestParam(required = false) String location,
+        @RequestParam(required = false) String placeName,
         @RequestParam(required = false) Integer durationMinutes,
         @RequestParam(required = false) LocalTime openingTime,
         @RequestParam(required = false) LocalTime closingTime,
@@ -54,7 +55,7 @@ public class ActivityController {
         @PathVariable Integer vacationDayId, @PathVariable Integer vacationId, 
         @PageableDefault(page = 0, size = 5, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
         
-        return activityService.searchActivities(vacationId, vacationDayId, name, activityType, location, durationMinutes, openingTime, closingTime, minimumAge, notes, pageable).map(this::toResponse);
+        return activityService.searchActivities(vacationId, vacationDayId, name, activityType, placeName, durationMinutes, openingTime, closingTime, minimumAge, notes, pageable).map(this::toResponse);
     }
 
     @GetMapping("/{id}")
@@ -94,7 +95,7 @@ public class ActivityController {
         activityResponse.setVacationDayId(activity.getVacationDay().getId());
         activityResponse.setName(activity.getName());
         activityResponse.setActivityType(activity.getActivityType());
-        activityResponse.setLocation(activity.getLocation());
+        activityResponse.setPlaceName(activity.getPlace().getPlaceName());
         activityResponse.setDurationMinutes(activity.getDurationMinutes());
         activityResponse.setOpeningTime(activity.getOpeningTime());
         activityResponse.setClosingTime(activity.getClosingTime());

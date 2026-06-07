@@ -28,7 +28,7 @@ public interface ActivityRepository extends JpaRepository<Activity, Integer> {
         where a.vacationDay = :vacationDay
           and (:name is null or lower(a.name) like lower(concat('%', :name, '%')))
           and (:activityType is null or a.activityType = :activityType)
-          and (:location is null or lower(a.location) like lower(concat('%', :location, '%')))
+          and (:placeName is null or lower(a.place.placeName) like lower(concat('%', :placeName, '%')))
           and (:durationMinutes is null or a.durationMinutes <= :durationMinutes)
           and (:openingTime is null or a.openingTime = :openingTime)
           and (:closingTime is null or a.closingTime = :closingTime)
@@ -39,7 +39,7 @@ public interface ActivityRepository extends JpaRepository<Activity, Integer> {
         @Param("vacationDay") VacationDay vacationDay,
         @Param("name") String name,
         @Param("activityType") ActivityType activityType,
-        @Param("location") String location,
+        @Param("placeName") String placeName,
         @Param("durationMinutes") Integer durationMinutes,
         @Param("openingTime") LocalTime openingTime,
         @Param("closingTime") LocalTime closingTime,

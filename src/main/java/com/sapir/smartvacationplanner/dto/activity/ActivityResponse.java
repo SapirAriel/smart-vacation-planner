@@ -12,7 +12,7 @@ public class ActivityResponse {
     private int vacationDayId;
     private String name;
     private ActivityType activityType;
-    private String location;
+    private String placeName;
     private int durationMinutes;
     private LocalTime openingTime;
     private LocalTime closingTime;
@@ -31,8 +31,8 @@ public class ActivityResponse {
     public ActivityType getActivityType() {
         return activityType;
     }
-    public String getLocation() {
-        return location;
+    public String getPlaceName() {
+        return placeName;
     }
     public int getDurationMinutes() {
         return durationMinutes;
@@ -62,8 +62,8 @@ public class ActivityResponse {
     public void setActivityType(ActivityType activityType) {
         this.activityType = activityType;
     }
-    public void setLocation(String location) {
-        this.location = location;
+    public void setPlaceName(String placeName) {
+        this.placeName = placeName;
     }
     public void setDurationMinutes(int durationMinutes) {
         this.durationMinutes = durationMinutes;
@@ -87,7 +87,7 @@ public class ActivityResponse {
             ", vacationDayId=" + vacationDayId +
             ", name=" + name +
             ", activityType=" + activityType +
-            ", location=" + location +
+            ", placeName=" + placeName +
             ", durationMinutes=" + durationMinutes +
             ", openingTime=" + openingTime +
             ", closingTime=" + closingTime +

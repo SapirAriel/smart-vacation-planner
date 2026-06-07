@@ -14,7 +14,7 @@ public class PatchActivityRequest {
 
     private ActivityType activityType;
 
-    private String location;
+    private String placeName;
 
     @Positive(message = "Duration minutes must be greater than 0")
     private Integer durationMinutes;
@@ -34,8 +34,8 @@ public class PatchActivityRequest {
     public ActivityType getActivityType() {
         return activityType;
     }
-    public String getLocation() {
-        return location;
+    public String getPlaceName() {
+        return placeName;
     }
     public Integer getDurationMinutes() {
         return durationMinutes;
@@ -59,8 +59,8 @@ public class PatchActivityRequest {
     public void setActivityType(ActivityType activityType) {
         this.activityType = activityType;
     }
-    public void setLocation(String location) {
-        this.location = location;
+    public void setPlaceName(String placeName) {
+        this.placeName = placeName;
     }
     public void setDurationMinutes(Integer durationMinutes) {
         this.durationMinutes = durationMinutes;

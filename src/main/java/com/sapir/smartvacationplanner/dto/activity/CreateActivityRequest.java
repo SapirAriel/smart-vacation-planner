@@ -18,8 +18,8 @@ public class CreateActivityRequest {
     @NotNull(message = "Activity type is required")
     private ActivityType activityType;
 
-    @NotBlank(message = "Location is required")
-    private String location;
+    @NotBlank(message = "Place name is required")
+    private String placeName;
 
     @Positive(message = "Duration minutes must be greater than 0")
     @NotNull(message = "Duration minutes is required")
@@ -43,8 +43,8 @@ public class CreateActivityRequest {
     public ActivityType getActivityType() {
         return activityType;
     }
-    public String getLocation() {
-        return location;
+    public String getPlaceName() {
+        return placeName;
     }
     public Integer getDurationMinutes() {
         return durationMinutes;
@@ -68,8 +68,8 @@ public class CreateActivityRequest {
     public void setActivityType(ActivityType activityType) {
         this.activityType = activityType;
     }
-    public void setLocation(String location) {
-        this.location = location;
+    public void setPlaceName(String placeName) {
+        this.placeName = placeName;
     }
     public void setDurationMinutes(Integer durationMinutes) {
         this.durationMinutes = durationMinutes;

@@ -89,7 +89,7 @@ public class ItineraryServiceImpl implements ItineraryService {
                     activity.getActivityType(),
                     possibleStart,
                     possibleEnd,
-                    activity.getLocation());
+                    activity.getPlace().getPlaceName());
 
                 scheduledActivities.add(scheduled);
 

@@ -18,7 +18,7 @@ public interface ActivityService {
 
     List<Activity> getAllActivities(Integer vacationId, Integer vacationDayId);
 
-    Page<Activity> searchActivities(Integer vacationId, Integer vacationDayId, String name, ActivityType activityType, String location, Integer durationMinutes, LocalTime openingTime, LocalTime closingTime, Integer minimumAge, String notes, Pageable pageable);
+    Page<Activity> searchActivities(Integer vacationId, Integer vacationDayId, String name, ActivityType activityType, String placeName, Integer durationMinutes, LocalTime openingTime, LocalTime closingTime, Integer minimumAge, String notes, Pageable pageable);
 
     Activity getActivityById(Integer vacationId, Integer vacationDayId, Integer id);
     
