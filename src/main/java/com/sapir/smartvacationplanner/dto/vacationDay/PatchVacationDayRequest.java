@@ -18,6 +18,8 @@ public class PatchVacationDayRequest {
 
     private DayType dayType;
 
+    private String hotelPlaceName;
+
     public LocalDate getDate() {
         return date;
     }
@@ -26,6 +28,9 @@ public class PatchVacationDayRequest {
     }
     public DayType getDayType() {
         return dayType;
+    }
+    public String getHotelPlaceName() {
+        return hotelPlaceName;
     }
 
     public void setDate(LocalDate date) {
@@ -36,6 +41,9 @@ public class PatchVacationDayRequest {
     }
     public void setDayType(DayType dayType) {
         this.dayType = dayType;
+    }
+    public void setHotelPlaceName(String hotelPlaceName) {
+        this.hotelPlaceName = hotelPlaceName;
     }
 
 } //PatchVacationDayRequest

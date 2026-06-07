@@ -22,6 +22,9 @@ public class UpdateVacationDayRequest {
     @NotNull(message = "Day type is required")
     private DayType dayType;
 
+    @NotNull(message = "Hotel place name is required")
+    private String hotelPlaceName;
+
     public LocalDate getDate() {
         return date;
     }
@@ -32,6 +35,9 @@ public class UpdateVacationDayRequest {
     public DayType getDayType() {
         return dayType;
     }
+    public String getHotelPlaceName() {
+        return hotelPlaceName;
+    }
 
     public void setDate(LocalDate date) {
         this.date = date;
@@ -41,6 +47,9 @@ public class UpdateVacationDayRequest {
     }
     public void setDayType(DayType dayType) {
         this.dayType = dayType;
+    }
+    public void setHotelPlaceName(String hotelPlaceName) {
+        this.hotelPlaceName = hotelPlaceName;
     }
 
 } //UpdateVacationDayRequest

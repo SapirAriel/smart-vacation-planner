@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import com.sapir.smartvacationplanner.entity.enums.DayType;
 import java.util.List;
 import java.util.ArrayList;
+import com.sapir.smartvacationplanner.common.place.Place;
 
 /**
  * VacationDay entity represents a day of a vacation.
@@ -35,25 +36,37 @@ private int dayNumber;
 @Enumerated(EnumType.STRING)
 private DayType dayType;
 
+@Embedded
+@AttributeOverrides({
+        @AttributeOverride(name = "placeName", column = @Column(name = "hotel_place_name")),
+        @AttributeOverride(name = "placeId", column = @Column(name = "hotel_place_id")),
+        @AttributeOverride(name = "formattedAddress", column = @Column(name = "hotel_formatted_address")),
+        @AttributeOverride(name = "latitude", column = @Column(name = "hotel_latitude")),
+        @AttributeOverride(name = "longitude", column = @Column(name = "hotel_longitude"))
+})
+private Place hotelPlace;
+
 @OneToMany(mappedBy = "vacationDay")
 private List<Activity> activities = new ArrayList<>();
 
 public VacationDay() {
 }
 
-public VacationDay(Vacation vacation, LocalDate date, int dayNumber, DayType dayType) {
+public VacationDay(Vacation vacation, LocalDate date, int dayNumber, DayType dayType, Place hotelPlace) {
     
     this.vacation = vacation;
     this.date = date;
     this.dayNumber = dayNumber;
     this.dayType = dayType;
+    this.hotelPlace = hotelPlace;
 }     
 
-public VacationDay(Vacation vacation, LocalDate date, int dayNumber, DayType dayType, List<Activity> activities) {
+public VacationDay(Vacation vacation, LocalDate date, int dayNumber, DayType dayType, Place hotelPlace, List<Activity> activities) {
     this.vacation = vacation;
     this.date = date;
     this.dayNumber = dayNumber;
     this.dayType = dayType;
+    this.hotelPlace = hotelPlace;
     this.activities = activities;
 }
 
@@ -72,6 +85,9 @@ public int getDayNumber() {
 }
 public DayType getDayType() {
     return dayType;
+}
+public Place getHotelPlace() {
+    return hotelPlace;
 }
 public List<Activity> getActivities() {
     return activities;
@@ -93,6 +109,9 @@ public void setDayNumber(int dayNumber) {
 public void setDayType(DayType dayType) {
     this.dayType = dayType;
 }
+public void setHotelPlace(Place hotelPlace) {
+    this.hotelPlace = hotelPlace;
+}
 public void setActivities(List<Activity> activities) {
     this.activities = activities;
 }
@@ -105,6 +124,7 @@ public String toString() {
         ", date=" + date +
         ", dayNumber=" + dayNumber +
         ", dayType='" + dayType + '\'' +
+        ", hotelPlace=" + hotelPlace +
         ", activities=" + activities +
         '}';
 }

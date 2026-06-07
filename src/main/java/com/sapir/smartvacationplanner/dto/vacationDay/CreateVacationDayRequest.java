@@ -21,6 +21,9 @@ public class CreateVacationDayRequest {
     @NotNull(message = "Day type is required")
     private DayType dayType;
 
+    @NotNull(message = "Hotel place name is required")
+    private String hotelPlaceName;
+
     public LocalDate getDate() {
         return date;
     }
@@ -31,6 +34,9 @@ public class CreateVacationDayRequest {
     public DayType getDayType() {
         return dayType;
     }
+    public String getHotelPlaceName() {
+        return hotelPlaceName;
+    }
 
     public void setDate(LocalDate date) {
         this.date = date;
@@ -40,6 +46,9 @@ public class CreateVacationDayRequest {
     }
     public void setDayType(DayType dayType) {
         this.dayType = dayType;
+    }
+    public void setHotelPlaceName(String hotelPlaceName) {
+        this.hotelPlaceName = hotelPlaceName;
     }
 
 } //CreateVacationDayRequest

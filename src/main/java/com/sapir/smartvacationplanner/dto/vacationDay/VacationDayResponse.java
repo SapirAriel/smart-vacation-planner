@@ -13,6 +13,7 @@ public class VacationDayResponse {
     private LocalDate date;
     private Integer dayNumber;
     private DayType dayType;
+    private String hotelPlaceName;
 
     public Integer getId() {
         return id;
@@ -29,7 +30,9 @@ public class VacationDayResponse {
     public DayType getDayType() {
         return dayType;
     }
-
+    public String getHotelPlaceName() {
+        return hotelPlaceName;
+    }
     public void setId(Integer id) {
         this.id = id;
     }
@@ -45,7 +48,10 @@ public class VacationDayResponse {
     public void setDayType(DayType dayType) {
         this.dayType = dayType;
     }
-    
+    public void setHotelPlaceName(String hotelPlaceName) {
+        this.hotelPlaceName = hotelPlaceName;
+    }
+
     public String toString() {
         return "VacationDayResponse{" +
             "id=" + id +
@@ -53,6 +59,7 @@ public class VacationDayResponse {
             ", date=" + date +
             ", dayNumber=" + dayNumber +
             ", dayType=" + dayType +
+            ", hotelPlaceName=" + hotelPlaceName +
             '}';
     }
 } //VacationDayResponse
