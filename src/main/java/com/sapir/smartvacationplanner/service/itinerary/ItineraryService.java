@@ -1,4 +1,4 @@
-package com.sapir.smartvacationplanner.service;
+package com.sapir.smartvacationplanner.service.itinerary;
 import com.sapir.smartvacationplanner.dto.itinerary.ItineraryResponse;
 import com.sapir.smartvacationplanner.entity.Vacation;
 import com.sapir.smartvacationplanner.entity.VacationDay;

@@ -24,12 +24,9 @@ public class GooglePlacesClient {
   }
 
   public PlaceResult searchPlace(String query) {
-    System.out.println("Entered GooglePlacesClient with query: " + query);
-
     if (query == null || query.isBlank()) {
         throw new IllegalArgumentException("Search query must not be empty");
     }
-    System.out.println("apiKey exists = " + (apiKey != null && !apiKey.isBlank()));
     GooglePlacesTextSearchRequest request = new GooglePlacesTextSearchRequest(query);
     GooglePlacesTextSearchResponse response = restClient.post()
     .uri(textSearchUrl)
@@ -39,8 +36,6 @@ public class GooglePlacesClient {
     .body(request)
     .retrieve()
     .body(GooglePlacesTextSearchResponse.class);
-
-    System.out.println(response);
 
     if (response == null || response.places() == null || response.places().isEmpty()) {
       throw new IllegalArgumentException("No place found for query: " + query);

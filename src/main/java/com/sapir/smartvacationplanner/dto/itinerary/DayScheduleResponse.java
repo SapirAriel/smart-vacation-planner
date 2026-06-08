@@ -4,6 +4,7 @@ import java.util.List;
 
 public class DayScheduleResponse {
 
+    private Integer vacationDayId;
     private Integer dayNumber;
     private LocalDate date;
     private List<ScheduledActivityResponse> activities;
@@ -11,12 +12,16 @@ public class DayScheduleResponse {
     public DayScheduleResponse() {
     }
 
-    public DayScheduleResponse(Integer dayNumber, LocalDate date, List<ScheduledActivityResponse> activities) {
+    public DayScheduleResponse(Integer vacationDayId, Integer dayNumber, LocalDate date, List<ScheduledActivityResponse> activities) {
+        this.vacationDayId = vacationDayId;
         this.dayNumber = dayNumber;
         this.date = date;
         this.activities = activities;
     }
 
+    public Integer getVacationDayId() {
+        return vacationDayId;
+    }
     public Integer getDayNumber() {
         return dayNumber;
     }
@@ -27,6 +32,9 @@ public class DayScheduleResponse {
         return activities;
     }
 
+    public void setVacationDayId(Integer vacationDayId) {
+        this.vacationDayId = vacationDayId;
+    }
     public void setDayNumber(Integer dayNumber) {
         this.dayNumber = dayNumber;
     }
@@ -39,6 +47,7 @@ public class DayScheduleResponse {
     
     public String toString() {
         return "DayScheduleResponse{" +
+            "vacationDayId=" + vacationDayId +
             "dayNumber=" + dayNumber +
             ", date=" + date +
             ", activities=" + activities +

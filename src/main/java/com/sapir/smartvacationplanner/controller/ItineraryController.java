@@ -1,8 +1,10 @@
 package com.sapir.smartvacationplanner.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.sapir.smartvacationplanner.service.ItineraryService;
+
 import com.sapir.smartvacationplanner.dto.itinerary.ItineraryResponse;
+import com.sapir.smartvacationplanner.service.itinerary.ItineraryService;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
