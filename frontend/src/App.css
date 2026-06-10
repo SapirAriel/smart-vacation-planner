@@ -1,0 +1,285 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #1f2937;
+  background: #f3f4f6;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+.app-header {
+  background: #1e3a5f;
+  color: #ffffff;
+  padding: 1.25rem 1.25rem;
+}
+
+.header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.header-brand {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.app-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+.app-subtitle {
+  margin: 0;
+  color: #dbeafe;
+}
+
+.header-credentials {
+  flex: 0 1 auto;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.header-credentials-hint {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  color: #bfdbfe;
+  font-style: italic;
+}
+
+.header-credentials-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.header-form-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #dbeafe;
+}
+
+.header-form-field input {
+  width: 160px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #1f2937;
+  background: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .header-inner {
+    flex-direction: column;
+  }
+
+  .header-credentials {
+    width: 100%;
+  }
+
+  .header-form-field input {
+    width: 100%;
+    min-width: 140px;
+  }
+}
+
+.app-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+
+section h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.section-hint,
+.chat-intro,
+.itinerary-summary {
+  margin: 0 0 1rem;
+  color: #4b5563;
+}
+
+.map-container {
+  height: 320px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+}
+
+.map-container .leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+
+.chat-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.form-field input {
+  width: 180px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.form-field input[type="number"] {
+  width: 120px;
+}
+
+.primary-button {
+  padding: 0.55rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.primary-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error-message {
+  margin: 0.75rem 0 0;
+  color: #b91c1c;
+  font-weight: 500;
+}
+
+.day-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.day-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+}
+
+.day-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.day-card-header h3 {
+  margin: 0;
+}
+
+.day-date {
+  color: #6b7280;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activity-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.activity-card h4 {
+  margin: 0 0 0.5rem;
+}
+
+.activity-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+
+.activity-details div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.activity-details dt {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.activity-details dd {
+  margin: 0;
+}
+
+.empty-message {
+  margin: 0;
+  color: #6b7280;
+}
+
+.debug-section {
+  margin-top: 1.25rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.75rem;
+}
+
+.debug-section summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #374151;
+}
+
+.debug-section pre {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem;
+  background: #111827;
+  color: #f9fafb;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+}
