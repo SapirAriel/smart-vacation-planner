@@ -1,17 +1,27 @@
 function ChatPanel({
   vacationId,
   onVacationIdChange,
+  selectedVacation,
   onGenerate,
   loading,
   error,
 }) {
+  const vacationIdDisabled = loading || Boolean(selectedVacation);
+
   return (
     <section className="chat-panel">
-      <h2>Planning</h2>
+      <h2>Step 3: Generate itinerary</h2>
       <p className="chat-intro">
-        Phase 1: enter an existing vacation ID and generate an itinerary from
-        the backend. A real chat flow will be added later.
+        Generate a day-by-day itinerary for your vacation using the backend
+        planner.
       </p>
+
+      {selectedVacation && (
+        <p className="selected-vacation-note">
+          Using created vacation: {selectedVacation.name} ({selectedVacation.city},{" "}
+          {selectedVacation.country})
+        </p>
+      )}
 
       <div className="chat-form">
         <div className="form-field">
@@ -22,7 +32,7 @@ function ChatPanel({
             min="1"
             value={vacationId}
             onChange={(event) => onVacationIdChange(event.target.value)}
-            disabled={loading}
+            disabled={vacationIdDisabled}
           />
         </div>
 
