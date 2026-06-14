@@ -1,12 +1,12 @@
 package com.sapir.smartvacationplanner.entity.enums;
 
-public enum ActivityType {
-    ATTRACTION,
+public enum PointOfInterestCategory {
+    TOURIST_ATTRACTION,
+    MUSEUM,
+    VIEWPOINT,
     RESTAURANT,
     CAFE,
-    VIEWPOINT,
     HIKE,
-    MUSEUM,
     SHOPPING,
     TRANSPORT,
     OTHER

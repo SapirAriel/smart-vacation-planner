@@ -2,34 +2,30 @@ package com.sapir.smartvacationplanner.entity;
 import jakarta.persistence.*;
 
 import com.sapir.smartvacationplanner.common.place.Place;
-import com.sapir.smartvacationplanner.entity.enums.ActivityType;
+import com.sapir.smartvacationplanner.entity.enums.PointOfInterestCategory;
 import java.time.LocalTime;
 
+
 /**
- * Activity entity represents an activity that a traveler can do on a vacation day.
- * It is a nested resource of VacationDay.
- * It is used to store the activity details such as name, type, place, duration, opening hours, minimum age, and notes.
+ * PointOfInterest entity represents a point of interest in a city. 
+ * It is used to store the point of interest details such as name, category, place, duration, opening hours, minimum age, and notes.
  */
 
 @Entity
-@Table(name = "activities")
-public class Activity {
+@Table(name = "points_of_interest")
+public class PointOfInterest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "vacation_day_id", nullable = false)
-    private VacationDay vacationDay;
-
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "activity_type", nullable = false)
+    @Column(name = "point_of_interest_category", nullable = false)
     @Enumerated(EnumType.STRING)
-    private ActivityType activityType;
+    private PointOfInterestCategory pointOfInterestCategory;
 
     @Embedded
     private Place place;
@@ -49,15 +45,14 @@ public class Activity {
     @Column(name = "notes", nullable = false)
     private String notes;
 
-    public Activity() {
+    public PointOfInterest() {
     }
 
-    public Activity(VacationDay vacationDay, String name, ActivityType activityType, Place place, 
+    public PointOfInterest(String name, PointOfInterestCategory pointOfInterestCategory, Place place, 
         int durationMinutes, LocalTime openingTime, LocalTime closingTime, int minimumAge, String notes) {
 
-        this.vacationDay = vacationDay;
         this.name = name;
-        this.activityType = activityType;
+        this.pointOfInterestCategory = pointOfInterestCategory;
         this.place = place;
         this.durationMinutes = durationMinutes;
         this.openingTime = openingTime;
@@ -69,14 +64,12 @@ public class Activity {
     public Integer getId() {
         return id;
     }
-    public VacationDay getVacationDay() {
-        return vacationDay;
-    }
+
     public String getName() {
         return name;
     }
-    public ActivityType getActivityType() {
-        return activityType;
+    public PointOfInterestCategory getPointOfInterestCategory() {
+        return pointOfInterestCategory;
     }
     public Place getPlace() {
         return place;
@@ -117,14 +110,11 @@ public class Activity {
     public void setId(Integer id) {
         this.id = id;
     }
-    public void setVacationDay(VacationDay vacationDay) {
-        this.vacationDay = vacationDay;
-    }
     public void setName(String name) {
         this.name = name;
     }
-    public void setActivityType(ActivityType activityType) {
-        this.activityType = activityType;
+    public void setPointOfInterestCategory(PointOfInterestCategory pointOfInterestCategory) {
+        this.pointOfInterestCategory = pointOfInterestCategory;
     }
     public void setPlace(Place place) {
         this.place = place;
@@ -168,9 +158,8 @@ public class Activity {
     public String toString() {
         return "Activity{" +
             "id=" + id +
-            ", vacationDay=" + vacationDay +
             ", name=" + name +
-            ", activityType=" + activityType +
+            ", pointOfInterestCategory=" + pointOfInterestCategory +
             ", place=" + place +
             ", durationMinutes=" + durationMinutes +
             ", openingTime=" + openingTime +

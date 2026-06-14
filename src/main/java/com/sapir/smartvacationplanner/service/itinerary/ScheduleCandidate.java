@@ -1,17 +1,17 @@
 package com.sapir.smartvacationplanner.service.itinerary;
-import com.sapir.smartvacationplanner.entity.Activity;
+import com.sapir.smartvacationplanner.entity.VacationDayActivity;
 import java.time.LocalTime;
 
 public record ScheduleCandidate(
-    Activity activity,
+    VacationDayActivity vacationDayActivity,
     double distanceFromCurrentPlace,
     int estimatedTravelMinutes,
     LocalTime possibleStartTime,
     LocalTime possibleEndTime
 ) {
 
-    public Activity getActivity() {
-        return activity;
+    public VacationDayActivity getVacationDayActivity() {
+        return vacationDayActivity;
     }
     public double getDistanceFromCurrentPlace() {
         return distanceFromCurrentPlace;

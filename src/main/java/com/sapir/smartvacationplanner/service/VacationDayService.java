@@ -4,7 +4,7 @@ import com.sapir.smartvacationplanner.entity.VacationDay;
 import com.sapir.smartvacationplanner.dto.vacationDay.CreateVacationDayRequest;
 import com.sapir.smartvacationplanner.dto.vacationDay.UpdateVacationDayRequest;
 import com.sapir.smartvacationplanner.dto.vacationDay.PatchVacationDayRequest;
-import com.sapir.smartvacationplanner.entity.Activity;
+import com.sapir.smartvacationplanner.entity.VacationDayActivity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.sapir.smartvacationplanner.entity.enums.DayType;
@@ -29,7 +29,7 @@ public interface VacationDayService {
 
     VacationDay patchVacationDay(Integer vacationId, Integer id, PatchVacationDayRequest request);
 
-    List<Activity> getActivities(Integer vacationId, Integer vacationDayId);
+    List<VacationDayActivity> getAllVacationDayActivities(Integer vacationId, Integer vacationDayId);
 
     void deleteVacationDay(Integer vacationId, Integer id);
 }

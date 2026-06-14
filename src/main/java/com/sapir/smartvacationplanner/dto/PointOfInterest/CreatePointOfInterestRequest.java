@@ -1,22 +1,22 @@
-package com.sapir.smartvacationplanner.dto.activity;
+package com.sapir.smartvacationplanner.dto.PointOfInterest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import com.sapir.smartvacationplanner.entity.enums.ActivityType;
+import com.sapir.smartvacationplanner.entity.enums.PointOfInterestCategory;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalTime;
 
 /**
- * UpdateActivityRequest is a DTO for updating an activity.
- * It is used to validate the request body for the update activity endpoint.
+ * CreatePointOfInterestRequest is a DTO for creating a new point of interest.
+ * It is used to validate the request body for the create point of interest endpoint.
  */
 
-public class UpdateActivityRequest {
+public class CreatePointOfInterestRequest {
 
     @NotBlank(message = "Name is required")
     private String name;
 
-    @NotNull(message = "Activity type is required")
-    private ActivityType activityType;
+    @NotNull(message = "Point of interest category is required")
+    private PointOfInterestCategory pointOfInterestCategory;
 
     @NotBlank(message = "Place name is required")
     private String placeName;
@@ -40,8 +40,8 @@ public class UpdateActivityRequest {
     public String getName() {
         return name;
     }
-    public ActivityType getActivityType() {
-        return activityType;
+    public PointOfInterestCategory getPointOfInterestCategory() {
+        return pointOfInterestCategory;
     }
     public String getPlaceName() {
         return placeName;
@@ -65,8 +65,8 @@ public class UpdateActivityRequest {
     public void setName(String name) {
         this.name = name;
     }
-    public void setActivityType(ActivityType activityType) {
-        this.activityType = activityType;
+    public void setPointOfInterestCategory(PointOfInterestCategory pointOfInterestCategory) {
+        this.pointOfInterestCategory = pointOfInterestCategory;
     }
     public void setPlaceName(String placeName) {
         this.placeName = placeName;
@@ -86,4 +86,4 @@ public class UpdateActivityRequest {
     public void setNotes(String notes) {
         this.notes = notes;
     }
-} //UpdateActivityRequest
+} //CreatePointOfInterestRequest

@@ -47,7 +47,7 @@ private DayType dayType;
 private Place hotelPlace;
 
 @OneToMany(mappedBy = "vacationDay")
-private List<Activity> activities = new ArrayList<>();
+private List<VacationDayActivity> vacationDayActivities = new ArrayList<>();
 
 public VacationDay() {
 }
@@ -61,13 +61,13 @@ public VacationDay(Vacation vacation, LocalDate date, int dayNumber, DayType day
     this.hotelPlace = hotelPlace;
 }     
 
-public VacationDay(Vacation vacation, LocalDate date, int dayNumber, DayType dayType, Place hotelPlace, List<Activity> activities) {
+public VacationDay(Vacation vacation, LocalDate date, int dayNumber, DayType dayType, Place hotelPlace, List<VacationDayActivity> vacationDayActivities) {
     this.vacation = vacation;
     this.date = date;
     this.dayNumber = dayNumber;
     this.dayType = dayType;
     this.hotelPlace = hotelPlace;
-    this.activities = activities;
+    this.vacationDayActivities = vacationDayActivities;
 }
 
 public Integer getId() {
@@ -89,8 +89,8 @@ public DayType getDayType() {
 public Place getHotelPlace() {
     return hotelPlace;
 }
-public List<Activity> getActivities() {
-    return activities;
+public List<VacationDayActivity> getVacationDayActivities() {
+    return vacationDayActivities;
 }
 
 public void setId(Integer id) {
@@ -112,8 +112,8 @@ public void setDayType(DayType dayType) {
 public void setHotelPlace(Place hotelPlace) {
     this.hotelPlace = hotelPlace;
 }
-public void setActivities(List<Activity> activities) {
-    this.activities = activities;
+public void setVacationDayActivities(List<VacationDayActivity> vacationDayActivities) {
+    this.vacationDayActivities = vacationDayActivities;
 }
 
 @Override
@@ -125,7 +125,7 @@ public String toString() {
         ", dayNumber=" + dayNumber +
         ", dayType='" + dayType + '\'' +
         ", hotelPlace=" + hotelPlace +
-        ", activities=" + activities +
+        ", vacationDayActivities=" + vacationDayActivities +
         '}';
 }
 

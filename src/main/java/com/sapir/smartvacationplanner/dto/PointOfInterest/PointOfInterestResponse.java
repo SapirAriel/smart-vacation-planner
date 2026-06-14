@@ -1,17 +1,16 @@
-package com.sapir.smartvacationplanner.dto.activity;
-import com.sapir.smartvacationplanner.entity.enums.ActivityType;
+package com.sapir.smartvacationplanner.dto.PointOfInterest;
+import com.sapir.smartvacationplanner.entity.enums.PointOfInterestCategory;
 import java.time.LocalTime;
 /**
- * ActivityResponse is a DTO for returning an activity.
- * It is used to return the activity details to the client.
+ * PointOfInterestResponse is a DTO for returning a point of interest.
+ * It is used to return the point of interest details to the client.
  */
 
-public class ActivityResponse {
+public class PointOfInterestResponse {
 
     private int id;
-    private int vacationDayId;
     private String name;
-    private ActivityType activityType;
+    private PointOfInterestCategory pointOfInterestCategory;
     private String placeName;
     private int durationMinutes;
     private LocalTime openingTime;
@@ -22,14 +21,11 @@ public class ActivityResponse {
     public int getId() {
         return id;
     }
-    public int getVacationDayId() {
-        return vacationDayId;
-    }
     public String getName() {
         return name;
     }
-    public ActivityType getActivityType() {
-        return activityType;
+    public PointOfInterestCategory getPointOfInterestCategory() {
+        return pointOfInterestCategory;
     }
     public String getPlaceName() {
         return placeName;
@@ -53,14 +49,11 @@ public class ActivityResponse {
     public void setId(int id) {
         this.id = id;
     }
-    public void setVacationDayId(int vacationDayId) {
-        this.vacationDayId = vacationDayId;
-    }
     public void setName(String name) {
         this.name = name;
     }
-    public void setActivityType(ActivityType activityType) {
-        this.activityType = activityType;
+    public void setPointOfInterestCategory(PointOfInterestCategory pointOfInterestCategory) {
+        this.pointOfInterestCategory = pointOfInterestCategory;
     }
     public void setPlaceName(String placeName) {
         this.placeName = placeName;
@@ -82,11 +75,10 @@ public class ActivityResponse {
     }
 
     public String toString() {
-        return "ActivityResponse{" +
+        return "PointOfInterestResponse{" +
             "id=" + id +
-            ", vacationDayId=" + vacationDayId +
             ", name=" + name +
-            ", activityType=" + activityType +
+            ", pointOfInterestCategory=" + pointOfInterestCategory +
             ", placeName=" + placeName +
             ", durationMinutes=" + durationMinutes +
             ", openingTime=" + openingTime +

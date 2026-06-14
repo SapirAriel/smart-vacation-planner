@@ -1,36 +1,39 @@
 package com.sapir.smartvacationplanner.dto.itinerary;
 import java.time.LocalTime;
-import com.sapir.smartvacationplanner.entity.enums.ActivityType;
+import com.sapir.smartvacationplanner.entity.enums.PointOfInterestCategory;
 
 public class ScheduledActivityResponse {
 
-    private Integer activityId;
-    private String activityName;
-    private ActivityType activityType;
+    private Integer vacationDayActivityId;
+    private String pointOfInterestName;
+    private PointOfInterestCategory pointOfInterestCategory;
     private LocalTime plannedStartTime;
     private LocalTime plannedEndTime;
     private String placeName;
+    private String notes;
 
     public ScheduledActivityResponse() {
     }
 
-    public ScheduledActivityResponse(Integer activityId, String activityName, ActivityType activityType, LocalTime plannedStartTime, LocalTime plannedEndTime, String placeName) {
-        this.activityId = activityId;
-        this.activityName = activityName;
-        this.activityType = activityType;
+    public ScheduledActivityResponse(Integer vacationDayActivityId, String pointOfInterestName, PointOfInterestCategory pointOfInterestCategory, 
+        LocalTime plannedStartTime, LocalTime plannedEndTime, String placeName, String notes) {
+        this.vacationDayActivityId = vacationDayActivityId;
+        this.pointOfInterestName = pointOfInterestName;
+        this.pointOfInterestCategory = pointOfInterestCategory;
         this.plannedStartTime = plannedStartTime;
         this.plannedEndTime = plannedEndTime;
         this.placeName = placeName;
+        this.notes = notes;
     } 
     
-    public Integer getActivityId() {
-        return activityId;
+    public Integer getVacationDayActivityId() {
+        return vacationDayActivityId;
     }
     public String getActivityName() {
-        return activityName;
+        return pointOfInterestName;
     }
-    public ActivityType getActivityType() {
-        return activityType;
+    public PointOfInterestCategory getPointOfInterestCategory() {
+        return pointOfInterestCategory;
     }
     public LocalTime getPlannedStartTime() {
         return plannedStartTime;
@@ -41,15 +44,17 @@ public class ScheduledActivityResponse {
     public String getPlaceName() {
         return placeName;
     }
-    
-    public void setActivityId(Integer activityId) {
-        this.activityId = activityId;
+    public String getNotes() {
+        return notes;
     }
-    public void setActivityName(String activityName) {
-        this.activityName = activityName;
+    public void setVacationDayActivityId(Integer vacationDayActivityId) {
+        this.vacationDayActivityId = vacationDayActivityId;
     }
-    public void setActivityType(ActivityType activityType) {
-        this.activityType = activityType;
+    public void setPointOfInterestName(String pointOfInterestName) {
+        this.pointOfInterestName = pointOfInterestName;
+    }
+    public void setPointOfInterestCategory(PointOfInterestCategory pointOfInterestCategory) {
+        this.pointOfInterestCategory = pointOfInterestCategory;
     }
     public void setPlannedStartTime(LocalTime plannedStartTime) {
         this.plannedStartTime = plannedStartTime;
@@ -60,15 +65,18 @@ public class ScheduledActivityResponse {
     public void setPlaceName(String placeName) {
         this.placeName = placeName;
     }
-    
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
     public String toString() {
         return "ScheduledActivityResponse{" +
-            "activityId=" + activityId +
-            ", activityName=" + activityName +
-            ", activityType=" + activityType +
+            "vacationDayActivityId=" + vacationDayActivityId +
+            ", pointOfInterestName=" + pointOfInterestName +
+            ", pointOfInterestCategory=" + pointOfInterestCategory +
             ", plannedStartTime=" + plannedStartTime +
             ", plannedEndTime=" + plannedEndTime +
             ", placeName=" + placeName +
+            ", notes=" + notes +
             '}';
     }
 }

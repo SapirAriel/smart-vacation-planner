@@ -3,7 +3,7 @@ import org.springframework.stereotype.Service;
 import com.sapir.smartvacationplanner.entity.Vacation;
 import com.sapir.smartvacationplanner.entity.VacationDay;
 import com.sapir.smartvacationplanner.service.AuthorizationService;
-import com.sapir.smartvacationplanner.entity.Activity;
+import com.sapir.smartvacationplanner.entity.VacationDayActivity;
 import com.sapir.smartvacationplanner.dto.itinerary.ItineraryResponse;
 import java.util.List;
 import org.springframework.data.domain.Sort;
@@ -14,15 +14,23 @@ import com.sapir.smartvacationplanner.dto.itinerary.DayScheduleResponse;
 import java.time.LocalDate;
 import com.sapir.smartvacationplanner.common.place.Place;
 import java.util.Comparator;
+import com.sapir.smartvacationplanner.repository.VacationDayActivityRepository;
 
+
+/**
+ * ItineraryServiceImpl is a service implementation for the Itinerary entity.
+ * It is used to generate an itinerary for a vacation.
+ */
 
 @Service
 public class ItineraryServiceImpl implements ItineraryService {
 
     private final AuthorizationService authorizationService;
+    private final VacationDayActivityRepository vacationDayActivityRepository;
 
-    public ItineraryServiceImpl(AuthorizationService authorizationService) {
+    public ItineraryServiceImpl(AuthorizationService authorizationService, VacationDayActivityRepository vacationDayActivityRepository) {
         this.authorizationService = authorizationService;
+        this.vacationDayActivityRepository = vacationDayActivityRepository;
     }
 
     @Override
@@ -41,11 +49,11 @@ public class ItineraryServiceImpl implements ItineraryService {
     }
 
     @Override
-    public List<Activity> getActivities(Integer vacationId, Integer vacationDayId) {
-        return authorizationService.getActivitiesForCurrentUser(vacationId, vacationDayId, Sort.by(
-                Sort.Order.asc("openingTime"),
-                Sort.Order.desc("closingTime"),
-                Sort.Order.asc("durationMinutes")));
+    public List<VacationDayActivity> getVacationDayActivities(Integer vacationId, Integer vacationDayId) {
+        return authorizationService.getVacationDayActivitiesForCurrentUser(vacationId, vacationDayId, Sort.by(
+                Sort.Order.asc("pointOfInterest.openingTime"),
+                Sort.Order.desc("pointOfInterest.closingTime"),
+                Sort.Order.asc("pointOfInterest.durationMinutes")));
     }
 
     @Override
@@ -133,20 +141,20 @@ public class ItineraryServiceImpl implements ItineraryService {
 
 
     private List<ScheduleCandidate> buildSchedulableCandidates(Place currentPlace, LocalTime currentTime, 
-        List<Activity> unscheduledActivities,LocalTime dayEndTime) {
+        List<VacationDayActivity> unscheduledActivities,LocalTime dayEndTime) {
 
             List<ScheduleCandidate> schedulableCandidates = new ArrayList<>();
 
-            for (Activity activity : unscheduledActivities) {
+            for (VacationDayActivity vacationDayActivity : unscheduledActivities) {
                 
-                double distanceKm = calculateDistanceKm(currentPlace, activity.getPlace());
+                double distanceKm = calculateDistanceKm(currentPlace, vacationDayActivity.getPointOfInterest().getPlace());
                 int travelMinutes = calculateTravelMinutes(distanceKm);
                 LocalTime possibleStartTime = currentTime.plusMinutes(travelMinutes);
-                LocalTime possibleEndTime = possibleStartTime.plusMinutes(activity.getDurationMinutes());
+                LocalTime possibleEndTime = possibleStartTime.plusMinutes(vacationDayActivity.getPointOfInterest().getDurationMinutes());
 
-                ScheduleCandidate scheduleCandidate = new ScheduleCandidate(activity, distanceKm, travelMinutes, possibleStartTime, possibleEndTime);
+                ScheduleCandidate scheduleCandidate = new ScheduleCandidate(vacationDayActivity, distanceKm, travelMinutes, possibleStartTime, possibleEndTime);
             
-                if (canScheduleActivity(scheduleCandidate, dayEndTime, activity.getOpeningTime(), activity.getClosingTime())) {
+                if (canScheduleActivity(scheduleCandidate, dayEndTime, vacationDayActivity.getPointOfInterest().getOpeningTime(), vacationDayActivity.getPointOfInterest().getClosingTime())) {
                     schedulableCandidates.add(scheduleCandidate);
                 }
             }
@@ -163,7 +171,7 @@ public class ItineraryServiceImpl implements ItineraryService {
         LocalTime currentTime = LocalTime.of(9, 0);
         LocalTime dayEndTime = LocalTime.of(18, 0);
 
-        List<Activity> unscheduledActivities = getActivities(vacationDay.getVacation().getId(), vacationDay.getId());
+        List<VacationDayActivity> unscheduledActivities = getVacationDayActivities(vacationDay.getVacation().getId(), vacationDay.getId());
         
         List<ScheduledActivityResponse> scheduledActivities = buildScheduledActivities
         (currentPlace, currentTime, unscheduledActivities, dayEndTime);
@@ -175,7 +183,7 @@ public class ItineraryServiceImpl implements ItineraryService {
 
 
     private List<ScheduledActivityResponse> buildScheduledActivities(Place currentPlace, LocalTime currentTime,
-        List<Activity> unscheduledActivities, LocalTime dayEndTime) {
+        List<VacationDayActivity> unscheduledActivities, LocalTime dayEndTime) {
 
         List<ScheduledActivityResponse> scheduledActivities = new ArrayList<>();
 
@@ -191,18 +199,25 @@ public class ItineraryServiceImpl implements ItineraryService {
             ScheduleCandidate selectedCandidate  = chooseNearestCandidate(schedulableCandidates);
 
             ScheduledActivityResponse scheduled = new ScheduledActivityResponse(
-                selectedCandidate.getActivity().getId(),
-                selectedCandidate.getActivity().getName(),
-                selectedCandidate.getActivity().getActivityType(),
+                selectedCandidate.getVacationDayActivity().getId(),
+                selectedCandidate.getVacationDayActivity().getPointOfInterest().getName(),
+                selectedCandidate.getVacationDayActivity().getPointOfInterest().getPointOfInterestCategory(),
                 selectedCandidate.getPossibleStartTime(),
                 selectedCandidate.getPossibleEndTime(),
-                selectedCandidate.getActivity().getPlace().getPlaceName());
+                selectedCandidate.getVacationDayActivity().getPointOfInterest().getPlace().getPlaceName(),
+                selectedCandidate.getVacationDayActivity().getPointOfInterest().getNotes());
                 
             scheduledActivities.add(scheduled);
 
-            unscheduledActivities.remove(selectedCandidate.getActivity());
+            selectedCandidate.getVacationDayActivity().setPlannedStartTime(selectedCandidate.getPossibleStartTime());
+            selectedCandidate.getVacationDayActivity().setPlannedEndTime(selectedCandidate.getPossibleEndTime());
+            selectedCandidate.getVacationDayActivity().setTravelMinutesFromPrevious(selectedCandidate.getEstimatedTravelMinutes());
+            selectedCandidate.getVacationDayActivity().setDistanceKmFromPrevious(selectedCandidate.getDistanceFromCurrentPlace());
+            vacationDayActivityRepository.save(selectedCandidate.getVacationDayActivity());
+
+            unscheduledActivities.remove(selectedCandidate.getVacationDayActivity());
             currentTime = selectedCandidate.getPossibleEndTime().plusMinutes(15);
-            currentPlace = selectedCandidate.getActivity().getPlace();
+            currentPlace = selectedCandidate.getVacationDayActivity().getPointOfInterest().getPlace();
         }
 
         return scheduledActivities;

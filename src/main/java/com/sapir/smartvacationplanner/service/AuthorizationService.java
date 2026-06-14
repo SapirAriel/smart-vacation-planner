@@ -11,9 +11,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
 import com.sapir.smartvacationplanner.entity.enums.Role;
 import com.sapir.smartvacationplanner.repository.VacationDayRepository;
-import com.sapir.smartvacationplanner.repository.ActivityRepository;
+import com.sapir.smartvacationplanner.repository.VacationDayActivityRepository;
 import com.sapir.smartvacationplanner.entity.VacationDay;
-import com.sapir.smartvacationplanner.entity.Activity;
+import com.sapir.smartvacationplanner.entity.VacationDayActivity;
 import java.util.List;
 import org.springframework.data.domain.Sort;
 import java.time.LocalDate;
@@ -28,15 +28,15 @@ public class AuthorizationService {
     private final UserRepository userRepository;
     private final VacationRepository vacationRepository;
     private final VacationDayRepository vacationDayRepository;
-    private final ActivityRepository activityRepository;
+    private final VacationDayActivityRepository vacationDayActivityRepository;
 
     public AuthorizationService(UserRepository userRepository, VacationRepository vacationRepository, 
-        VacationDayRepository vacationDayRepository, ActivityRepository activityRepository) {
+        VacationDayRepository vacationDayRepository, VacationDayActivityRepository vacationDayActivityRepository) {
 
         this.userRepository = userRepository;
         this.vacationRepository = vacationRepository;
         this.vacationDayRepository = vacationDayRepository;
-        this.activityRepository = activityRepository;
+        this.vacationDayActivityRepository = vacationDayActivityRepository;
     }
    
     public User getCurrentUser() {
@@ -81,16 +81,16 @@ public class AuthorizationService {
         return vacationDayRepository.findByVacation(vacation);
     }
 
-    public Activity getActivityForCurrentUser(Integer vacationId, Integer vacationDayId, Integer activityId) {
-        
+    public VacationDayActivity getVacationDayActivityForCurrentUser(Integer vacationId, Integer vacationDayId, Integer vacationDayActivityId) {
+
         VacationDay vacationDay = getVacationDayForCurrentUser(vacationId,vacationDayId);
-        return activityRepository.findByVacationDayAndId(vacationDay, activityId).orElseThrow(() 
-        -> new ResourceNotFoundException("Activity not found with id: " + activityId));
+        return vacationDayActivityRepository.findByVacationDayAndId(vacationDay, vacationDayActivityId).orElseThrow(() 
+        -> new ResourceNotFoundException("Vacation day activity not found with id: " + vacationDayActivityId));
     }
 
-    public List<Activity> getActivitiesForCurrentUser(Integer vacationId, Integer vacationDayId, Sort sort) {
+    public List<VacationDayActivity> getVacationDayActivitiesForCurrentUser(Integer vacationId, Integer vacationDayId, Sort sort) {
         VacationDay vacationDay = getVacationDayForCurrentUser(vacationId, vacationDayId);
-        return activityRepository.findByVacationDay(vacationDay, sort);
+        return vacationDayActivityRepository.findByVacationDay(vacationDay, sort);
     }
 
 }

@@ -1,28 +1,37 @@
-package com.sapir.smartvacationplanner.dto.activity;
-import com.sapir.smartvacationplanner.entity.enums.ActivityType;
+package com.sapir.smartvacationplanner.dto.PointOfInterest;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import com.sapir.smartvacationplanner.entity.enums.PointOfInterestCategory;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalTime;
 
 /**
- * PatchActivityRequest is a DTO for patching an activity.
- * It is used to validate the request body for the create activity endpoint.
+ * UpdatePointOfInterestRequest is a DTO for updating a point of interest.
+ * It is used to validate the request body for the update point of interest endpoint.
  */
 
-public class PatchActivityRequest {
+public class UpdatePointOfInterestRequest {
 
+    @NotBlank(message = "Name is required")
     private String name;
 
-    private ActivityType activityType;
+    @NotNull(message = "Point of interest category is required")
+    private PointOfInterestCategory pointOfInterestCategory;
 
+    @NotBlank(message = "Place name is required")
     private String placeName;
 
     @Positive(message = "Duration minutes must be greater than 0")
+    @NotNull(message = "Duration minutes is required")
     private Integer durationMinutes;
 
+    @NotNull(message = "Opening time is required")
     private LocalTime openingTime;
 
+    @NotNull(message = "Closing time is required")
     private LocalTime closingTime;
 
+    @NotNull(message = "Minimum age is required")
     private Integer minimumAge;
 
     private String notes;
@@ -31,8 +40,8 @@ public class PatchActivityRequest {
     public String getName() {
         return name;
     }
-    public ActivityType getActivityType() {
-        return activityType;
+    public PointOfInterestCategory getPointOfInterestCategory() {
+        return pointOfInterestCategory;
     }
     public String getPlaceName() {
         return placeName;
@@ -56,8 +65,8 @@ public class PatchActivityRequest {
     public void setName(String name) {
         this.name = name;
     }
-    public void setActivityType(ActivityType activityType) {
-        this.activityType = activityType;
+    public void setPointOfInterestCategory(PointOfInterestCategory pointOfInterestCategory) {
+        this.pointOfInterestCategory = pointOfInterestCategory;
     }
     public void setPlaceName(String placeName) {
         this.placeName = placeName;
@@ -77,4 +86,4 @@ public class PatchActivityRequest {
     public void setNotes(String notes) {
         this.notes = notes;
     }
-} //PatchActivityRequest
+} //UpdatePointOfInterestRequest

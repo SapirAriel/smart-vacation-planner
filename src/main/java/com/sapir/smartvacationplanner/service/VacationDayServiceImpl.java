@@ -8,8 +8,7 @@ import com.sapir.smartvacationplanner.entity.VacationDay;
 import com.sapir.smartvacationplanner.repository.VacationDayRepository;
 import com.sapir.smartvacationplanner.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-import com.sapir.smartvacationplanner.entity.Activity;
-import com.sapir.smartvacationplanner.repository.ActivityRepository;
+import com.sapir.smartvacationplanner.repository.VacationDayActivityRepository;
 import java.time.temporal.ChronoUnit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +17,7 @@ import java.time.LocalDate;
 import com.sapir.smartvacationplanner.common.place.Place;
 import com.sapir.smartvacationplanner.integration.google.GooglePlacesClient;
 import com.sapir.smartvacationplanner.integration.google.dto.PlaceResult;
+import com.sapir.smartvacationplanner.entity.VacationDayActivity;
 
 /**
  * VacationDayServiceImpl is a service implementation for the VacationDay entity.
@@ -28,14 +28,14 @@ import com.sapir.smartvacationplanner.integration.google.dto.PlaceResult;
 public class VacationDayServiceImpl implements VacationDayService {
 
     private final VacationDayRepository vacationDayRepository;
-    private final ActivityRepository activityRepository;
+    private final VacationDayActivityRepository vacationDayActivityRepository;
     private final AuthorizationService authorizationService;
     private final GooglePlacesClient googlePlacesClient;
 
     public VacationDayServiceImpl(VacationDayRepository vacationDayRepository,
-            ActivityRepository activityRepository, AuthorizationService authorizationService, GooglePlacesClient googlePlacesClient) {
+            VacationDayActivityRepository vacationDayActivityRepository, AuthorizationService authorizationService, GooglePlacesClient googlePlacesClient) {
         this.vacationDayRepository = vacationDayRepository;
-        this.activityRepository = activityRepository;
+        this.vacationDayActivityRepository = vacationDayActivityRepository;
         this.authorizationService = authorizationService;
         this.googlePlacesClient = googlePlacesClient;
     }
@@ -106,9 +106,9 @@ public class VacationDayServiceImpl implements VacationDayService {
     }
 
     @Override
-    public List<Activity> getActivities(Integer vacationId, Integer vacationDayId) {
+    public List<VacationDayActivity> getAllVacationDayActivities(Integer vacationId, Integer vacationDayId) {
         VacationDay vacationDay = getVacationDayForCurrentUser(vacationId, vacationDayId);
-        return activityRepository.findByVacationDay(vacationDay);
+        return vacationDayActivityRepository.findByVacationDay(vacationDay);
     }
 
     @Override
