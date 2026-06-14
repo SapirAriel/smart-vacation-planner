@@ -61,7 +61,7 @@ public class VacationDayServiceImpl implements VacationDayService {
     public VacationDay createVacationDay(Integer vacationId, CreateVacationDayRequest request) {
         Vacation vacation = authorizationService.getVacationForCurrentUser(vacationId);
         PlaceResult placeResult = googlePlacesClient.searchPlace(request.getHotelPlaceName());
-        Place hotelPlace = new Place(request.getHotelPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.latitude(), placeResult.longitude());
+        Place hotelPlace = new Place(request.getHotelPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.city(), placeResult.country(), placeResult.latitude(), placeResult.longitude());
         VacationDay vacationDay = new VacationDay(vacation, request.getDate(), request.getDayNumber(), request.getDayType(), hotelPlace);
         validateVacationDayConstraints(vacationDay);
         return vacationDayRepository.save(vacationDay);
@@ -73,7 +73,7 @@ public class VacationDayServiceImpl implements VacationDayService {
 
         if (!request.getHotelPlaceName().equals(existing.getHotelPlace().getPlaceName())) {
             PlaceResult placeResult = googlePlacesClient.searchPlace(request.getHotelPlaceName());
-            Place hotelPlace = new Place(request.getHotelPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.latitude(), placeResult.longitude());
+            Place hotelPlace = new Place(request.getHotelPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.city(), placeResult.country(), placeResult.latitude(), placeResult.longitude());
             existing.setHotelPlace(hotelPlace);
         }
         existing.setDate(request.getDate());
@@ -98,7 +98,7 @@ public class VacationDayServiceImpl implements VacationDayService {
         }
         if (request.getHotelPlaceName() != null && !request.getHotelPlaceName().equals(existing.getHotelPlace().getPlaceName())) {
             PlaceResult placeResult = googlePlacesClient.searchPlace(request.getHotelPlaceName());
-            Place hotelPlace = new Place(request.getHotelPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.latitude(), placeResult.longitude());
+            Place hotelPlace = new Place(request.getHotelPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.city(), placeResult.country(), placeResult.latitude(), placeResult.longitude());
             existing.setHotelPlace(hotelPlace);
         }
         validateVacationDayConstraints(existing);

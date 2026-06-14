@@ -41,8 +41,10 @@ private DayType dayType;
         @AttributeOverride(name = "placeName", column = @Column(name = "hotel_place_name")),
         @AttributeOverride(name = "placeId", column = @Column(name = "hotel_place_id")),
         @AttributeOverride(name = "formattedAddress", column = @Column(name = "hotel_formatted_address")),
+        @AttributeOverride(name = "city", column = @Column(name = "hotel_city")),
+        @AttributeOverride(name = "country", column = @Column(name = "hotel_country")),
         @AttributeOverride(name = "latitude", column = @Column(name = "hotel_latitude")),
-        @AttributeOverride(name = "longitude", column = @Column(name = "hotel_longitude"))
+        @AttributeOverride(name = "longitude", column = @Column(name = "hotel_longitude"))      
 })
 private Place hotelPlace;
 

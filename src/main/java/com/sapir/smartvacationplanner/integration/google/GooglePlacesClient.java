@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Value;
 import com.sapir.smartvacationplanner.integration.google.dto.PlaceResult;
 import com.sapir.smartvacationplanner.integration.google.dto.GooglePlacesTextSearchRequest;
 import com.sapir.smartvacationplanner.integration.google.dto.GooglePlacesTextSearchResponse;  
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GooglePlacesClient {
 
-  private static final String FIELD_MASK = "places.id,places.formattedAddress,places.location";
+  private static final String FIELD_MASK = "places.id,places.formattedAddress,places.location,places.addressComponents";
   private final RestClient restClient;
   private final String apiKey;
   private final String textSearchUrl;
@@ -47,7 +49,37 @@ public class GooglePlacesClient {
       throw new IllegalArgumentException("No location found for place: " + place.id());
     }
 
-    return new PlaceResult(place.id(), place.formattedAddress(), place.location().latitude(), place.location().longitude());
+    String city = extractCity(place.addressComponents());
+    String country = extractCountry(place.addressComponents());
+
+    return new PlaceResult(place.id(), place.formattedAddress(), place.location().latitude(), place.location().longitude(), city, country);
   }
+
+  private String extractCountry(List<GooglePlacesTextSearchResponse.AddressComponent> components) {
+    return findLongTextByType(components, "country")
+            .orElse(null);
+}
+
+  private String extractCity(List<GooglePlacesTextSearchResponse.AddressComponent> components) {
+      return findLongTextByType(components, "locality")
+              .or(() -> findLongTextByType(components, "postal_town"))
+              .or(() -> findLongTextByType(components, "administrative_area_level_2"))
+              .or(() -> findLongTextByType(components, "administrative_area_level_1"))
+              .orElse(null);
+  }
+
+  private Optional<String> findLongTextByType(
+          List<GooglePlacesTextSearchResponse.AddressComponent> components, String type) {
+      if (components == null) {
+          return Optional.empty();
+      }
+
+      return components.stream()
+              .filter(component -> component.types() != null)
+              .filter(component -> component.types().contains(type))
+              .map(GooglePlacesTextSearchResponse.AddressComponent::longText)
+              .filter(text -> text != null && !text.isBlank())
+              .findFirst();
+}
 
 }

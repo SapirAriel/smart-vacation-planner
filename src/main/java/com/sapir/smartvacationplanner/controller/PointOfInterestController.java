@@ -46,6 +46,8 @@ public class PointOfInterestController {
     public Page<PointOfInterestResponse> searchPointOfInterests(@RequestParam(required = false) String name,
         @RequestParam(required = false) PointOfInterestCategory pointOfInterestCategory,
         @RequestParam(required = false) String placeName,
+        @RequestParam(required = false) String city,
+        @RequestParam(required = false) String country,
         @RequestParam(required = false) Integer durationMinutes,
         @RequestParam(required = false) LocalTime openingTime,
         @RequestParam(required = false) LocalTime closingTime,
@@ -53,7 +55,7 @@ public class PointOfInterestController {
         @RequestParam(required = false) String notes,
         @PageableDefault(page = 0, size = 5, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
         
-        return pointOfInterestService.searchPointOfInterests(name, pointOfInterestCategory, placeName, durationMinutes, openingTime, closingTime, minimumAge, notes, pageable).map(this::toResponse);
+        return pointOfInterestService.searchPointOfInterests(name, pointOfInterestCategory, placeName, city, country, durationMinutes, openingTime, closingTime, minimumAge, notes, pageable).map(this::toResponse);
     }
 
     @GetMapping("/{id}")

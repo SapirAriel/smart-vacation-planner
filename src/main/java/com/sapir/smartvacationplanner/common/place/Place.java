@@ -11,13 +11,19 @@ public class Place {
     @Column(name = "place_name", nullable = false)
     private String placeName; 
 
-    // Google Maps API place details (placeId, formattedAddress, latitude, longitude)
+    // Google Maps API place details (placeId, formattedAddress, latitude, longitude, city, country)
 
     @Column(name = "place_id")
     private String placeId;
 
     @Column(name = "formatted_address")
     private String formattedAddress;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "country")
+    private String country;
 
     @Column(name = "latitude")
     private Double latitude;
@@ -32,10 +38,12 @@ public class Place {
         this.placeName = placeName;
     }
 
-    public Place(String placeName, String placeId, String formattedAddress, Double latitude, Double longitude) {
+    public Place(String placeName, String placeId, String formattedAddress, String city, String country, Double latitude, Double longitude) {
         this.placeName = placeName;
         this.placeId = placeId;
         this.formattedAddress = formattedAddress;
+        this.city = city;
+        this.country = country;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -48,6 +56,12 @@ public class Place {
     }
     public String getFormattedAddress() {
         return formattedAddress;
+    }
+    public String getCity() {
+        return city;
+    }
+    public String getCountry() {
+        return country;
     }
     public Double getLatitude() {
         return latitude;
@@ -65,6 +79,12 @@ public class Place {
     public void setFormattedAddress(String formattedAddress) {
         this.formattedAddress = formattedAddress;
     }
+    public void setCity(String city) {
+        this.city = city;
+    }
+    public void setCountry(String country) {
+        this.country = country;
+    }
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }   
@@ -78,6 +98,8 @@ public class Place {
             "placeName='" + placeName + '\'' +
             ", placeId='" + placeId + '\'' +
             ", formattedAddress='" + formattedAddress + '\'' +
+            ", city='" + city + '\'' +
+            ", country='" + country + '\'' +
             ", latitude=" + latitude +
             ", longitude=" + longitude +
             '}';

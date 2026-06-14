@@ -16,16 +16,20 @@ public interface PointOfInterestRepository extends JpaRepository<PointOfInterest
           where (:name is null or lower(p.name) like lower(concat('%', :name, '%')))
           and (:pointOfInterestCategory is null or p.pointOfInterestCategory = :pointOfInterestCategory)
           and (:placeName is null or lower(p.place.placeName) like lower(concat('%', :placeName, '%')))
+          and (:city IS NULL OR LOWER(p.place.city) = LOWER(:city))
+          and (:country IS NULL OR LOWER(p.place.country) = LOWER(:country))
           and (:durationMinutes is null or p.durationMinutes = :durationMinutes)
           and (:openingTime is null or p.openingTime = :openingTime)
           and (:closingTime is null or p.closingTime = :closingTime)
           and (:minimumAge is null or p.minimumAge = :minimumAge)
-          and (:notes is null or lower(p.notes) like lower(concat('%', :notes, '%')))
+          and (:notes is null or lower(p.notes) like lower(concat('%', :notes, '%'))) 
     """)
     Page<PointOfInterest> searchPointOfInterests(
         @Param("name") String name, 
         @Param("pointOfInterestCategory") PointOfInterestCategory pointOfInterestCategory, 
         @Param("placeName") String placeName, 
+        @Param("city") String city,
+        @Param("country") String country,
         @Param("durationMinutes") Integer durationMinutes, 
         @Param("openingTime") LocalTime openingTime, 
         @Param("closingTime") LocalTime closingTime, 

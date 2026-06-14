@@ -38,9 +38,9 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
     }
 
     @Override
-    public Page<PointOfInterest> searchPointOfInterests(String name, PointOfInterestCategory pointOfInterestCategory, String placeName, Integer durationMinutes, LocalTime openingTime, LocalTime closingTime, Integer minimumAge, String notes, Pageable pageable) {
+    public Page<PointOfInterest> searchPointOfInterests(String name, PointOfInterestCategory pointOfInterestCategory, String placeName, String city, String country, Integer durationMinutes, LocalTime openingTime, LocalTime closingTime, Integer minimumAge, String notes, Pageable pageable) {
         
-        return pointOfInterestRepository.searchPointOfInterests(name, pointOfInterestCategory, placeName, durationMinutes, openingTime, closingTime, minimumAge, notes, pageable);
+        return pointOfInterestRepository.searchPointOfInterests(name, pointOfInterestCategory, placeName, city, country, durationMinutes, openingTime, closingTime, minimumAge, notes, pageable);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
     @Override
     public PointOfInterest createPointOfInterest(CreatePointOfInterestRequest request) {
         PlaceResult placeResult = googlePlacesClient.searchPlace(request.getPlaceName());
-        Place place = new Place(request.getPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.latitude(), placeResult.longitude());
+        Place place = new Place(request.getPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.city(), placeResult.country(), placeResult.latitude(), placeResult.longitude());
         
         PointOfInterest pointOfInterest = new PointOfInterest(request.getName(), request.getPointOfInterestCategory(), place, 
         request.getDurationMinutes(), request.getOpeningTime(), request.getClosingTime(), request.getMinimumAge(), request.getNotes());
@@ -67,7 +67,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
         
         if (!existing.getPlace().getPlaceName().equals(request.getPlaceName())) {
             PlaceResult placeResult = googlePlacesClient.searchPlace(request.getPlaceName());
-            Place place = new Place(request.getPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.latitude(), placeResult.longitude());
+            Place place = new Place(request.getPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.city(), placeResult.country(), placeResult.latitude(), placeResult.longitude());
             existing.setPlace(place);
         }
 
