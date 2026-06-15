@@ -46,6 +46,10 @@ public class PointOfInterestController {
     public Page<PointOfInterestResponse> searchPointOfInterests(@RequestParam(required = false) String name,
         @RequestParam(required = false) PointOfInterestCategory pointOfInterestCategory,
         @RequestParam(required = false) String placeName,
+        @RequestParam(required = false) String placeId,
+        @RequestParam(required = false) String formattedAddress,
+        @RequestParam(required = false) Double latitude,
+        @RequestParam(required = false) Double longitude,
         @RequestParam(required = false) String city,
         @RequestParam(required = false) String country,
         @RequestParam(required = false) Integer durationMinutes,
@@ -89,6 +93,12 @@ public class PointOfInterestController {
         pointOfInterestResponse.setName(pointOfInterest.getName());
         pointOfInterestResponse.setPointOfInterestCategory(pointOfInterest.getPointOfInterestCategory());
         pointOfInterestResponse.setPlaceName(pointOfInterest.getPlace().getPlaceName());
+        pointOfInterestResponse.setPlaceId(pointOfInterest.getPlace().getPlaceId());
+        pointOfInterestResponse.setFormattedAddress(pointOfInterest.getPlace().getFormattedAddress());
+        pointOfInterestResponse.setLatitude(pointOfInterest.getPlace().getLatitude());
+        pointOfInterestResponse.setLongitude(pointOfInterest.getPlace().getLongitude());
+        pointOfInterestResponse.setCity(pointOfInterest.getPlace().getCity());
+        pointOfInterestResponse.setCountry(pointOfInterest.getPlace().getCountry());
         pointOfInterestResponse.setDurationMinutes(pointOfInterest.getDurationMinutes());
         pointOfInterestResponse.setOpeningTime(pointOfInterest.getOpeningTime());
         pointOfInterestResponse.setClosingTime(pointOfInterest.getClosingTime());

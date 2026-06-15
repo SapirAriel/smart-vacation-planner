@@ -55,21 +55,53 @@ public class SecurityConfig {
 
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                // vacation day activities - customer can manage selected POIs in their own vacation day
+                .requestMatchers(HttpMethod.GET, "/api/v1/vacations/*/days/*/vacationDayActivities/**")
+                .hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/vacations/*/days/*/vacationDayActivities")
+                .hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/vacations/*/days/*/vacationDayActivities/*")
+                .hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/vacations/*/days/*/vacationDayActivities/*")
+                .hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/vacations/*/days/*/vacationDayActivities/*")
+                .hasAnyRole("CUSTOMER", "ADMIN")
+
+                // vacation days - customer can manage days in their own vacation
+                .requestMatchers(HttpMethod.GET, "/api/v1/vacations/*/days/**")
+                .hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/vacations/*/days")
+                .hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/vacations/*/days/*")
+                .hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/vacations/*/days/*")
+                .hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/vacations/*/days/*")
+                .hasAnyRole("CUSTOMER", "ADMIN")
+
                 // vacations
                 .requestMatchers(HttpMethod.GET, "/api/v1/vacations/**")
-                    .hasAnyRole("CUSTOMER", "ADMIN")
-
+                .hasAnyRole("CUSTOMER", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/vacations/**")
-                    .hasAnyRole("CUSTOMER", "ADMIN")
-
+                .hasAnyRole("CUSTOMER", "ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/v1/vacations/**")
-                    .hasAnyRole("CUSTOMER", "ADMIN")
-
+                .hasAnyRole("CUSTOMER", "ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/v1/vacations/**")
-                    .hasAnyRole("CUSTOMER", "ADMIN")
-
+                .hasAnyRole("CUSTOMER", "ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/vacations/**")
-                    .hasRole("ADMIN")
+                .hasRole("ADMIN")
+
+                // point of interests - admin can manage all point of interests
+                .requestMatchers(HttpMethod.GET, "/api/v1/point-of-interests/**")
+                .hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/point-of-interests/**")
+                .hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/point-of-interests/**")
+                .hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/point-of-interests/**")
+                .hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/point-of-interests/**")
+                .hasRole("ADMIN")
 
                 .anyRequest().authenticated()
         );

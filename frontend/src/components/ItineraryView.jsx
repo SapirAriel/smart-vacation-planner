@@ -1,11 +1,14 @@
 import DayCard from "./DayCard.jsx";
+import { sortItineraryDays } from "../utils/sortItinerary.js";
 
 function ItineraryView({ itinerary, rawJson }) {
   if (!itinerary) {
     return null;
   }
 
-  const days = Array.isArray(itinerary.days) ? itinerary.days : [];
+  const days = sortItineraryDays(
+    Array.isArray(itinerary.days) ? itinerary.days : []
+  );
   const vacationName = itinerary.vacationName || "Untitled vacation";
 
   return (

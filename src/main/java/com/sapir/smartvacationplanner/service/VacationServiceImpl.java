@@ -78,6 +78,7 @@ public class VacationServiceImpl implements VacationService {
         existingVacation.setCity(vacation.getCity());
         existingVacation.setStartDate(vacation.getStartDate());
         existingVacation.setEndDate(vacation.getEndDate());
+        existingVacation.setTravelerType(vacation.getTravelerType());
         existingVacation.setBudget(vacation.getBudget());
         existingVacation.setPace(vacation.getPace());
     
@@ -112,6 +113,7 @@ public class VacationServiceImpl implements VacationService {
         if (vacation.getPace() != null) {
             existingVacation.setPace(vacation.getPace());
         }
+        validateVacationConstraints(existingVacation);
         return vacationRepository.save(existingVacation);
     }
 
@@ -124,8 +126,6 @@ public class VacationServiceImpl implements VacationService {
     @Override
     public void deleteVacation(Integer id) {
         Vacation existingVacation = getVacationById(id);
-        if (existingVacation == null) {
-            throw new IllegalArgumentException("Vacation not found with id: " + id);}
         vacationRepository.delete(existingVacation);
     }
 

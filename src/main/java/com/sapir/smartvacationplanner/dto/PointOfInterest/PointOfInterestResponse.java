@@ -12,6 +12,14 @@ public class PointOfInterestResponse {
     private String name;
     private PointOfInterestCategory pointOfInterestCategory;
     private String placeName;
+
+    private String placeId;
+    private String formattedAddress;
+    private Double latitude;
+    private Double longitude;
+    private String city;
+    private String country;
+    
     private int durationMinutes;
     private LocalTime openingTime;
     private LocalTime closingTime;
@@ -29,6 +37,25 @@ public class PointOfInterestResponse {
     }
     public String getPlaceName() {
         return placeName;
+    }
+
+    public String getPlaceId() {
+        return placeId;
+    }
+    public String getFormattedAddress() {
+        return formattedAddress;
+    }
+    public Double getLatitude() {
+        return latitude;
+    }
+    public Double getLongitude() {
+        return longitude;
+    }
+    public String getCity() {
+        return city;
+    }
+    public String getCountry() {
+        return country;
     }
     public int getDurationMinutes() {
         return durationMinutes;
@@ -58,6 +85,24 @@ public class PointOfInterestResponse {
     public void setPlaceName(String placeName) {
         this.placeName = placeName;
     }
+    public void setPlaceId(String placeId) {
+        this.placeId = placeId;
+    }
+    public void setFormattedAddress(String formattedAddress) {
+        this.formattedAddress = formattedAddress;
+    }
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+    public void setCity(String city) {
+        this.city = city;
+    }
+    public void setCountry(String country) {
+        this.country = country;
+    }
     public void setDurationMinutes(int durationMinutes) {
         this.durationMinutes = durationMinutes;
     }
@@ -80,6 +125,12 @@ public class PointOfInterestResponse {
             ", name=" + name +
             ", pointOfInterestCategory=" + pointOfInterestCategory +
             ", placeName=" + placeName +
+            ", placeId=" + placeId +
+            ", formattedAddress=" + formattedAddress +
+            ", latitude=" + latitude +
+            ", longitude=" + longitude +
+            ", city=" + city +
+            ", country=" + country +
             ", durationMinutes=" + durationMinutes +
             ", openingTime=" + openingTime +
             ", closingTime=" + closingTime +

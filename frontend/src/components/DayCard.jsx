@@ -1,4 +1,5 @@
 import ActivityCard from "./ActivityCard.jsx";
+import { sortActivitiesByStartTime } from "../utils/sortItinerary.js";
 
 function formatValue(value) {
   if (value === null || value === undefined || value === "") {
@@ -12,7 +13,9 @@ function DayCard({ day }) {
     return null;
   }
 
-  const activities = Array.isArray(day.activities) ? day.activities : [];
+  const activities = sortActivitiesByStartTime(
+    Array.isArray(day.activities) ? day.activities : []
+  );
 
   return (
     <article className="day-card">

@@ -22,9 +22,9 @@ const DEFAULT_FORM = {
   pace: "BALANCED",
 };
 
-function VacationForm({ username, password, onVacationCreated }) {
+function VacationCreateForm({ username, password, onVacationCreated, loading }) {
   const [form, setForm] = useState(DEFAULT_FORM);
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   function updateField(field, value) {
@@ -65,7 +65,7 @@ function VacationForm({ username, password, onVacationCreated }) {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
     setError("");
 
     const vacationRequest = {
@@ -93,16 +93,18 @@ function VacationForm({ username, password, onVacationCreated }) {
           : "Something went wrong while creating the vacation.";
       setError(message);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   }
+
+  const isDisabled = submitting || loading;
 
   return (
     <section className="vacation-form-section">
       <h2>Step 1: Create vacation</h2>
       <p className="section-hint">
-        Start by creating a vacation. The returned vacation ID will be used for
-        itinerary generation.
+        Start by creating a vacation. City and country will be used to search
+        points of interest.
       </p>
 
       <form className="vacation-form" onSubmit={handleSubmit}>
@@ -113,7 +115,7 @@ function VacationForm({ username, password, onVacationCreated }) {
             type="text"
             value={form.name}
             onChange={(event) => updateField("name", event.target.value)}
-            disabled={loading}
+            disabled={isDisabled}
           />
         </div>
 
@@ -124,7 +126,7 @@ function VacationForm({ username, password, onVacationCreated }) {
             type="text"
             value={form.country}
             onChange={(event) => updateField("country", event.target.value)}
-            disabled={loading}
+            disabled={isDisabled}
           />
         </div>
 
@@ -135,7 +137,7 @@ function VacationForm({ username, password, onVacationCreated }) {
             type="text"
             value={form.city}
             onChange={(event) => updateField("city", event.target.value)}
-            disabled={loading}
+            disabled={isDisabled}
           />
         </div>
 
@@ -146,7 +148,7 @@ function VacationForm({ username, password, onVacationCreated }) {
             type="date"
             value={form.startDate}
             onChange={(event) => updateField("startDate", event.target.value)}
-            disabled={loading}
+            disabled={isDisabled}
           />
         </div>
 
@@ -157,7 +159,7 @@ function VacationForm({ username, password, onVacationCreated }) {
             type="date"
             value={form.endDate}
             onChange={(event) => updateField("endDate", event.target.value)}
-            disabled={loading}
+            disabled={isDisabled}
           />
         </div>
 
@@ -167,7 +169,7 @@ function VacationForm({ username, password, onVacationCreated }) {
             id="travelerType"
             value={form.travelerType}
             onChange={(event) => updateField("travelerType", event.target.value)}
-            disabled={loading}
+            disabled={isDisabled}
           >
             {TRAVELER_TYPES.map((type) => (
               <option key={type} value={type}>
@@ -186,7 +188,7 @@ function VacationForm({ username, password, onVacationCreated }) {
             step="1"
             value={form.budget}
             onChange={(event) => updateField("budget", event.target.value)}
-            disabled={loading}
+            disabled={isDisabled}
           />
         </div>
 
@@ -196,7 +198,7 @@ function VacationForm({ username, password, onVacationCreated }) {
             id="pace"
             value={form.pace}
             onChange={(event) => updateField("pace", event.target.value)}
-            disabled={loading}
+            disabled={isDisabled}
           >
             {PACE_OPTIONS.map((pace) => (
               <option key={pace} value={pace}>
@@ -210,9 +212,9 @@ function VacationForm({ username, password, onVacationCreated }) {
           <button
             type="submit"
             className="primary-button"
-            disabled={loading}
+            disabled={isDisabled}
           >
-            {loading ? "Creating..." : "Create Vacation"}
+            {submitting ? "Creating..." : "Create Vacation"}
           </button>
         </div>
       </form>
@@ -222,4 +224,4 @@ function VacationForm({ username, password, onVacationCreated }) {
   );
 }
 
-export default VacationForm;
+export default VacationCreateForm;
