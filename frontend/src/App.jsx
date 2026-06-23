@@ -223,7 +223,7 @@ function App() {
     }
 
     if (selectedPoiIds.length === 0) {
-      setSaveDayError("Select at least one POI for this day.");
+      setSaveDayError("Select at least one POI to save as a day activity.");
       return;
     }
 
@@ -272,8 +272,8 @@ function App() {
 
       setSaveDaySuccess(
         existingSavedDay?.vacationDayId
-          ? `Day ${selectedDayNumber} updated successfully.`
-          : `Day ${selectedDayNumber} saved successfully.`
+          ? `Day ${selectedDayNumber} activities updated successfully.`
+          : `Day ${selectedDayNumber} activities saved successfully.`
       );
     } catch (requestError) {
       const message =
@@ -296,7 +296,7 @@ function App() {
 
     if (!hasSavedDayWithPois(savedDayDataByDayNumber)) {
       setItineraryError(
-        "Save at least one vacation day with selected POIs before generating an itinerary."
+        "Save at least one vacation day with day activities before generating an itinerary."
       );
       setItinerary(null);
       setRawJson("");
@@ -365,9 +365,10 @@ function App() {
         <VacationDetails vacation={activeVacation} />
 
         <section className="step-section step-2-section">
-          <h2>Step 2: Choose POIs for each vacation day</h2>
+          <h2>Step 2: Assign POIs to vacation days</h2>
           <p className="section-hint">
-            Select a vacation day, then choose POIs from the map and save the day.
+            Select a vacation day, choose POIs from the map, then save them as
+            day activities.
           </p>
 
           {!activeVacation ? (
@@ -439,7 +440,7 @@ function App() {
           ) : !canGenerateItinerary ? (
             <>
               <p className="step-locked-message">
-                Save at least one vacation day with selected POIs before
+                Save at least one vacation day with day activities before
                 generating an itinerary.
               </p>
               <button
@@ -453,7 +454,7 @@ function App() {
           ) : (
             <>
               <p className="section-hint">
-                After saving the relevant vacation days and POIs, generate the
+                After saving vacation days with day activities, generate the
                 full itinerary.
               </p>
 

@@ -53,7 +53,7 @@ private BigDecimal budget;
 @Enumerated(EnumType.STRING)
 private Pace pace;
 
-@OneToMany(mappedBy = "vacation")
+@OneToMany(mappedBy = "vacation", cascade = CascadeType.ALL, orphanRemoval = true)
 private List<VacationDay> vacationDays = new ArrayList<>();
 
 public Vacation() { 

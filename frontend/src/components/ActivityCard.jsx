@@ -12,7 +12,12 @@ function ActivityCard({ activity }) {
 
   return (
     <article className="activity-card">
-      <h4>{formatValue(activity.activityName)}</h4>
+      <h4>{formatValue(activity.pointOfInterestName)}</h4>
+      {activity.pointOfInterestCategory && (
+        <p className="activity-category">
+          {formatValue(activity.pointOfInterestCategory)}
+        </p>
+      )}
       <dl className="activity-details">
         <div>
           <dt>Start</dt>
@@ -26,6 +31,12 @@ function ActivityCard({ activity }) {
           <dt>Place</dt>
           <dd>{formatValue(activity.placeName)}</dd>
         </div>
+        {activity.notes && (
+          <div>
+            <dt>Notes</dt>
+            <dd>{formatValue(activity.notes)}</dd>
+          </div>
+        )}
       </dl>
     </article>
   );

@@ -48,7 +48,7 @@ private DayType dayType;
 })
 private Place hotelPlace;
 
-@OneToMany(mappedBy = "vacationDay")
+@OneToMany(mappedBy = "vacationDay", cascade = CascadeType.ALL, orphanRemoval = true)
 private List<VacationDayActivity> vacationDayActivities = new ArrayList<>();
 
 public VacationDay() {

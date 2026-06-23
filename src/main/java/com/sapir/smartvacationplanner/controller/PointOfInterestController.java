@@ -26,7 +26,7 @@ import java.time.LocalTime;
 
 
 @RestController
-@RequestMapping("/api/v1/pointOfInterests")
+@RequestMapping("/api/v1/points-of-interest")
 public class PointOfInterestController {
 
     private final PointOfInterestService pointOfInterestService;

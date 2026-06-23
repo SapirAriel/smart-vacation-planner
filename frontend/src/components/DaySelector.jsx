@@ -36,7 +36,7 @@ function DaySelector({
                 Day {day.dayNumber} — {day.date}
               </span>
               <span className="day-selector-meta">
-                {saved ? "Saved" : "Not saved"} · {selectedCount} POI
+                {saved ? "Activities saved" : "Not saved"} · {selectedCount} POI
                 {selectedCount === 1 ? "" : "s"} selected
               </span>
             </button>

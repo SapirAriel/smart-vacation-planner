@@ -30,7 +30,7 @@ function DayCard({ day }) {
         <div className="activity-list">
           {activities.map((activity, index) => (
             <ActivityCard
-              key={activity?.activityId ?? `activity-${index}`}
+              key={activity?.vacationDayActivityId ?? `activity-${index}`}
               activity={activity}
             />
           ))}

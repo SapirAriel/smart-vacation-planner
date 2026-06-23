@@ -71,8 +71,8 @@ function DayPoiSelectionPanel({
         {savingDay
           ? "Saving..."
           : isSavedDay
-            ? "Update Day"
-            : "Save Day"}
+            ? "Update day activities"
+            : "Save day activities"}
       </button>
 
       {saveError && <p className="error-message">{saveError}</p>}

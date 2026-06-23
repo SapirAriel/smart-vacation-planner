@@ -6,7 +6,7 @@ export async function getVacationDayActivities(
   username,
   password
 ) {
-  const url = `${API_BASE_URL}/api/v1/vacations/${vacationId}/days/${vacationDayId}/vacationDayActivities`;
+  const url = `${API_BASE_URL}/api/v1/vacations/${vacationId}/days/${vacationDayId}/activities`;
   const activities = await apiRequest(url, { method: "GET" }, username, password);
   return Array.isArray(activities) ? activities : [];
 }
@@ -18,8 +18,16 @@ export async function createVacationDayActivity(
   username,
   password
 ) {
-  const url = `${API_BASE_URL}/api/v1/vacations/${vacationId}/days/${vacationDayId}/vacationDayActivities/${pointOfInterestId}`;
-  return apiRequest(url, { method: "POST" }, username, password);
+  const url = `${API_BASE_URL}/api/v1/vacations/${vacationId}/days/${vacationDayId}/activities`;
+  return apiRequest(
+    url,
+    {
+      method: "POST",
+      body: JSON.stringify({ pointOfInterestId }),
+    },
+    username,
+    password
+  );
 }
 
 export async function deleteVacationDayActivity(
@@ -29,7 +37,7 @@ export async function deleteVacationDayActivity(
   username,
   password
 ) {
-  const url = `${API_BASE_URL}/api/v1/vacations/${vacationId}/days/${vacationDayId}/vacationDayActivities/${activityId}`;
+  const url = `${API_BASE_URL}/api/v1/vacations/${vacationId}/days/${vacationDayId}/activities/${activityId}`;
   return apiRequest(url, { method: "DELETE" }, username, password);
 }
 

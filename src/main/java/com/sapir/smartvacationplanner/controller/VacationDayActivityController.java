@@ -10,10 +10,14 @@ import com.sapir.smartvacationplanner.entity.VacationDayActivity;
 import com.sapir.smartvacationplanner.service.VacationDayActivityService;
 import com.sapir.smartvacationplanner.dto.VacationDayActivity.VacationDayActivityResponse;
 import java.util.List;
+import com.sapir.smartvacationplanner.dto.VacationDayActivity.CreateVacationDayActivityRequest;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestBody;
+import com.sapir.smartvacationplanner.dto.VacationDayActivity.UpdateVacationDayActivityRequest;
 
 
 @RestController
-@RequestMapping("/api/v1/vacations/{vacationId}/days/{vacationDayId}/vacationDayActivities")
+@RequestMapping("/api/v1/vacations/{vacationId}/days/{vacationDayId}/activities")
 public class VacationDayActivityController {
 
     private final VacationDayActivityService vacationDayActivityService;
@@ -36,16 +40,17 @@ public class VacationDayActivityController {
         return toResponse(vacationDayActivity);
     }
     
-    @PostMapping("/{pointOfInterestId}")
-    public VacationDayActivityResponse createVacationDayActivity(@PathVariable Integer vacationId, @PathVariable Integer vacationDayId, @PathVariable int pointOfInterestId) {
+    @PostMapping
+    public VacationDayActivityResponse createVacationDayActivity(@PathVariable Integer vacationId, @PathVariable Integer vacationDayId, @Valid @RequestBody CreateVacationDayActivityRequest vacationDayActivityRequest) {
         
-        return toResponse(vacationDayActivityService.createVacationDayActivity(vacationId, vacationDayId, pointOfInterestId));
+        return toResponse(vacationDayActivityService.createVacationDayActivity(vacationId, vacationDayId, vacationDayActivityRequest.getPointOfInterestId()));
     }
-    
-    @PutMapping("/{id}/{pointOfInterestId}")
-    public VacationDayActivityResponse updateVacationDayActivity(@PathVariable Integer vacationId, @PathVariable Integer vacationDayId, @PathVariable int id, @PathVariable int pointOfInterestId) {
+
+
+    @PutMapping("/{id}")
+    public VacationDayActivityResponse updateVacationDayActivity(@PathVariable Integer vacationId, @PathVariable Integer vacationDayId, @PathVariable int id, @Valid @RequestBody UpdateVacationDayActivityRequest vacationDayActivityRequest) {
         
-        return toResponse(vacationDayActivityService.updateVacationDayActivity(vacationId, vacationDayId, id, pointOfInterestId));
+        return toResponse(vacationDayActivityService.updateVacationDayActivity(vacationId, vacationDayId, id, vacationDayActivityRequest.getPointOfInterestId()));
     }
 
     @DeleteMapping("/{id}")
@@ -59,6 +64,7 @@ public class VacationDayActivityController {
         vacationDayActivityResponse.setId(vacationDayActivity.getId());
         vacationDayActivityResponse.setVacationDayId(vacationDayActivity.getVacationDay().getId());
         vacationDayActivityResponse.setPointOfInterestId(vacationDayActivity.getPointOfInterest().getId());
+        vacationDayActivityResponse.setPointOfInterestName(vacationDayActivity.getPointOfInterest().getName());
         return vacationDayActivityResponse;
     }
 } //VacationDayActivityController

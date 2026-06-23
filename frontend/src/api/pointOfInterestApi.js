@@ -12,7 +12,7 @@ export async function searchPointsOfInterestByCity(
     size: "100",
   });
 
-  const url = `${API_BASE_URL}/api/v1/pointOfInterests/search?${params.toString()}`;
+  const url = `${API_BASE_URL}/api/v1/points-of-interest/search?${params.toString()}`;
   const page = await apiRequest(url, { method: "GET" }, username, password);
   return Array.isArray(page?.content) ? page.content : [];
 }

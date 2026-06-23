@@ -42,7 +42,7 @@ public class PointOfInterest {
     @Column(name = "minimum_age", nullable = false)
     private int minimumAge;
     
-    @Column(name = "notes", nullable = false)
+    @Column(name = "notes")
     private String notes;
 
     public PointOfInterest() {

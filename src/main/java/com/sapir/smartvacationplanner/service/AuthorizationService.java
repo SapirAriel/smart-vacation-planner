@@ -55,6 +55,7 @@ public class AuthorizationService {
         Vacation vacation = vacationRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Vacation not found with id: " + id));
 
+
         if (currentUser.getRole() != Role.ADMIN &&
         !vacation.getUser().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("Access denied for vacation with id: " + id);

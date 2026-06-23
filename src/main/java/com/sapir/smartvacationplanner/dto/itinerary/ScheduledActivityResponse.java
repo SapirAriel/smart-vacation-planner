@@ -29,7 +29,7 @@ public class ScheduledActivityResponse {
     public Integer getVacationDayActivityId() {
         return vacationDayActivityId;
     }
-    public String getActivityName() {
+    public String getPointOfInterestName() {
         return pointOfInterestName;
     }
     public PointOfInterestCategory getPointOfInterestCategory() {
