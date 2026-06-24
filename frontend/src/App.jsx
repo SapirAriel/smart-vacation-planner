@@ -1,12 +1,18 @@
 import { useState } from "react";
 import { generateItinerary } from "./api/itineraryApi.js";
 import { searchPointsOfInterestByCity } from "./api/pointOfInterestApi.js";
-import { createVacationDay } from "./api/vacationDayApi.js";
+import {
+  buildCreateVacationDayPayload,
+  buildUpdateVacationDayPayload,
+  createVacationDay,
+  updateVacationDay,
+} from "./api/vacationDayApi.js";
 import {
   getVacationDayActivities,
   replaceVacationDayActivities,
 } from "./api/vacationDayActivityApi.js";
 import { deriveVacationDays } from "./utils/deriveVacationDays.js";
+import { hydrateVacationDayState } from "./utils/hydrateVacationDayState.js";
 import { hasSavedDayWithPois } from "./utils/stepFlow.js";
 import Header from "./components/Header.jsx";
 import VacationCreateForm from "./components/VacationCreateForm.jsx";
@@ -95,6 +101,22 @@ function App() {
     }
   }
 
+  function applyHydratedVacationDayState(hydrated) {
+    setSavedDayDataByDayNumber(hydrated.savedDayDataByDayNumber);
+    setDayFormByDayNumber(hydrated.dayFormByDayNumber);
+    setSelectedPoiIdsByDay(hydrated.selectedPoiIdsByDay);
+  }
+
+  async function refreshVacationDayStateFromBackend(vacationId) {
+    const hydrated = await hydrateVacationDayState(
+      vacationId,
+      username,
+      password
+    );
+    applyHydratedVacationDayState(hydrated);
+    return hydrated;
+  }
+
   async function activateVacation(vacation) {
     resetPlanningState();
     setActiveVacation(vacation);
@@ -103,7 +125,18 @@ function App() {
     setVacationFlowLoading(true);
 
     try {
-      await loadPointsOfInterest(vacation.city, vacation.country);
+      const poiPromise = loadPointsOfInterest(vacation.city, vacation.country);
+
+      if (vacation.id != null) {
+        const hydrated = await hydrateVacationDayState(
+          vacation.id,
+          username,
+          password
+        );
+        applyHydratedVacationDayState(hydrated);
+      }
+
+      await poiPromise;
     } finally {
       setVacationFlowLoading(false);
     }
@@ -238,16 +271,27 @@ function App() {
       if (!vacationDayId) {
         const createdDay = await createVacationDay(
           activeVacationId,
-          {
+          buildCreateVacationDayPayload({
             date: selectedDay.date,
             dayNumber: selectedDay.dayNumber,
             dayType: dayForm.dayType,
             hotelPlaceName: dayForm.hotelPlaceName.trim(),
-          },
+          }),
           username,
           password
         );
         vacationDayId = createdDay.id;
+      } else {
+        await updateVacationDay(
+          activeVacationId,
+          vacationDayId,
+          buildUpdateVacationDayPayload({
+            dayType: dayForm.dayType,
+            hotelPlaceName: dayForm.hotelPlaceName.trim(),
+          }),
+          username,
+          password
+        );
       }
 
       await replaceVacationDayActivities(
@@ -280,6 +324,24 @@ function App() {
         requestError instanceof Error
           ? requestError.message
           : "Something went wrong while saving the day.";
+
+      const isConflict =
+        message.includes("409") ||
+        message.toLowerCase().includes("already exists") ||
+        message.toLowerCase().includes("conflict");
+
+      if (isConflict) {
+        try {
+          await refreshVacationDayStateFromBackend(activeVacationId);
+          setSaveDayError(
+            "This vacation day already exists on the server. Day data was refreshed — save again to update it."
+          );
+          return;
+        } catch {
+          // Fall through to the original error message.
+        }
+      }
+
       setSaveDayError(message);
     } finally {
       setSavingDay(false);
@@ -394,7 +456,9 @@ function App() {
                   savingDay={savingDay}
                   saveError={saveDayError}
                   saveSuccess={saveDaySuccess}
-                  isSavedDay={Boolean(savedDayDataByDayNumber[selectedDayNumber])}
+                  isSavedDay={Boolean(
+                    savedDayDataByDayNumber[selectedDayNumber]?.vacationDayId
+                  )}
                 />
 
                 <SelectedDayActivities

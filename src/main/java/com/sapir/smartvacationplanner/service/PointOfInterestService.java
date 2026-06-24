@@ -17,7 +17,7 @@ public interface PointOfInterestService {
 
     List<PointOfInterest> getAllPointOfInterests();
 
-    Page<PointOfInterest> searchPointOfInterests(String name, PointOfInterestCategory pointOfInterestCategory, String placeName, String city, String country, Integer durationMinutes, LocalTime openingTime, LocalTime closingTime, Integer minimumAge, String notes, Pageable pageable);
+    Page<PointOfInterest> searchPointOfInterests(PointOfInterestCategory pointOfInterestCategory, String placeName, String city, String country, Integer durationMinutes, LocalTime openingTime, LocalTime closingTime, Integer minimumAge, String notes, Pageable pageable);
 
     PointOfInterest getPointOfInterestById(Integer id);
     

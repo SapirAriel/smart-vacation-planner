@@ -7,14 +7,19 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalTime;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.Optional;
+
 public interface PointOfInterestRepository extends JpaRepository<PointOfInterest, Integer> {
+
+    Optional<PointOfInterest> findByPlace_PlaceNameIgnoreCase(String placeName);
+
+    Optional<PointOfInterest> findByPlace_PlaceId(String placeId);
 
 
     @Query("""
         select p 
         from PointOfInterest p
-          where (:name is null or lower(p.name) like lower(concat('%', :name, '%')))
-          and (:pointOfInterestCategory is null or p.pointOfInterestCategory = :pointOfInterestCategory)
+          where (:pointOfInterestCategory is null or p.pointOfInterestCategory = :pointOfInterestCategory)
           and (:placeName is null or lower(p.place.placeName) like lower(concat('%', :placeName, '%')))
           and (:city IS NULL OR LOWER(p.place.city) = LOWER(:city))
           and (:country IS NULL OR LOWER(p.place.country) = LOWER(:country))
@@ -25,7 +30,6 @@ public interface PointOfInterestRepository extends JpaRepository<PointOfInterest
           and (:notes is null or lower(p.notes) like lower(concat('%', :notes, '%'))) 
     """)
     Page<PointOfInterest> searchPointOfInterests(
-        @Param("name") String name, 
         @Param("pointOfInterestCategory") PointOfInterestCategory pointOfInterestCategory, 
         @Param("placeName") String placeName, 
         @Param("city") String city,

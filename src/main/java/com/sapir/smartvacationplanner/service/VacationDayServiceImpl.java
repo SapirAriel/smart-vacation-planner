@@ -18,6 +18,7 @@ import com.sapir.smartvacationplanner.common.place.Place;
 import com.sapir.smartvacationplanner.integration.google.GooglePlacesClient;
 import com.sapir.smartvacationplanner.integration.google.dto.PlaceResult;
 import com.sapir.smartvacationplanner.entity.VacationDayActivity;
+import com.sapir.smartvacationplanner.exception.DuplicateResourceException;
 
 /**
  * VacationDayServiceImpl is a service implementation for the VacationDay entity.
@@ -59,9 +60,17 @@ public class VacationDayServiceImpl implements VacationDayService {
 
     @Override
     public VacationDay createVacationDay(Integer vacationId, CreateVacationDayRequest request) {
+        
+        if (vacationDayRepository.existsByVacationIdAndDayNumber(vacationId, request.getDayNumber())) {
+            throw new DuplicateResourceException("Day number already exists for this vacation");}
+        
+        if (vacationDayRepository.existsByVacationIdAndDate(vacationId, request.getDate())) {
+            throw new DuplicateResourceException("Date already exists for this vacation");}
+        
         Vacation vacation = authorizationService.getVacationForCurrentUser(vacationId);
-        PlaceResult placeResult = googlePlacesClient.searchPlace(request.getHotelPlaceName());
-        Place hotelPlace = new Place(request.getHotelPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.city(), placeResult.country(), placeResult.latitude(), placeResult.longitude());
+        PlaceResult hotelPlaceResult = googlePlacesClient.searchPlace(request.getHotelPlaceName());
+        Place hotelPlace = new Place(request.getHotelPlaceName(), hotelPlaceResult.placeId(), hotelPlaceResult.formattedAddress(), hotelPlaceResult.city(), hotelPlaceResult.country(), hotelPlaceResult.latitude(), hotelPlaceResult.longitude());
+
         VacationDay vacationDay = new VacationDay(vacation, request.getDate(), request.getDayNumber(), request.getDayType(), hotelPlace);
         validateVacationDayConstraints(vacationDay);
         return vacationDayRepository.save(vacationDay);
@@ -72,12 +81,10 @@ public class VacationDayServiceImpl implements VacationDayService {
         VacationDay existing = getVacationDayForCurrentUser(vacationId, id);
 
         if (!request.getHotelPlaceName().equals(existing.getHotelPlace().getPlaceName())) {
-            PlaceResult placeResult = googlePlacesClient.searchPlace(request.getHotelPlaceName());
-            Place hotelPlace = new Place(request.getHotelPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.city(), placeResult.country(), placeResult.latitude(), placeResult.longitude());
+            PlaceResult hotelPlaceResult = googlePlacesClient.searchPlace(request.getHotelPlaceName());
+            Place hotelPlace = new Place(request.getHotelPlaceName(), hotelPlaceResult.placeId(), hotelPlaceResult.formattedAddress(), hotelPlaceResult.city(), hotelPlaceResult.country(), hotelPlaceResult.latitude(), hotelPlaceResult.longitude());
             existing.setHotelPlace(hotelPlace);
         }
-        existing.setDate(request.getDate());
-        existing.setDayNumber(request.getDayNumber());
         existing.setDayType(request.getDayType());
         validateVacationDayConstraints(existing);
         return vacationDayRepository.save(existing);
@@ -87,12 +94,6 @@ public class VacationDayServiceImpl implements VacationDayService {
     public VacationDay patchVacationDay(Integer vacationId, Integer id, PatchVacationDayRequest request) {
         VacationDay existing = getVacationDayForCurrentUser(vacationId, id);
         
-        if (request.getDate() != null) {
-            existing.setDate(request.getDate());
-        }
-        if (request.getDayNumber() != null) {
-            existing.setDayNumber(request.getDayNumber());
-        }
         if (request.getDayType() != null) {
             existing.setDayType(request.getDayType());
         }

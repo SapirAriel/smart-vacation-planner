@@ -23,6 +23,7 @@ function DaySelector({
         {derivedDays.map((day) => {
           const isSelected = selectedDayNumber === day.dayNumber;
           const saved = savedDayDataByDayNumber[day.dayNumber];
+          const isBackendDay = Boolean(saved?.vacationDayId);
           const selectedCount = (selectedPoiIdsByDay[day.dayNumber] || []).length;
 
           return (
@@ -36,7 +37,7 @@ function DaySelector({
                 Day {day.dayNumber} — {day.date}
               </span>
               <span className="day-selector-meta">
-                {saved ? "Activities saved" : "Not saved"} · {selectedCount} POI
+                {isBackendDay ? "Saved" : "Not saved"} · {selectedCount} POI
                 {selectedCount === 1 ? "" : "s"} selected
               </span>
             </button>

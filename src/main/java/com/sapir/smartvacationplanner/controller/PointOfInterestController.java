@@ -43,13 +43,8 @@ public class PointOfInterestController {
     }
 
     @GetMapping("/search")
-    public Page<PointOfInterestResponse> searchPointOfInterests(@RequestParam(required = false) String name,
-        @RequestParam(required = false) PointOfInterestCategory pointOfInterestCategory,
+    public Page<PointOfInterestResponse> searchPointOfInterests(@RequestParam(required = false) PointOfInterestCategory pointOfInterestCategory,
         @RequestParam(required = false) String placeName,
-        @RequestParam(required = false) String placeId,
-        @RequestParam(required = false) String formattedAddress,
-        @RequestParam(required = false) Double latitude,
-        @RequestParam(required = false) Double longitude,
         @RequestParam(required = false) String city,
         @RequestParam(required = false) String country,
         @RequestParam(required = false) Integer durationMinutes,
@@ -57,9 +52,9 @@ public class PointOfInterestController {
         @RequestParam(required = false) LocalTime closingTime,
         @RequestParam(required = false) Integer minimumAge,
         @RequestParam(required = false) String notes,
-        @PageableDefault(page = 0, size = 5, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+        @PageableDefault(page = 0, size = 5, sort = "place.placeName", direction = Sort.Direction.ASC) Pageable pageable) {
         
-        return pointOfInterestService.searchPointOfInterests(name, pointOfInterestCategory, placeName, city, country, durationMinutes, openingTime, closingTime, minimumAge, notes, pageable).map(this::toResponse);
+        return pointOfInterestService.searchPointOfInterests(pointOfInterestCategory, placeName, city, country, durationMinutes, openingTime, closingTime, minimumAge, notes, pageable).map(this::toResponse);
     }
 
     @GetMapping("/{id}")
@@ -90,7 +85,6 @@ public class PointOfInterestController {
     private PointOfInterestResponse toResponse(PointOfInterest pointOfInterest) {
         PointOfInterestResponse pointOfInterestResponse = new PointOfInterestResponse();
         pointOfInterestResponse.setId(pointOfInterest.getId());
-        pointOfInterestResponse.setName(pointOfInterest.getName());
         pointOfInterestResponse.setPointOfInterestCategory(pointOfInterest.getPointOfInterestCategory());
         pointOfInterestResponse.setPlaceName(pointOfInterest.getPlace().getPlaceName());
         pointOfInterestResponse.setPlaceId(pointOfInterest.getPlace().getPlaceId());

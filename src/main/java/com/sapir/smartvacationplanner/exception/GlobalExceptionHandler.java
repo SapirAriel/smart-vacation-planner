@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -71,6 +72,20 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateResourceException(
+            DuplicateResourceException exc,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse errorResponse = new ApiErrorResponse();
+        errorResponse.setMessage(exc.getMessage());
+        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setStatus(HttpStatus.CONFLICT.value());
+        errorResponse.setTimestamp(Instant.now().toString());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(
             AccessDeniedException exc,
@@ -100,5 +115,19 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolationException(
+        DataIntegrityViolationException exc,
+        HttpServletRequest request
+) {
+    ApiErrorResponse errorResponse = new ApiErrorResponse();
+    errorResponse.setMessage("Resource already exists or violates a database constraint");
+    errorResponse.setPath(request.getRequestURI());
+    errorResponse.setStatus(HttpStatus.CONFLICT.value());
+    errorResponse.setTimestamp(Instant.now().toString());
+
+    return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+}
 }
 

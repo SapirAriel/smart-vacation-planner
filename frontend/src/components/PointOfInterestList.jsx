@@ -1,3 +1,5 @@
+import { getPoiDisplayName } from "../utils/poiDisplay.js";
+
 function formatValue(value) {
   if (value === null || value === undefined || value === "") {
     return "—";
@@ -51,8 +53,8 @@ function PointOfInterestList({
                     onChange={() => onTogglePoi(poi.id)}
                   />
                   <span>
-                    <strong>#{formatValue(poi.id)}</strong> {formatValue(poi.name)}
-                    {poi.placeName ? ` — ${poi.placeName}` : ""}
+                    <strong>#{formatValue(poi.id)}</strong>{" "}
+                    {formatValue(getPoiDisplayName(poi))}
                   </span>
                 </label>
               </li>

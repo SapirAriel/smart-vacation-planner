@@ -1,3 +1,5 @@
+import { getPoiDisplayName } from "../utils/poiDisplay.js";
+
 function formatValue(value) {
   if (value === null || value === undefined || value === "") {
     return "—";
@@ -34,8 +36,8 @@ function SelectedDayActivities({ selectedDayNumber, pointsOfInterest, selectedPo
         <ul className="selected-poi-list">
           {selectedPois.map((poi) => (
             <li key={poi.id}>
-              <strong>#{formatValue(poi.id)}</strong> {formatValue(poi.name)}
-              {poi.placeName ? ` — ${poi.placeName}` : ""}
+              <strong>#{formatValue(poi.id)}</strong>{" "}
+              {formatValue(getPoiDisplayName(poi))}
             </li>
           ))}
         </ul>

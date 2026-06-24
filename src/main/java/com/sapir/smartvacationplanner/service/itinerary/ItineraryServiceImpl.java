@@ -200,7 +200,6 @@ public class ItineraryServiceImpl implements ItineraryService {
 
             ScheduledActivityResponse scheduled = new ScheduledActivityResponse(
                 selectedCandidate.getVacationDayActivity().getId(),
-                selectedCandidate.getVacationDayActivity().getPointOfInterest().getName(),
                 selectedCandidate.getVacationDayActivity().getPointOfInterest().getPointOfInterestCategory(),
                 selectedCandidate.getPossibleStartTime(),
                 selectedCandidate.getPossibleEndTime(),

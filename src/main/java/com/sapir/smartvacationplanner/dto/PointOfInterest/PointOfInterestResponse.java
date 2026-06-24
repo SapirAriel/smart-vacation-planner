@@ -9,7 +9,6 @@ import java.time.LocalTime;
 public class PointOfInterestResponse {
 
     private int id;
-    private String name;
     private PointOfInterestCategory pointOfInterestCategory;
     private String placeName;
 
@@ -28,9 +27,6 @@ public class PointOfInterestResponse {
 
     public int getId() {
         return id;
-    }
-    public String getName() {
-        return name;
     }
     public PointOfInterestCategory getPointOfInterestCategory() {
         return pointOfInterestCategory;
@@ -76,9 +72,6 @@ public class PointOfInterestResponse {
     public void setId(int id) {
         this.id = id;
     }
-    public void setName(String name) {
-        this.name = name;
-    }
     public void setPointOfInterestCategory(PointOfInterestCategory pointOfInterestCategory) {
         this.pointOfInterestCategory = pointOfInterestCategory;
     }
@@ -122,7 +115,6 @@ public class PointOfInterestResponse {
     public String toString() {
         return "PointOfInterestResponse{" +
             "id=" + id +
-            ", name=" + name +
             ", pointOfInterestCategory=" + pointOfInterestCategory +
             ", placeName=" + placeName +
             ", placeId=" + placeId +

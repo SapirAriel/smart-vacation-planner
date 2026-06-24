@@ -64,7 +64,7 @@ public class VacationDayActivityController {
         vacationDayActivityResponse.setId(vacationDayActivity.getId());
         vacationDayActivityResponse.setVacationDayId(vacationDayActivity.getVacationDay().getId());
         vacationDayActivityResponse.setPointOfInterestId(vacationDayActivity.getPointOfInterest().getId());
-        vacationDayActivityResponse.setPointOfInterestName(vacationDayActivity.getPointOfInterest().getName());
+        vacationDayActivityResponse.setPointOfInterestPlaceName(vacationDayActivity.getPointOfInterest().getPlace().getPlaceName());
         return vacationDayActivityResponse;
     }
 } //VacationDayActivityController

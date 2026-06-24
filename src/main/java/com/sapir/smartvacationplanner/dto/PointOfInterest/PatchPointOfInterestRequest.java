@@ -10,8 +10,6 @@ import java.time.LocalTime;
 
 public class PatchPointOfInterestRequest {
 
-    private String name;
-
     private PointOfInterestCategory pointOfInterestCategory;
 
     private String placeName;
@@ -28,9 +26,6 @@ public class PatchPointOfInterestRequest {
     private String notes;
 
 
-    public String getName() {
-        return name;
-    }
     public PointOfInterestCategory getPointOfInterestCategory() {
         return pointOfInterestCategory;
     }
@@ -53,9 +48,6 @@ public class PatchPointOfInterestRequest {
         return notes;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
     public void setPointOfInterestCategory(PointOfInterestCategory pointOfInterestCategory) {
         this.pointOfInterestCategory = pointOfInterestCategory;
     }

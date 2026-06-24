@@ -5,7 +5,6 @@ import com.sapir.smartvacationplanner.entity.enums.PointOfInterestCategory;
 public class ScheduledActivityResponse {
 
     private Integer vacationDayActivityId;
-    private String pointOfInterestName;
     private PointOfInterestCategory pointOfInterestCategory;
     private LocalTime plannedStartTime;
     private LocalTime plannedEndTime;
@@ -15,10 +14,9 @@ public class ScheduledActivityResponse {
     public ScheduledActivityResponse() {
     }
 
-    public ScheduledActivityResponse(Integer vacationDayActivityId, String pointOfInterestName, PointOfInterestCategory pointOfInterestCategory, 
+    public ScheduledActivityResponse(Integer vacationDayActivityId, PointOfInterestCategory pointOfInterestCategory, 
         LocalTime plannedStartTime, LocalTime plannedEndTime, String placeName, String notes) {
         this.vacationDayActivityId = vacationDayActivityId;
-        this.pointOfInterestName = pointOfInterestName;
         this.pointOfInterestCategory = pointOfInterestCategory;
         this.plannedStartTime = plannedStartTime;
         this.plannedEndTime = plannedEndTime;
@@ -28,9 +26,6 @@ public class ScheduledActivityResponse {
     
     public Integer getVacationDayActivityId() {
         return vacationDayActivityId;
-    }
-    public String getPointOfInterestName() {
-        return pointOfInterestName;
     }
     public PointOfInterestCategory getPointOfInterestCategory() {
         return pointOfInterestCategory;
@@ -50,9 +45,6 @@ public class ScheduledActivityResponse {
     public void setVacationDayActivityId(Integer vacationDayActivityId) {
         this.vacationDayActivityId = vacationDayActivityId;
     }
-    public void setPointOfInterestName(String pointOfInterestName) {
-        this.pointOfInterestName = pointOfInterestName;
-    }
     public void setPointOfInterestCategory(PointOfInterestCategory pointOfInterestCategory) {
         this.pointOfInterestCategory = pointOfInterestCategory;
     }
@@ -71,7 +63,6 @@ public class ScheduledActivityResponse {
     public String toString() {
         return "ScheduledActivityResponse{" +
             "vacationDayActivityId=" + vacationDayActivityId +
-            ", pointOfInterestName=" + pointOfInterestName +
             ", pointOfInterestCategory=" + pointOfInterestCategory +
             ", plannedStartTime=" + plannedStartTime +
             ", plannedEndTime=" + plannedEndTime +

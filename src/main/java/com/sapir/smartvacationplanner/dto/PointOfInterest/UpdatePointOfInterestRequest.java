@@ -1,5 +1,4 @@
 package com.sapir.smartvacationplanner.dto.PointOfInterest;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import com.sapir.smartvacationplanner.entity.enums.PointOfInterestCategory;
 import jakarta.validation.constraints.Positive;
@@ -12,14 +11,8 @@ import java.time.LocalTime;
 
 public class UpdatePointOfInterestRequest {
 
-    @NotBlank(message = "Name is required")
-    private String name;
-
     @NotNull(message = "Point of interest category is required")
     private PointOfInterestCategory pointOfInterestCategory;
-
-    @NotBlank(message = "Place name is required")
-    private String placeName;
 
     @Positive(message = "Duration minutes must be greater than 0")
     @NotNull(message = "Duration minutes is required")
@@ -37,14 +30,8 @@ public class UpdatePointOfInterestRequest {
     private String notes;
 
 
-    public String getName() {
-        return name;
-    }
     public PointOfInterestCategory getPointOfInterestCategory() {
         return pointOfInterestCategory;
-    }
-    public String getPlaceName() {
-        return placeName;
     }
     public Integer getDurationMinutes() {
         return durationMinutes;
@@ -62,14 +49,8 @@ public class UpdatePointOfInterestRequest {
         return notes;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
     public void setPointOfInterestCategory(PointOfInterestCategory pointOfInterestCategory) {
         this.pointOfInterestCategory = pointOfInterestCategory;
-    }
-    public void setPlaceName(String placeName) {
-        this.placeName = placeName;
     }
     public void setDurationMinutes(Integer durationMinutes) {
         this.durationMinutes = durationMinutes;

@@ -5,7 +5,7 @@ public class VacationDayActivityResponse {
     private int id;
     private int vacationDayId;
     private int pointOfInterestId;
-    private String pointOfInterestName;
+    private String pointOfInterestPlaceName;
 
     public int getId() {
         return id;
@@ -16,8 +16,8 @@ public class VacationDayActivityResponse {
     public int getPointOfInterestId() {
         return pointOfInterestId;
     }
-    public String getPointOfInterestName() {
-        return pointOfInterestName;
+    public String getPointOfInterestPlaceName() {
+        return pointOfInterestPlaceName;
     }
 
     public void setId(int id) {
@@ -29,8 +29,8 @@ public class VacationDayActivityResponse {
     public void setPointOfInterestId(int pointOfInterestId) {
         this.pointOfInterestId = pointOfInterestId;
     }
-    public void setPointOfInterestName(String pointOfInterestName) {
-        this.pointOfInterestName = pointOfInterestName;
+    public void setPointOfInterestPlaceName(String pointOfInterestPlaceName) {
+        this.pointOfInterestPlaceName = pointOfInterestPlaceName;
     }
 
     public String toString() {
@@ -38,7 +38,7 @@ public class VacationDayActivityResponse {
             "id=" + id +
             ", vacationDayId=" + vacationDayId +
             ", pointOfInterestId=" + pointOfInterestId +
-            ", pointOfInterestName=" + pointOfInterestName +
+            ", pointOfInterestPlaceName=" + pointOfInterestPlaceName +
             '}';
     }
 }

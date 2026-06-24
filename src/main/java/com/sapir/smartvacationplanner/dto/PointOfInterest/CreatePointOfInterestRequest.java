@@ -12,9 +12,6 @@ import java.time.LocalTime;
 
 public class CreatePointOfInterestRequest {
 
-    @NotBlank(message = "Name is required")
-    private String name;
-
     @NotNull(message = "Point of interest category is required")
     private PointOfInterestCategory pointOfInterestCategory;
 
@@ -37,9 +34,6 @@ public class CreatePointOfInterestRequest {
     private String notes;
 
 
-    public String getName() {
-        return name;
-    }
     public PointOfInterestCategory getPointOfInterestCategory() {
         return pointOfInterestCategory;
     }
@@ -62,9 +56,6 @@ public class CreatePointOfInterestRequest {
         return notes;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
     public void setPointOfInterestCategory(PointOfInterestCategory pointOfInterestCategory) {
         this.pointOfInterestCategory = pointOfInterestCategory;
     }

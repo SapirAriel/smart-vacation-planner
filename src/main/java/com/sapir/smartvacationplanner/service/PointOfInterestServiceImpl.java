@@ -13,6 +13,7 @@ import com.sapir.smartvacationplanner.integration.google.GooglePlacesClient;
 import com.sapir.smartvacationplanner.integration.google.dto.PlaceResult;
 import com.sapir.smartvacationplanner.exception.ResourceNotFoundException;
 import com.sapir.smartvacationplanner.entity.enums.PointOfInterestCategory;
+import java.util.Optional;
 
 
 /**
@@ -38,9 +39,9 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
     }
 
     @Override
-    public Page<PointOfInterest> searchPointOfInterests(String name, PointOfInterestCategory pointOfInterestCategory, String placeName, String city, String country, Integer durationMinutes, LocalTime openingTime, LocalTime closingTime, Integer minimumAge, String notes, Pageable pageable) {
+    public Page<PointOfInterest> searchPointOfInterests(PointOfInterestCategory pointOfInterestCategory, String placeName, String city, String country, Integer durationMinutes, LocalTime openingTime, LocalTime closingTime, Integer minimumAge, String notes, Pageable pageable) {
         
-        return pointOfInterestRepository.searchPointOfInterests(name, pointOfInterestCategory, placeName, city, country, durationMinutes, openingTime, closingTime, minimumAge, notes, pageable);
+        return pointOfInterestRepository.searchPointOfInterests(pointOfInterestCategory, placeName, city, country, durationMinutes, openingTime, closingTime, minimumAge, notes, pageable);
     }
 
     @Override
@@ -51,10 +52,26 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
 
     @Override
     public PointOfInterest createPointOfInterest(CreatePointOfInterestRequest request) {
+
+        String normalizedPlaceName = request.getPlaceName().trim();
+
+        Optional<PointOfInterest> existingByName = pointOfInterestRepository.findByPlace_PlaceNameIgnoreCase(normalizedPlaceName);
+
+        if (existingByName.isPresent()) {
+            return existingByName.get();
+        }
+
         PlaceResult placeResult = googlePlacesClient.searchPlace(request.getPlaceName());
+
+        Optional<PointOfInterest> existingByPlaceId = pointOfInterestRepository.findByPlace_PlaceId(placeResult.placeId());
+
+        if (existingByPlaceId.isPresent()) {
+            return existingByPlaceId.get();
+        }
+        
         Place place = new Place(request.getPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.city(), placeResult.country(), placeResult.latitude(), placeResult.longitude());
         
-        PointOfInterest pointOfInterest = new PointOfInterest(request.getName(), request.getPointOfInterestCategory(), place, 
+        PointOfInterest pointOfInterest = new PointOfInterest(request.getPointOfInterestCategory(), place, 
         request.getDurationMinutes(), request.getOpeningTime(), request.getClosingTime(), request.getMinimumAge(), request.getNotes());
 
         return pointOfInterestRepository.save(pointOfInterest);
@@ -64,14 +81,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
     public PointOfInterest updatePointOfInterest(Integer id, UpdatePointOfInterestRequest request) {
 
         PointOfInterest existing = getPointOfInterestById(id);
-        
-        if (!existing.getPlace().getPlaceName().equals(request.getPlaceName())) {
-            PlaceResult placeResult = googlePlacesClient.searchPlace(request.getPlaceName());
-            Place place = new Place(request.getPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.city(), placeResult.country(), placeResult.latitude(), placeResult.longitude());
-            existing.setPlace(place);
-        }
 
-        existing.setName(request.getName());
         existing.setPointOfInterestCategory(request.getPointOfInterestCategory());
         existing.setDurationMinutes(request.getDurationMinutes());
         existing.setOpeningTime(request.getOpeningTime());

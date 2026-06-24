@@ -12,16 +12,15 @@ import java.time.LocalTime;
  */
 
 @Entity
-@Table(name = "points_of_interest")
+@Table(name = "points_of_interest",
+    uniqueConstraints = { @UniqueConstraint(columnNames = {"place_id"}, name = "unique_place_id"),
+                          @UniqueConstraint(columnNames = {"place_name"}, name = "unique_place_name") })
 public class PointOfInterest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-
-    @Column(name = "name", nullable = false)
-    private String name;
 
     @Column(name = "point_of_interest_category", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -48,10 +47,9 @@ public class PointOfInterest {
     public PointOfInterest() {
     }
 
-    public PointOfInterest(String name, PointOfInterestCategory pointOfInterestCategory, Place place, 
+    public PointOfInterest(PointOfInterestCategory pointOfInterestCategory, Place place, 
         int durationMinutes, LocalTime openingTime, LocalTime closingTime, int minimumAge, String notes) {
 
-        this.name = name;
         this.pointOfInterestCategory = pointOfInterestCategory;
         this.place = place;
         this.durationMinutes = durationMinutes;
@@ -65,9 +63,6 @@ public class PointOfInterest {
         return id;
     }
 
-    public String getName() {
-        return name;
-    }
     public PointOfInterestCategory getPointOfInterestCategory() {
         return pointOfInterestCategory;
     }
@@ -109,9 +104,6 @@ public class PointOfInterest {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-    public void setName(String name) {
-        this.name = name;
     }
     public void setPointOfInterestCategory(PointOfInterestCategory pointOfInterestCategory) {
         this.pointOfInterestCategory = pointOfInterestCategory;
@@ -158,7 +150,6 @@ public class PointOfInterest {
     public String toString() {
         return "Activity{" +
             "id=" + id +
-            ", name=" + name +
             ", pointOfInterestCategory=" + pointOfInterestCategory +
             ", place=" + place +
             ", durationMinutes=" + durationMinutes +

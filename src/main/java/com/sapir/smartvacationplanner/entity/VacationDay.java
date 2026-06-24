@@ -13,7 +13,9 @@ import com.sapir.smartvacationplanner.common.place.Place;
  */
 
 @Entity
-@Table(name = "vacation_days")
+@Table(name = "vacation_days",
+    uniqueConstraints = { @UniqueConstraint(columnNames = {"vacation_id", "date"}, name = "unique_vacation_id_date"),
+                          @UniqueConstraint(columnNames = {"vacation_id", "day_number"}, name = "unique_vacation_id_day_number") })
 public class VacationDay {
 
 @Id

@@ -1,3 +1,5 @@
+import { getPoiDisplayName } from "../utils/poiDisplay.js";
+
 const NOTES_MAX_LENGTH = 100;
 
 function formatValue(value) {
@@ -72,7 +74,7 @@ function PoiMapPopup({
 
   return (
     <div className="map-popup">
-      <h3 className="map-popup-title">{formatValue(poi.name) || "Unnamed POI"}</h3>
+      <h3 className="map-popup-title">{getPoiDisplayName(poi)}</h3>
 
       <p className="map-popup-secondary">
         #{formatValue(poi.id)}
