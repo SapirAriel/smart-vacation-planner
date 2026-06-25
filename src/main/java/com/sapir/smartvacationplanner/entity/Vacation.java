@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ArrayList;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * Vacation entity represents a vacation.
@@ -15,7 +16,9 @@ import jakarta.persistence.JoinColumn;
  */ 
 
 @Entity
-@Table(name = "vacations")
+@Table(name = "vacations",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "name"})})
+
 public class Vacation {
 
 @Id
@@ -27,7 +30,7 @@ private Integer id;
 @JoinColumn(name = "user_id")
 private User user;
 
-@Column(name = "name", nullable = false, unique = true)
+@Column(name = "name", nullable = false)
 private String name; 
 
 @Column(name = "country", nullable = false)   

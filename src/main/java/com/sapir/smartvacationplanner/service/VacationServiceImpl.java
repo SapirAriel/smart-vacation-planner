@@ -13,6 +13,7 @@ import com.sapir.smartvacationplanner.entity.enums.Pace;
 import java.math.BigDecimal;
 import com.sapir.smartvacationplanner.entity.User;
 import com.sapir.smartvacationplanner.entity.enums.Role;
+import com.sapir.smartvacationplanner.exception.DuplicateResourceException;
 
 /**
  * VacationServiceImpl is a service implementation for the Vacation entity.
@@ -63,15 +64,20 @@ public class VacationServiceImpl implements VacationService {
         
         validateVacationConstraints(vacation);
         User currentUser = authorizationService.getCurrentUser();
+
+        validateVacationNameIsUniqueForUser(currentUser, vacation.getName(), null);
+
         vacation.setUser(currentUser);
         return vacationRepository.save(vacation);
     }
 
     @Override
-
     public Vacation updateVacation(Integer id, Vacation vacation) {
 
         Vacation existingVacation = getVacationById(id);
+        User currentUser = existingVacation.getUser();
+
+        validateVacationNameIsUniqueForUser(currentUser, vacation.getName(), existingVacation.getName());
 
         existingVacation.setName(vacation.getName());
         existingVacation.setCountry(vacation.getCountry());
@@ -89,8 +95,11 @@ public class VacationServiceImpl implements VacationService {
     @Override
     public Vacation patchVacation(Integer id, Vacation vacation) {
         Vacation existingVacation = getVacationById(id);
+        User currentUser = existingVacation.getUser();
+
         if (vacation.getName() != null) {
-        existingVacation.setName(vacation.getName());
+            validateVacationNameIsUniqueForUser(currentUser, vacation.getName(), existingVacation.getName());
+            existingVacation.setName(vacation.getName());
         }
         if (vacation.getCountry() != null) {
             existingVacation.setCountry(vacation.getCountry());
@@ -133,6 +142,20 @@ public class VacationServiceImpl implements VacationService {
         if (vacation.getStartDate() != null && vacation.getEndDate() != null
             && vacation.getEndDate().isBefore(vacation.getStartDate())) {
             throw new IllegalArgumentException("endDate must be after or equal to startDate");}
+    }
+
+    private void validateVacationNameIsUniqueForUser(User user, String newName, String existingName) {
+        if (newName == null) {
+            return;
+        }
+    
+        if (existingName != null && existingName.equals(newName)) {
+            return;
+        }
+    
+        if (vacationRepository.existsByUserIdAndName(user.getId(), newName)) {
+            throw new DuplicateResourceException("Vacation name already exists for this user");
+        }
     }
 
 }

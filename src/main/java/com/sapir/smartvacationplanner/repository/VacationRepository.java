@@ -14,6 +14,8 @@ import java.util.List;
 public interface VacationRepository extends JpaRepository<Vacation, Integer> {
 
     List<Vacation> findByUserId(Integer userId);   
+
+    boolean existsByUserIdAndName(Integer userId, String name);
     
 
     @Query("""
