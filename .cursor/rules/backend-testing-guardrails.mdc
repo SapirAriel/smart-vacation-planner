@@ -1,0 +1,112 @@
+---
+
+description: Mandatory guardrails for Spring Boot backend testing tasks
+globs: []
+alwaysApply: true
+-----------------
+
+# Backend Testing Guardrails
+
+Apply these instructions whenever the user asks to plan, create, modify, review, debug,
+or run tests for the Spring Boot backend.
+
+## Required skill
+
+Use the `spring-backend-flow-testing` skill for backend testing tasks.
+
+Follow its two-phase process:
+
+1. Analyze the scenario and present a test plan.
+2. Wait for explicit user approval before creating or modifying test files.
+
+## Approval requirement
+
+Before creating, modifying, renaming, moving, or deleting any test file:
+
+* Present the exact proposed change.
+* Identify the affected file paths.
+* Explain which test cases will be implemented.
+* Wait for explicit user approval.
+
+Do not interpret the original testing request as approval to edit files.
+
+Do not combine the planning phase and implementation phase into one step.
+
+## Allowed changes after approval
+
+After explicit approval, changes are permitted only under:
+
+```text
+src/test/**
+```
+
+This includes:
+
+```text
+src/test/java/**
+src/test/resources/**
+```
+
+Implement only the files and test cases included in the approved plan.
+
+If additional changes become necessary, stop and request separate approval.
+
+## Forbidden changes
+
+During a backend testing task, never modify:
+
+```text
+src/main/**
+pom.xml
+mvnw
+mvnw.cmd
+application.properties
+application.yml
+docker-compose.yml
+```
+
+Also never:
+
+* Modify production behavior.
+* Modify security or authorization logic.
+* Modify validation logic.
+* Modify exception handling.
+* Modify entities, repositories, services, or controllers.
+* Modify database constraints or migrations.
+* Add or update dependencies.
+* Add Testcontainers or another testing framework.
+* Weaken assertions to make a test pass.
+* Change an expected result merely to match an existing bug.
+* Hide a failing test.
+* Claim that a test passed without executing it.
+
+## Production bugs
+
+When a test exposes a probable production bug:
+
+* Keep the test unchanged if it represents the approved requirement correctly.
+* Do not fix the production code.
+* Report the expected behavior.
+* Report the actual behavior.
+* Identify the likely production area involved.
+* State that the production fix requires a separate task and explicit approval.
+
+## Test execution
+
+After approved test changes:
+
+* Run the focused test first.
+* Run the relevant wider test suite when appropriate.
+* Report the exact command and result.
+* Report blockers and existing unrelated failures honestly.
+
+Running tests does not grant permission to modify files outside `src/test/**`.
+
+## Final confirmation
+
+Every implementation report must explicitly confirm:
+
+* Which files under `src/test/**` were changed.
+* That no production files were changed.
+* Which commands were executed.
+* Which tests passed or failed.

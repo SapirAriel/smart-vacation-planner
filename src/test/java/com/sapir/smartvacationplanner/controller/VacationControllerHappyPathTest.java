@@ -13,7 +13,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+
+import com.sapir.smartvacationplanner.entity.enums.Pace;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -52,6 +55,8 @@ class VacationControllerHappyPathTest {
         savedVacation.setStartDate(LocalDate.of(2026, 5, 10));
         savedVacation.setEndDate(LocalDate.of(2026, 5, 11));
         savedVacation.setTravelerType(TravelerType.INDIVIDUAL);
+        savedVacation.setBudget(new BigDecimal("1000"));
+        savedVacation.setPace(Pace.BALANCED);
         // Fill the returned object with data we expect to see in the response
 
         when(vacationService.createVacation(ArgumentMatchers.any(Vacation.class)))
@@ -76,7 +81,9 @@ class VacationControllerHappyPathTest {
                                   "city": "Test City",
                                   "startDate": "2026-05-10",
                                   "endDate": "2026-05-11",
-                                  "travelerType": "INDIVIDUAL"
+                                  "travelerType": "INDIVIDUAL",
+                                  "budget": 1000,
+                                  "pace": "BALANCED"
                                 }
                                 """))
                 .andExpect(status().isOk())

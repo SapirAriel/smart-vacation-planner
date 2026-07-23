@@ -59,8 +59,11 @@ class VacationControllerValidationTest {
                 .andExpect(jsonPath("$.fieldErrors").isArray())
                 // Verify that fieldErrors exists and is returned as an array
 
-                .andExpect(jsonPath("$.fieldErrors.length()").value(6));
-                // There are 6 required fields in CreateVacationRequest
-                // Sending {} should produce 6 validation errors
+                .andExpect(jsonPath("$.fieldErrors.length()").value(8))
+                // There are 8 required fields in CreateVacationRequest
+                // Sending {} should produce 8 validation errors
+
+                .andExpect(jsonPath("$.fieldErrors[?(@.field=='budget')].error").value("Budget is required"))
+                .andExpect(jsonPath("$.fieldErrors[?(@.field=='pace')].error").value("Pace is required"));
     }
 }
