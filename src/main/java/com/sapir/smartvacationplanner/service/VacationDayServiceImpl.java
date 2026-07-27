@@ -60,14 +60,14 @@ public class VacationDayServiceImpl implements VacationDayService {
 
     @Override
     public VacationDay createVacationDay(Integer vacationId, CreateVacationDayRequest request) {
-        
+        Vacation vacation = authorizationService.getVacationForCurrentUser(vacationId);
+
         if (vacationDayRepository.existsByVacationIdAndDayNumber(vacationId, request.getDayNumber())) {
             throw new DuplicateResourceException("Day number already exists for this vacation");}
         
         if (vacationDayRepository.existsByVacationIdAndDate(vacationId, request.getDate())) {
             throw new DuplicateResourceException("Date already exists for this vacation");}
-        
-        Vacation vacation = authorizationService.getVacationForCurrentUser(vacationId);
+
         PlaceResult hotelPlaceResult = googlePlacesClient.searchPlace(request.getHotelPlaceName());
         Place hotelPlace = new Place(request.getHotelPlaceName(), hotelPlaceResult.placeId(), hotelPlaceResult.formattedAddress(), hotelPlaceResult.city(), hotelPlaceResult.country(), hotelPlaceResult.latitude(), hotelPlaceResult.longitude());
 
@@ -122,15 +122,18 @@ public class VacationDayServiceImpl implements VacationDayService {
 
         if (vacationDay.getDate() != null
         && vacationDay.getDate().isBefore(vacationDay.getVacation().getStartDate())) {
-            throw new IllegalArgumentException("date must be on or after vacation startDate");}
+            throw new IllegalArgumentException("Date must be on or after vacation startDate");}
 
         if (vacationDay.getDate() != null
         && vacationDay.getDate().isAfter(vacationDay.getVacation().getEndDate())) {
-            throw new IllegalArgumentException("date must be on or before vacation endDate");}
+            throw new IllegalArgumentException("Date must be on or before vacation endDate");}
+
+        if (vacationDay.getDayNumber() < 1) {
+            throw new IllegalArgumentException("Day number must be greater than 0");}
 
         long vacationDuration = 1+ChronoUnit.DAYS.between(vacationDay.getVacation().getStartDate(), vacationDay.getVacation().getEndDate());
         if (vacationDay.getDayNumber() > vacationDuration) {
-            throw new IllegalArgumentException("day number must be less than or equal to vacation duration");}
+            throw new IllegalArgumentException("Day number must be less than or equal to vacation duration");}
 
     }
 
