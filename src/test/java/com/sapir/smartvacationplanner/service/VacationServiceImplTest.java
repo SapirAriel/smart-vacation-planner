@@ -1,11 +1,16 @@
 package com.sapir.smartvacationplanner.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -17,14 +22,27 @@ import com.sapir.smartvacationplanner.exception.DuplicateResourceException;
 import com.sapir.smartvacationplanner.repository.VacationRepository;
 import com.sapir.smartvacationplanner.repository.VacationDayRepository;
 
+@ExtendWith(MockitoExtension.class)
 class VacationServiceImplTest {
 
-    private static VacationServiceImpl createService(
-            VacationRepository repo,
-            AuthorizationService authService
-    ) {
-        VacationDayRepository dayRepo = Mockito.mock(VacationDayRepository.class);
-        return new VacationServiceImpl(repo, dayRepo, authService);
+    @Mock
+    private VacationRepository repo;
+
+    @Mock
+    private VacationDayRepository dayRepo;
+
+    @Mock
+    private AuthorizationService authService;
+
+    private VacationServiceImpl service;
+
+    @BeforeEach
+    void setUp() {
+        service = new VacationServiceImpl(
+                repo,
+                dayRepo,
+                authService
+        );
     }
 
     private static User createUser(Integer id) {
@@ -38,9 +56,6 @@ class VacationServiceImplTest {
     @Test
     void createVacation_whenEndDateBeforeStartDate_throwsIllegalArgumentException() {
         // Arrange
-        VacationRepository repo = Mockito.mock(VacationRepository.class);
-        AuthorizationService authService = Mockito.mock(AuthorizationService.class);
-        VacationServiceImpl service = createService(repo, authService);
         Vacation vacation = new Vacation();
         vacation.setName("Test Vacation");
         vacation.setCountry("Test Country");
@@ -57,15 +72,12 @@ class VacationServiceImplTest {
         });
 
         assertEquals("endDate must be after or equal to startDate", ex.getMessage());
-        Mockito.verify(repo, Mockito.never()).save(Mockito.any(Vacation.class));
+        Mockito.verify(repo, Mockito.never()).save(any(Vacation.class));
     }
 
     @Test
     void createVacation_whenEndDateAfterStartDate_createsVacation() {
         // Arrange
-        VacationRepository repo = Mockito.mock(VacationRepository.class);
-        AuthorizationService authService = Mockito.mock(AuthorizationService.class);
-        VacationServiceImpl service = createService(repo, authService);
         User currentUser = createUser(1);
 
         Vacation vacation = new Vacation();
@@ -87,13 +99,15 @@ class VacationServiceImplTest {
 
         // Assert
         assertNotNull(savedVacation);
-        assertEquals("Test Vacation", savedVacation.getName());
-        assertEquals("Test Country", savedVacation.getCountry());
-        assertEquals("Test City", savedVacation.getCity());
-        assertEquals(LocalDate.of(2026, 5, 10), savedVacation.getStartDate());
-        assertEquals(LocalDate.of(2026, 5, 11), savedVacation.getEndDate());
-        assertEquals(TravelerType.INDIVIDUAL, savedVacation.getTravelerType());
-        assertEquals(currentUser, savedVacation.getUser());
+        assertAll(
+                () -> assertEquals("Test Vacation", savedVacation.getName()),
+                () -> assertEquals("Test Country", savedVacation.getCountry()),
+                () -> assertEquals("Test City", savedVacation.getCity()),
+                () -> assertEquals(LocalDate.of(2026, 5, 10), savedVacation.getStartDate()),
+                () -> assertEquals(LocalDate.of(2026, 5, 11), savedVacation.getEndDate()),
+                () -> assertEquals(TravelerType.INDIVIDUAL, savedVacation.getTravelerType()),
+                () -> assertEquals(currentUser, savedVacation.getUser())
+        );
         Mockito.verify(repo).existsByUserIdAndName(1, "Test Vacation");
         Mockito.verify(repo).save(vacation);
     }
@@ -101,9 +115,6 @@ class VacationServiceImplTest {
     @Test
     void createVacation_whenNameAlreadyExistsForCurrentUser_throwsDuplicateResourceException() {
         // Arrange
-        VacationRepository repo = Mockito.mock(VacationRepository.class);
-        AuthorizationService authService = Mockito.mock(AuthorizationService.class);
-        VacationServiceImpl service = createService(repo, authService);
         User currentUser = createUser(1);
 
         Vacation vacation = new Vacation();
@@ -124,15 +135,12 @@ class VacationServiceImplTest {
 
         assertEquals("Vacation name already exists for this user", ex.getMessage());
         Mockito.verify(repo).existsByUserIdAndName(1, "Test Vacation");
-        Mockito.verify(repo, Mockito.never()).save(Mockito.any(Vacation.class));
+        Mockito.verify(repo, Mockito.never()).save(any(Vacation.class));
     }
 
     @Test
     void updateVacation_whenEndDateBeforeStartDate_throwsIllegalArgumentException() {
         // Arrange
-        VacationRepository repo = Mockito.mock(VacationRepository.class);
-        AuthorizationService authService = Mockito.mock(AuthorizationService.class);
-        VacationServiceImpl service = createService(repo, authService);
         User owner = createUser(1);
 
         Vacation existingVacation = new Vacation();
@@ -164,15 +172,12 @@ class VacationServiceImplTest {
         });
 
         assertEquals("endDate must be after or equal to startDate", ex.getMessage());
-        Mockito.verify(repo, Mockito.never()).save(Mockito.any(Vacation.class));
+        Mockito.verify(repo, Mockito.never()).save(any(Vacation.class));
     }
 
     @Test
     void updateVacation_whenEndDateAfterStartDate_updatesVacation() {
         // Arrange
-        VacationRepository repo = Mockito.mock(VacationRepository.class);
-        AuthorizationService authService = Mockito.mock(AuthorizationService.class);
-        VacationServiceImpl service = createService(repo, authService);
         User owner = createUser(1);
 
         Vacation existingVacation = new Vacation();
@@ -204,14 +209,16 @@ class VacationServiceImplTest {
 
         // Assert
         assertNotNull(updatedVacation);
-        assertEquals(1, updatedVacation.getId());
-        assertEquals(owner, updatedVacation.getUser());
-        assertEquals("Test Vacation", updatedVacation.getName());
-        assertEquals("Test Country", updatedVacation.getCountry());
-        assertEquals("Test City", updatedVacation.getCity());
-        assertEquals(LocalDate.of(2026, 5, 10), updatedVacation.getStartDate());
-        assertEquals(LocalDate.of(2026, 5, 11), updatedVacation.getEndDate());
-        assertEquals(TravelerType.INDIVIDUAL, updatedVacation.getTravelerType());
+        assertAll(
+                () -> assertEquals(1, updatedVacation.getId()),
+                () -> assertEquals(owner, updatedVacation.getUser()),
+                () -> assertEquals("Test Vacation", updatedVacation.getName()),
+                () -> assertEquals("Test Country", updatedVacation.getCountry()),
+                () -> assertEquals("Test City", updatedVacation.getCity()),
+                () -> assertEquals(LocalDate.of(2026, 5, 10), updatedVacation.getStartDate()),
+                () -> assertEquals(LocalDate.of(2026, 5, 11), updatedVacation.getEndDate()),
+                () -> assertEquals(TravelerType.INDIVIDUAL, updatedVacation.getTravelerType())
+        );
         Mockito.verify(authService).getVacationForCurrentUser(1);
         Mockito.verify(repo).existsByUserIdAndName(1, "Test Vacation");
         Mockito.verify(repo).save(existingVacation);
@@ -220,9 +227,6 @@ class VacationServiceImplTest {
     @Test
     void updateVacation_whenNameAlreadyExistsForSameUser_throwsDuplicateResourceException() {
         // Arrange
-        VacationRepository repo = Mockito.mock(VacationRepository.class);
-        AuthorizationService authService = Mockito.mock(AuthorizationService.class);
-        VacationServiceImpl service = createService(repo, authService);
         User owner = createUser(1);
 
         Vacation existingVacation = new Vacation();
@@ -253,15 +257,12 @@ class VacationServiceImplTest {
 
         assertEquals("Vacation name already exists for this user", ex.getMessage());
         Mockito.verify(repo).existsByUserIdAndName(1, "Taken Name");
-        Mockito.verify(repo, Mockito.never()).save(Mockito.any(Vacation.class));
+        Mockito.verify(repo, Mockito.never()).save(any(Vacation.class));
     }
 
     @Test
     void updateVacation_whenNameUnchanged_updatesVacationWithoutDuplicateCheck() {
         // Arrange
-        VacationRepository repo = Mockito.mock(VacationRepository.class);
-        AuthorizationService authService = Mockito.mock(AuthorizationService.class);
-        VacationServiceImpl service = createService(repo, authService);
         User owner = createUser(1);
 
         Vacation existingVacation = new Vacation();

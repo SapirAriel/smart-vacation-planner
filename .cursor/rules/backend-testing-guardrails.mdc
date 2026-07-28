@@ -1,14 +1,21 @@
 ---
 
 description: Mandatory guardrails for Spring Boot backend testing tasks
-globs: []
-alwaysApply: true
------------------
+globs:
+  - src/main/java/**
+  - src/main/resources/**
+  - src/test/java/**
+  - src/test/resources/**
+  - docs/testing/backend-test-coverage-map.md
+  - pom.xml
+alwaysApply: false
+---
 
 # Backend Testing Guardrails
 
 Apply these instructions whenever the user asks to plan, create, modify, review, debug,
-or run tests for the Spring Boot backend.
+or run tests for the Spring Boot backend, or when the user changes backend production
+behavior that affects the backend coverage inventory.
 
 ## Required skill
 
@@ -17,27 +24,107 @@ Use the `spring-backend-flow-testing` skill for backend testing tasks.
 Follow its two-phase process:
 
 1. Analyze the scenario and present a test plan.
-2. Wait for explicit user approval before creating or modifying test files.
+2. Wait for explicit user approval before implementation edits.
 
-## Approval requirement
+## Approval gate
 
-Before creating, modifying, renaming, moving, or deleting any test file:
+Before creating, modifying, renaming, moving, or deleting backend test files, or before
+changing backend production behavior under a separately approved production task:
 
 * Present the exact proposed change.
-* Identify the affected file paths.
-* Explain which test cases will be implemented.
+* Identify the exact affected file paths.
+* Identify the exact test cases or production behavior changes.
 * Wait for explicit user approval.
 
 Do not interpret the original testing request as approval to edit files.
 
 Do not combine the planning phase and implementation phase into one step.
 
+This Rule does not itself authorize production-code changes.
+
+## Testing-only task restrictions
+
+During a testing-only task:
+
+* production files remain forbidden,
+* `pom.xml` remains forbidden,
+* main application configuration remains forbidden,
+* only exact approved files under `src/test/**` may change,
+* `docs/testing/backend-test-coverage-map.md` may change when required,
+* approval does not authorize arbitrary changes across all `src/test/**` files,
+* any additional file requires separate approval.
+
+## Separately approved production-behavior tasks
+
+For a separately approved backend production-behavior task:
+
+* production edits require a separate explicit plan and approval,
+* only exact production files named in that approved plan may change,
+* only exact related test files named in that approved plan may change,
+* `docs/testing/backend-test-coverage-map.md` must be updated in the same implementation slice,
+* any additional production, test, configuration, or dependency file requires separate approval.
+
+## Coverage map maintenance
+
+Any approved backend testing or backend production-behavior change that affects the
+backend verification inventory must update:
+
+```text
+docs/testing/backend-test-coverage-map.md
+```
+
+in the same implementation slice.
+
+The plan must identify:
+
+* the exact affected Coverage IDs,
+* the exact affected map sections,
+* whether coverage statuses change,
+* whether metrics change,
+* whether backlog or concerns change,
+* or whether only verification metadata and the change log change.
+
+Do not edit the coverage map during Plan Mode.
+
+Use the exact status vocabulary:
+
+`Complete for current contract`
+
+Mocked-only coverage must not be marked `Complete for current contract` when relevant
+HTTP, database, Spring Security filter-chain, or external-integration risks remain.
+
+Update verification metadata using actual command results.
+
+Recalculate metrics only when the numerator or denominator genuinely changes.
+
+Update concerns or backlog only when supported by the current code and tests.
+
+Add a `Coverage change log` entry for every approved slice.
+
+List the exact affected Coverage IDs in the final report.
+
+For pure test-quality refactors:
+
+* update verification metadata,
+* update the change log,
+* do not increase coverage statuses or percentages unless genuinely new behavior is tested.
+
+For production behavior changes without matching tests:
+
+* update the production inventory,
+* record the remaining testing gap,
+* do not present the flow as fully verified or `Complete for current contract`.
+
+If the map disagrees with the current code and tests, treat the current code and tests as
+source of truth, update the map in the approved slice, and report the discrepancy.
+
 ## Allowed changes after approval
 
-After explicit approval, changes are permitted only under:
+After explicit approval in a testing-only task, changes are permitted only under:
 
 ```text
 src/test/**
+docs/testing/backend-test-coverage-map.md
 ```
 
 This includes:
@@ -47,7 +134,7 @@ src/test/java/**
 src/test/resources/**
 ```
 
-Implement only the files and test cases included in the approved plan.
+Implement only the exact files and test cases included in the approved plan.
 
 If additional changes become necessary, stop and request separate approval.
 
@@ -67,14 +154,14 @@ docker-compose.yml
 
 Also never:
 
-* Modify production behavior.
-* Modify security or authorization logic.
-* Modify validation logic.
-* Modify exception handling.
-* Modify entities, repositories, services, or controllers.
-* Modify database constraints or migrations.
+* Modify production behavior as part of a testing-only task.
+* Modify security or authorization logic during a testing-only task.
+* Modify validation logic during a testing-only task.
+* Modify exception handling during a testing-only task.
+* Modify entities, repositories, services, or controllers during a testing-only task.
+* Modify database constraints or migrations during a testing-only task.
 * Add or update dependencies.
-* Add Testcontainers or another testing framework.
+* Add Testcontainers or another testing framework without separate approval.
 * Weaken assertions to make a test pass.
 * Change an expected result merely to match an existing bug.
 * Hide a failing test.
@@ -93,20 +180,46 @@ When a test exposes a probable production bug:
 
 ## Test execution
 
-After approved test changes:
+After approved changes:
 
-* Run the focused test first.
+* Run the focused test first when a meaningful focused suite exists.
 * Run the relevant wider test suite when appropriate.
-* Report the exact command and result.
+* Attempt the full test suite.
+* Report the exact commands and results.
 * Report blockers and existing unrelated failures honestly.
 
-Running tests does not grant permission to modify files outside `src/test/**`.
+If the full suite fails or is blocked:
+
+* record exactly what ran,
+* record failures, errors, skipped tests, or environment blockers,
+* do not mark affected Coverage IDs `Complete for current contract`,
+* preserve the remaining gap in the coverage map,
+* and do not fabricate passing results.
+
+Running tests does not grant permission to modify files outside the approved scope.
 
 ## Final confirmation
 
+A backend testing task or explicitly approved backend production-behavior task is not
+complete until:
+
+* focused tests were run when applicable,
+* the full suite was attempted,
+* actual results were reported honestly,
+* affected coverage-map rows were updated,
+* verification metadata was updated,
+* a coverage change-log entry was added,
+* and the final report listed the exact affected Coverage IDs.
+
 Every implementation report must explicitly confirm:
 
-* Which files under `src/test/**` were changed.
-* That no production files were changed.
+* All changed files.
+* Whether `docs/testing/backend-test-coverage-map.md` was changed.
+* For a testing-only task, that no production file changed.
+* For an explicitly approved production task, every changed production file and confirmation that no unapproved production file changed.
 * Which commands were executed.
-* Which tests passed or failed.
+* Which tests passed, failed, or were skipped.
+* Which Coverage IDs were updated.
+* Which coverage-map sections were updated.
+* Whether metrics changed or remained unchanged.
+* Which remaining gaps are still open.

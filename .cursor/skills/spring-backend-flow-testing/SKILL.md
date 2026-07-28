@@ -2,13 +2,13 @@
 
 name: spring-backend-flow-testing
 description: >
-Plan, implement, review, debug, and run tests for Spring Boot backend
-business flows. Use this skill for unit tests, controller tests,
-integration tests, security and ownership tests, validation,
-persistence, database constraints, and itinerary-generation flows.
-Always begin with analysis and a proposed test plan. Do not create or
-modify test files until the user explicitly approves the plan.
---------------------------------------------------------------
+  Plan, implement, review, debug, and run tests for Spring Boot backend
+  business flows. Use this skill for unit tests, controller tests,
+  integration tests, security and ownership tests, validation,
+  persistence, database constraints, and itinerary-generation flows.
+  Always begin with analysis and a proposed test plan. Do not create or
+  modify test files until the user explicitly approves the plan.
+---
 
 # Spring Backend Flow Testing
 
@@ -38,6 +38,7 @@ Use this skill when the user asks to:
 * Test database constraints or entity relationships.
 * Test itinerary generation or scheduling logic.
 * Test a complete Spring Boot business flow.
+* Update the backend coverage map as part of an approved backend testing or backend production-behavior task.
 
 ## Non-negotiable restrictions
 
@@ -53,10 +54,12 @@ During a testing task:
 * Never weaken an assertion merely to make a failing test pass.
 * Never report a test as passing unless it was actually executed successfully.
 
-After explicit approval, file changes are permitted only under:
+After explicit approval in a testing-only task, file changes are permitted only in the
+exact approved files under:
 
 ```text
 src/test/**
+docs/testing/backend-test-coverage-map.md
 ```
 
 This includes test classes and test-specific resources such as:
@@ -66,8 +69,20 @@ src/test/java/**
 src/test/resources/**
 ```
 
-Any required change outside `src/test/**` must be reported separately and must not be
+Approval does not authorize arbitrary edits across all of `src/test/**`.
+
+Any other required change outside these approved locations must be reported separately and must not be
 performed as part of this skill.
+
+When this skill is used alongside a separately approved backend production-behavior task,
+it governs the testing and coverage-map workflow but does not itself authorize production
+edits.
+
+Production edits require a separate explicit production plan and approval. Only exact
+production files named in the approved plan may change, only exact related test files
+named in the approved plan may change, and `docs/testing/backend-test-coverage-map.md`
+must be updated in the same approved implementation slice. Any additional production,
+test, configuration, or dependency file requires new approval.
 
 ## Phase 1: Analysis and test plan
 
@@ -117,10 +132,42 @@ Inspect as applicable:
 * Test dependencies in `pom.xml`.
 * Test profiles and test configuration.
 * Existing test fixtures, builders, helpers, and conventions.
+* `docs/testing/backend-test-coverage-map.md`, when it exists.
 
 Follow existing project patterns when they are clear and appropriate.
 
 Do not create a second test architecture when the project already has a usable one.
+
+### 2a. Coverage map check
+
+Before finalizing the plan for any backend testing task or backend production-behavior task that affects the backend verification inventory:
+
+1. Read `docs/testing/backend-test-coverage-map.md` if it exists.
+2. Identify the exact affected Coverage IDs.
+3. Identify which map sections would change:
+   * coverage matrix rows,
+   * verification metadata,
+   * inventory-based metrics,
+   * known limitations / production concerns,
+   * prioritized backlog,
+   * coverage change log.
+4. Compare the map against the current code and tests.
+5. Report stale or inaccurate map content.
+6. Classify the planned task as exactly one of:
+   * new behavior coverage,
+   * production behavior change,
+   * pure test-quality refactor,
+   * documentation-only correction.
+7. State explicitly whether:
+   * coverage statuses will change,
+   * inventory-based percentages will change,
+   * or both will remain unchanged.
+8. Also state whether the planned work would change:
+   * verification metadata only,
+   * backlog / concerns only,
+   * or only the change log,
+   when those are the only map sections affected beyond statuses and metrics.
+9. Do not edit the coverage map during the planning phase.
 
 ### 3. Select the correct test level
 
@@ -218,6 +265,8 @@ Before creating or modifying any test file, present:
 * Proposed test method names.
 * Test data that will be required.
 * Existing helpers or infrastructure that will be reused.
+* Exact affected Coverage IDs, when the coverage map exists.
+* Exact coverage-map sections that would be updated after implementation.
 * Commands that will be run after implementation.
 * Any assumptions or unresolved decisions.
 
@@ -250,6 +299,8 @@ If implementation reveals that additional test files or scenarios are needed:
 * Request separate approval.
 
 Do not treat approval of one test as approval for unrelated tests.
+
+When the approved scope affects backend tests or backend production behavior, implement the corresponding coverage-map updates in the same slice.
 
 ### 2. Implement consistently
 
@@ -324,7 +375,7 @@ Run the narrowest relevant test first.
 Windows example:
 
 ```powershell
-.\mvnw.cmd test -Dtest=VacationSecurityIntegrationTest
+.\mvnw.cmd test "-Dtest=VacationSecurityIntegrationTest"
 ```
 
 macOS or Linux example:
@@ -353,6 +404,30 @@ If test execution is blocked, report the exact blocker, such as:
 
 Do not fix a blocker outside `src/test/**` without separate approval.
 
+### 6. Update the coverage map
+
+When the approved task affects backend tests or backend production behavior:
+
+1. Update the affected Coverage IDs and rows in `docs/testing/backend-test-coverage-map.md`.
+2. Update verification metadata using the actual final commands and results.
+3. Recalculate only the metrics whose numerator or denominator genuinely changed.
+4. Update concerns and backlog only when supported by the final code and tests.
+5. Add a `Coverage change log` entry.
+6. If the coverage map disagrees with the current code and tests, treat the code and tests as the source of truth, correct the map, and report the discrepancy.
+
+For pure test-quality refactors:
+
+* update the coverage change log,
+* record the actual test results,
+* keep coverage statuses and inventory-based percentages unchanged unless the work genuinely adds or improves behavior coverage.
+
+If tests fail or the full suite is blocked:
+
+* do not mark the affected Coverage IDs as `Complete for current contract`,
+* record exactly what ran,
+* record the failures, errors, skips, or blockers honestly,
+* preserve the remaining gap in the coverage map.
+
 ## Final report
 
 After implementation and execution, report:
@@ -360,13 +435,20 @@ After implementation and execution, report:
 * Scenario tested.
 * Test level used and why.
 * Test files created or changed.
+* Whether `docs/testing/backend-test-coverage-map.md` was updated.
+* Exact affected Coverage IDs.
 * Test methods added or changed.
-* Confirmation that no production files were changed.
+* For a testing-only task, confirmation that no production file changed.
+* For an explicitly approved production-behavior task, every changed production file and confirmation that no unapproved production file changed.
 * Commands executed.
 * Number of passing and failing tests.
 * Exact failure reason when applicable.
+* Every skipped test name and its reason, when applicable.
+* Environment or infrastructure blockers, when applicable.
+* Whether inventory-based metrics changed or remained unchanged.
 * Database or state assertions performed.
 * Important cases not yet covered.
+* Coverage-map sections changed.
 * Recommended next testing scenario.
 
 ## SmartVacationPlanner priorities
@@ -418,10 +500,12 @@ A testing task is complete only when:
 * The requirement is explicitly defined.
 * The selected test level is justified.
 * The implementation stayed within the approved scope.
-* Only files under `src/test/**` were changed.
+* Only approved files were changed.
 * The test would fail if the behavior regressed.
 * Response and state assertions are meaningful.
 * The test is isolated and repeatable.
 * The test was executed, or an exact blocker was reported.
 * No passing result was invented.
 * Remaining coverage gaps were stated honestly.
+* `docs/testing/backend-test-coverage-map.md` was updated when required.
+* The final report listed the affected Coverage IDs and the map changes.
