@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -24,9 +25,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(VacationController.class)
+@AutoConfigureMockMvc(addFilters = false)
 // Loads only the web layer for VacationController
 // This includes request handling, JSON binding, validation, and response mapping
 // It does not load the full application context
+// Security filters are intentionally disabled; filter-chain coverage lives in PointOfInterestSecurityTest
 
 class VacationControllerHappyPathTest {
 

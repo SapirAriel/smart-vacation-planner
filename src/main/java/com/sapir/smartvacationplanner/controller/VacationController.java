@@ -110,7 +110,7 @@ public VacationController(VacationService vacationService) {
 
     @PatchMapping("/{id}")
     public VacationResponse patchVacation(@PathVariable int id,
-                             @RequestBody PatchVacationRequest vacationRequest) {
+                            @Valid @RequestBody PatchVacationRequest vacationRequest) {
 
     Vacation vacation = vacationService.getVacationById(id);
 

@@ -2,10 +2,12 @@
 
 ## Verification metadata
 
-- Last verified: `2026-07-28 17:40 UTC+03:00`
+- Last verified: `2026-07-30 19:08 UTC+03:00`
 - Verification source: actual Maven run plus repository inspection
+- Last focused VacationDay response-mapping command: `.\mvnw.cmd test "-Dtest=VacationDayControllerResponseMappingTest"`
+- Last focused VacationDay response-mapping result: `2` tests run, `0` failures, `0` errors, `0` skipped
 - Last full test run command: `.\mvnw.cmd test`
-- Total tests run: `36`
+- Total tests run: `48`
 - Failures: `0`
 - Errors: `0`
 - Skipped: `1`
@@ -22,7 +24,9 @@
   - `GOOGLE_MAPS_API_KEY` required only for real Google/full-context execution, not for current mocked unit tests
 - Notes:
   - `src/test/resources` does not exist
-  - current baseline includes mocked service-unit tests, two `@WebMvcTest` controller tests, and one skipped `@SpringBootTest`
+  - current suite includes mocked service-unit tests, vacation and VacationDay `@WebMvcTest` with `@AutoConfigureMockMvc(addFilters = false)`, POI security `@WebMvcTest` importing production `SecurityConfig`, and one skipped `@SpringBootTest`
+  - full suite is green
+  - null `hotelPlace` serializes `hotelPlaceName` as JSON `null` (`jsonPath("$.hotelPlaceName").value(nullValue())`)
 
 ## Coverage status definitions
 
@@ -46,7 +50,7 @@
 | `AUTH-DAY-LIST` | `AuthorizationService.getVacationDaysForCurrentUser(Integer)` | Indirect | Ownership then day list | None | Not covered | Not covered | Not covered | N/A | missing all behavior | Medium | No direct unit test |
 | `AUTH-ACTIVITY-ACCESS-BY-ID` | `AuthorizationService.getVacationDayActivityForCurrentUser(Integer, Integer, Integer)` | Indirect via activity service/controller | Vacation + day ownership then scoped activity lookup; missing -> `Vacation day activity not found with id: X` | None | Not covered | Not covered | Not covered | N/A | missing all behavior | High | Relied on by activity update/delete service methods |
 | `AUTH-ACTIVITY-LIST` | `AuthorizationService.getVacationDayActivitiesForCurrentUser(Integer, Integer, Sort)` | Indirect | Ownership then scoped/sorted list | None | Not covered | Not covered | Not covered | N/A | missing all behavior | Medium | No DB proof of sorting |
-| `SECURITY-FILTER-CHAIN` | `SecurityConfig` path and role rules | All `/api/v1/**` | HTTP Basic auth, role-based access, custom 403 JSON, CORS, JDBC user details | None | Not covered | Not covered | Not covered | N/A | missing 401/403, admin/customer path-rule tests, custom access denied body | Critical | POI path mismatch exists: config uses `/points-of-interests/**`, controller uses `/points-of-interest/**` |
+| `SECURITY-FILTER-CHAIN` | `SecurityConfig` path and role rules | All `/api/v1/**` | HTTP Basic auth, role-based access, custom 403 JSON, CORS, JDBC user details | `PointOfInterestSecurityTest.getAllPointOfInterests_whenCustomer_reachesServiceAndIsNotRejected`, `PointOfInterestSecurityTest.getPointOfInterestById_whenCustomer_reachesServiceAndIsNotRejected`, `PointOfInterestSecurityTest.createPointOfInterest_whenCustomer_returns403WithCustomAccessDeniedJsonAndDoesNotInvokeService`, `PointOfInterestSecurityTest.updatePointOfInterest_whenCustomer_returns403AndDoesNotInvokeService`, `PointOfInterestSecurityTest.deletePointOfInterest_whenCustomer_returns403AndDoesNotInvokeService`, `PointOfInterestSecurityTest.createPointOfInterest_whenAdmin_reachesServiceAndIsNotForbidden`, `PointOfInterestSecurityTest.getAllPointOfInterests_whenUnauthenticated_returns401AndDoesNotInvokeService` | N/A | Partial | Not covered | N/A | missing vacation/day/activity/itinerary path-rule proofs; JDBC `UserDetailsManager` login path unproven | Critical | POI collection and ID paths proven against real production `SecurityFilterChain` via `@Import(SecurityConfig.class)`; custom access-denied JSON asserted for CUSTOMER POST |
 
 ### Vacation
 
@@ -57,7 +61,7 @@
 | `VAC-GET-BY-ID` | `VacationServiceImpl.getVacationById(Integer)` | `GET /api/v1/vacations/{id}` | Delegates to authorization | None | Not covered | Not covered | Not covered | N/A | missing endpoint + auth propagation coverage | High | Auth helper partially covered separately, but not this flow |
 | `VAC-CREATE` | `VacationServiceImpl.createVacation(Vacation)` | `POST /api/v1/vacations` | Date validation, current-user assignment, duplicate-name protection, save | `VacationServiceImplTest.createVacation_whenEndDateBeforeStartDate_throwsIllegalArgumentException`, `VacationServiceImplTest.createVacation_whenEndDateAfterStartDate_createsVacation`, `VacationServiceImplTest.createVacation_whenNameAlreadyExistsForCurrentUser_throwsDuplicateResourceException`, `VacationControllerHappyPathTest.createVacation_whenValidBody_returns200WithIdAndName`, `VacationControllerValidationTest.createVacation_whenRequiredFieldsAreMissing_returns400WithFieldErrors` | Good at unit level | Partial | Not covered | N/A | missing DB unique-constraint proof, missing auth filter-chain coverage, missing duplicate-name mapping to HTTP 409, missing invalid-date mapping to HTTP 400, missing complete serialized response contract | High | Current HTTP coverage proves basic POST mapping, one basic success response, and required-field validation only |
 | `VAC-UPDATE` | `VacationServiceImpl.updateVacation(Integer, Vacation)` | `PUT /api/v1/vacations/{id}` | Full-field update, duplicate-name branch, unchanged owner/id, date validation | `VacationServiceImplTest.updateVacation_whenEndDateBeforeStartDate_throwsIllegalArgumentException`, `VacationServiceImplTest.updateVacation_whenEndDateAfterStartDate_updatesVacation`, `VacationServiceImplTest.updateVacation_whenNameAlreadyExistsForSameUser_throwsDuplicateResourceException`, `VacationServiceImplTest.updateVacation_whenNameUnchanged_updatesVacationWithoutDuplicateCheck` | Good at unit level | Not covered | Not covered | N/A | missing HTTP mapping/validation/security, missing DB proof of uniqueness and persistence | High | Name-unchanged short-circuit is well covered at unit level |
-| `VAC-PATCH` | `VacationServiceImpl.patchVacation(Integer, Vacation)` | `PATCH /api/v1/vacations/{id}` | Partial update, duplicate check only when name provided, post-merge date validation | None | Not covered | Not covered | Not covered | N/A | missing all behavior | High | Controller patch method also lacks `@Valid` |
+| `VAC-PATCH` | `VacationServiceImpl.patchVacation(Integer, Vacation)` | `PATCH /api/v1/vacations/{id}` | Partial update, duplicate check only when name provided, post-merge date validation | None | Not covered | Not covered | Not covered | N/A | missing all service-unit behavior | High | Controller already uses `@Valid` on `PatchVacationRequest`; HTTP budget validation is covered under `HTTP-VAC-PATCH` / `HTTP-VAC-PATCH-VALIDATION` |
 | `VAC-GET-DAYS` | `VacationServiceImpl.getVacationDays(Integer)` | None directly; day endpoint lives elsewhere | Authorized vacation then `findByVacation_Id` | None | Not covered | Not covered | Not covered | N/A | missing service behavior and repository proof | Medium | Controller path for days is on `VacationDayController` |
 | `VAC-DELETE` | `VacationServiceImpl.deleteVacation(Integer)` | `DELETE /api/v1/vacations/{id}` | Authorized delete; entity cascade expected | None | Not covered | Not covered | Not covered | N/A | missing delete behavior, role restriction, cascade/orphan removal proof | Critical | HTTP DELETE is ADMIN-only in `SecurityConfig`, but not tested |
 
@@ -65,10 +69,10 @@
 
 | Coverage ID | Production class and method | Endpoint | Main behavior and important branches | Exact existing test methods | Service unit status | HTTP status | DB status | External integration status | Missing behavior | Priority | Notes or production concerns |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| `DAY-LIST` | `VacationDayServiceImpl.getAllVacationDays(Integer)` | `GET /api/v1/vacations/{vacationId}/days` | Authorized list by vacation | None | Not covered | Not covered | Not covered | N/A | missing all behavior | Medium | No tests for service or controller |
-| `DAY-SEARCH` | `VacationDayServiceImpl.searchVacationDays(...)` | `GET /api/v1/vacations/{vacationId}/days/page` | Optional filters by type/date/dayNumber | None | Not covered | Not covered | Not covered | N/A | missing filter behavior and repo query proof | High | Controller accepts `hotelPlaceName`, but service/repo ignore it |
-| `DAY-GET-BY-ID` | `VacationDayServiceImpl.getVacationDayById(Integer, Integer)` | `GET /api/v1/vacations/{vacationId}/days/{id}` | Delegates to scoped auth helper | None | Not covered | Not covered | Not covered | N/A | missing endpoint and auth propagation | High | |
-| `DAY-CREATE` | `VacationDayServiceImpl.createVacationDay(Integer, CreateVacationDayRequest)` | `POST /api/v1/vacations/{vacationId}/days` | Authorization before duplicate checks; unique day/date; hotel lookup; date and day-number bounds; save | `VacationDayServiceImplTest.createVacationDay_whenDateEqualsVacationStartDate_createsVacationDay`, `VacationDayServiceImplTest.createVacationDay_whenDateEqualsVacationEndDate_createsVacationDay`, `VacationDayServiceImplTest.createVacationDay_whenDateBeforeVacationStartDate_throwsIllegalArgumentException`, `VacationDayServiceImplTest.createVacationDay_whenDateAfterVacationEndDate_throwsIllegalArgumentException`, `VacationDayServiceImplTest.createVacationDay_whenDayNumberAlreadyExists_throwsDuplicateResourceException`, `VacationDayServiceImplTest.createVacationDay_whenDateAlreadyExists_throwsDuplicateResourceException`, `VacationDayServiceImplTest.createVacationDay_whenDayNumberIsZero_throwsIllegalArgumentException`, `VacationDayServiceImplTest.createVacationDay_whenDayNumberExceedsVacationDuration_throwsIllegalArgumentException`, `VacationDayServiceImplTest.createVacationDay_whenVacationBelongsToAnotherUser_throwsAccessDeniedException`, `VacationDayServiceImplTest.createVacationDay_whenUnauthorizedAndDuplicateDataExists_throwsAccessDeniedException` | Good at unit level | Not covered | Not covered | Not covered | missing HTTP mapping/validation/security, missing DB uniqueness proof, missing real Google integration, missing save-to-DB semantics | Critical | Google-dependent service behavior is exercised only through a mocked `GooglePlacesClient` |
+| `DAY-LIST` | `VacationDayServiceImpl.getAllVacationDays(Integer)` | `GET /api/v1/vacations/{vacationId}/days` | Authorized list by vacation | None | Not covered | Not covered | Not covered | N/A | missing all behavior | Medium | Shared `toResponse` hotelPlaceName mapping is proven only via GET-by-ID under `HTTP-DAY-GET`; this list service/endpoint is not HTTP-tested by that class |
+| `DAY-SEARCH` | `VacationDayServiceImpl.searchVacationDays(...)` | `GET /api/v1/vacations/{vacationId}/days/page` | Optional filters: `dayType`, `date`, `dayNumber`, plus `pageable` | None | Not covered | Not covered | Not covered | N/A | missing filter behavior and repo query proof | High | Frontend does not currently call `/page`; endpoint is not defective for that reason. Hotel-name search is not part of this contract |
+| `DAY-GET-BY-ID` | `VacationDayServiceImpl.getVacationDayById(Integer, Integer)` | `GET /api/v1/vacations/{vacationId}/days/{id}` | Delegates to scoped auth helper | None | Not covered | Not covered | Not covered | N/A | missing service-unit and auth propagation; HTTP response mapping covered under `HTTP-DAY-GET` | High | Service method itself remains untested; controller `toResponse` hotelPlaceName contract proven via shared mapper on GET-by-ID |
+| `DAY-CREATE` | `VacationDayServiceImpl.createVacationDay(Integer, CreateVacationDayRequest)` | `POST /api/v1/vacations/{vacationId}/days` | Authorization → local date/dayNumber validation → duplicate day-number check → duplicate date check → Google hotel lookup → entity creation → save; invalid date/dayNumber short-circuits before duplicate queries, Google, and save | `VacationDayServiceImplTest.createVacationDay_whenDateEqualsVacationStartDate_createsVacationDay`, `VacationDayServiceImplTest.createVacationDay_whenDateEqualsVacationEndDate_createsVacationDay`, `VacationDayServiceImplTest.createVacationDay_whenDateBeforeVacationStartDate_throwsIllegalArgumentException`, `VacationDayServiceImplTest.createVacationDay_whenDateAfterVacationEndDate_throwsIllegalArgumentException`, `VacationDayServiceImplTest.createVacationDay_whenDayNumberAlreadyExists_throwsDuplicateResourceException`, `VacationDayServiceImplTest.createVacationDay_whenDateAlreadyExists_throwsDuplicateResourceException`, `VacationDayServiceImplTest.createVacationDay_whenDayNumberIsZero_throwsIllegalArgumentException`, `VacationDayServiceImplTest.createVacationDay_whenDayNumberExceedsVacationDuration_throwsIllegalArgumentException`, `VacationDayServiceImplTest.createVacationDay_whenVacationBelongsToAnotherUser_throwsAccessDeniedException`, `VacationDayServiceImplTest.createVacationDay_whenUnauthorizedAndDuplicateDataExists_throwsAccessDeniedException` | Good at unit level | Not covered | Not covered | Not covered | missing HTTP mapping/validation/security, missing DB uniqueness proof, missing real Google integration, missing save-to-DB semantics | Critical | Google-dependent service behavior is exercised only through a mocked `GooglePlacesClient`; validation short-circuit before duplicates/Google/save is proven at unit level |
 | `DAY-UPDATE` | `VacationDayServiceImpl.updateVacationDay(Integer, Integer, UpdateVacationDayRequest)` | `PUT /api/v1/vacations/{vacationId}/days/{id}` | Replaces hotel Place only when name changes; updates dayType; validates constraints; saves | None | Not covered | Not covered | Not covered | Not covered | missing all behavior | Critical | Important immutable/mutable field contract currently untested |
 | `DAY-PATCH` | `VacationDayServiceImpl.patchVacationDay(Integer, Integer, PatchVacationDayRequest)` | `PATCH /api/v1/vacations/{vacationId}/days/{id}` | Partial dayType/hotel changes; validates after patch | None | Not covered | Not covered | Not covered | Not covered | missing all behavior | High | |
 | `DAY-LIST-ACTIVITIES` | `VacationDayServiceImpl.getAllVacationDayActivities(Integer, Integer)` | None directly; activities have own controller | Authorized day then list activities | None | Not covered | Not covered | Not covered | N/A | missing all behavior | Medium | |
@@ -112,14 +116,15 @@
 | `HTTP-VAC-LIST` | `GET /api/v1/vacations` | Maps vacation list response | None | N/A | Not covered | Not covered | N/A | mapping, security, serialization, service delegation | Medium | |
 | `HTTP-VAC-SEARCH` | `GET /api/v1/vacations/page` | Query-param binding + pageable mapping | None | N/A | Not covered | Not covered | N/A | filters, paging, security | High | |
 | `HTTP-VAC-GET` | `GET /api/v1/vacations/{id}` | Path binding + response | None | N/A | Not covered | Not covered | N/A | not found, denied, serialization | High | |
-| `HTTP-VAC-CREATE` | `POST /api/v1/vacations` | Valid request returns vacation response | `VacationControllerHappyPathTest.createVacation_whenValidBody_returns200WithIdAndName` | N/A | Partial | Not covered | N/A | security, full response fields, duplicate/date error mappings | High | |
-| `HTTP-VAC-CREATE-VALIDATION` | `POST /api/v1/vacations` | Invalid body -> 400 with field errors | `VacationControllerValidationTest.createVacation_whenRequiredFieldsAreMissing_returns400WithFieldErrors` | N/A | Good at HTTP level | Not covered | N/A | more validation variants, security | Medium | |
+| `HTTP-VAC-CREATE` | `POST /api/v1/vacations` | Valid request returns vacation response | `VacationControllerHappyPathTest.createVacation_whenValidBody_returns200WithIdAndName` | N/A | Partial | Not covered | N/A | security filter-chain, full response fields, duplicate/date error mappings | High | Controller-slice uses `@AutoConfigureMockMvc(addFilters = false)`; not security-filter coverage |
+| `HTTP-VAC-CREATE-VALIDATION` | `POST /api/v1/vacations` | Invalid body -> 400 with field errors | `VacationControllerValidationTest.createVacation_whenRequiredFieldsAreMissing_returns400WithFieldErrors` | N/A | Good at HTTP level | Not covered | N/A | more validation variants | Medium | Controller-slice uses `@AutoConfigureMockMvc(addFilters = false)`; not security-filter coverage |
 | `HTTP-VAC-UPDATE` | `PUT /api/v1/vacations/{id}` | Validated full update mapping | None | N/A | Not covered | Not covered | N/A | mapping, validation, security | High | |
-| `HTTP-VAC-PATCH` | `PATCH /api/v1/vacations/{id}` | Partial update binding | None | N/A | Not covered | Not covered | N/A | mapping, validation absence, security | High | |
+| `HTTP-VAC-PATCH` | `PATCH /api/v1/vacations/{id}` | Partial update binding; positive budget PATCH; omitted budget allowed | `VacationControllerPatchValidationTest.patchVacation_whenBudgetIsPositive_invokesService`, `VacationControllerPatchValidationTest.patchVacation_whenBudgetIsOmitted_doesNotFailBudgetValidation` | N/A | Partial | Not covered | N/A | missing name/date/other field PATCH paths, security, service-level date/duplicate mapping | High | Controller-slice uses `@AutoConfigureMockMvc(addFilters = false)`; not security-filter coverage |
+| `HTTP-VAC-PATCH-VALIDATION` | `PATCH /api/v1/vacations/{id}` | Invalid budget (`@Positive`) -> 400 with field errors; service not invoked | `VacationControllerPatchValidationTest.patchVacation_whenBudgetIsZero_returns400AndDoesNotInvokeService` | N/A | Good at HTTP level | Not covered | N/A | other PATCH field constraints if added later | Medium | Same unique endpoint as `HTTP-VAC-PATCH`; proves existing `@Valid` activates `PatchVacationRequest` constraints |
 | `HTTP-VAC-DELETE` | `DELETE /api/v1/vacations/{id}` | Delete mapping and security role rule | None | N/A | Not covered | Not covered | N/A | admin-only filter behavior, response contract | Critical | |
-| `HTTP-DAY-LIST` | `GET /api/v1/vacations/{vacationId}/days` | Day list mapping | None | N/A | Not covered | Not covered | N/A | all behavior | Medium | |
-| `HTTP-DAY-SEARCH` | `GET /api/v1/vacations/{vacationId}/days/page` | Query binding for `dayType`, `date`, `hotelPlaceName`, `dayNumber`, pageable | None | N/A | Not covered | Not covered | N/A | binding, ignored `hotelPlaceName`, security | High | |
-| `HTTP-DAY-GET` | `GET /api/v1/vacations/{vacationId}/days/{id}` | Path binding | None | N/A | Not covered | Not covered | N/A | all behavior | Medium | |
+| `HTTP-DAY-LIST` | `GET /api/v1/vacations/{vacationId}/days` | Day list mapping | None | N/A | Not covered | Not covered | N/A | list endpoint HTTP behavior; security | Medium | Shared private `toResponse` hotelPlaceName mapping is proven via GET-by-ID only; this list endpoint was not HTTP-tested |
+| `HTTP-DAY-SEARCH` | `GET /api/v1/vacations/{vacationId}/days/page` | Query binding for `dayType`, `date`, `dayNumber`, pageable | None | N/A | Not covered | Not covered | N/A | binding, paging/sort, security; hotel-name filtering is not supported | High | Not called by current frontend; no production removal approved |
+| `HTTP-DAY-GET` | `GET /api/v1/vacations/{vacationId}/days/{id}` | Path binding + `toResponse` including `hotelPlaceName` when hotel Place present; null hotel serializes as JSON null | `VacationDayControllerResponseMappingTest.getVacationDayById_whenHotelPlaceExists_returnsHotelPlaceName`, `VacationDayControllerResponseMappingTest.getVacationDayById_whenHotelPlaceIsNull_returns200WithoutMappingFailure` | N/A | Partial | Not covered | N/A | missing not-found/denied mappings, security filter-chain, full field contract beyond id/vacationId/hotelPlaceName | Medium | Proves existing shared `toResponse` hotelPlaceName mapping; `@AutoConfigureMockMvc(addFilters = false)` — not security-filter coverage |
 | `HTTP-DAY-CREATE` | `POST /api/v1/vacations/{vacationId}/days` | `@Valid CreateVacationDayRequest` | None | N/A | Not covered | Not covered | N/A | validation, errors, security | High | |
 | `HTTP-DAY-UPDATE` | `PUT /api/v1/vacations/{vacationId}/days/{id}` | `@Valid UpdateVacationDayRequest` | None | N/A | Not covered | Not covered | N/A | validation, security | High | |
 | `HTTP-DAY-PATCH` | `PATCH /api/v1/vacations/{vacationId}/days/{id}` | `@Valid PatchVacationDayRequest` | None | N/A | Not covered | Not covered | N/A | mapping/security | High | |
@@ -129,19 +134,19 @@
 | `HTTP-ACT-CREATE` | `POST /api/v1/vacations/{vacationId}/days/{vacationDayId}/activities` | `@Valid` request with `pointOfInterestId` | None | N/A | Not covered | Not covered | N/A | validation, security | High | |
 | `HTTP-ACT-UPDATE` | `PUT /api/v1/vacations/{vacationId}/days/{vacationDayId}/activities/{id}` | `@Valid` update request | None | N/A | Not covered | Not covered | N/A | validation, security | High | |
 | `HTTP-ACT-DELETE` | `DELETE /api/v1/vacations/{vacationId}/days/{vacationDayId}/activities/{id}` | Delete mapping | None | N/A | Not covered | Not covered | N/A | all behavior | Medium | |
-| `HTTP-POI-LIST` | `GET /api/v1/points-of-interest` | List mapping | None | N/A | Not covered | Not covered | N/A | all behavior | Medium | |
+| `HTTP-POI-LIST` | `GET /api/v1/points-of-interest` | List mapping; CUSTOMER allow; unauthenticated 401 | `PointOfInterestSecurityTest.getAllPointOfInterests_whenCustomer_reachesServiceAndIsNotRejected`, `PointOfInterestSecurityTest.getAllPointOfInterests_whenUnauthenticated_returns401AndDoesNotInvokeService` | N/A | Partial | Not covered | N/A | missing ADMIN GET, empty/non-empty payload contracts beyond security smoke, DB | Medium | SecurityFilterChain collection-path match proven for CUSTOMER and anonymous |
 | `HTTP-POI-SEARCH` | `GET /api/v1/points-of-interest/search` | Query binding and pageable sort | None | N/A | Not covered | Not covered | N/A | all behavior | High | |
-| `HTTP-POI-GET` | `GET /api/v1/points-of-interest/{id}` | Path binding | None | N/A | Not covered | Not covered | N/A | all behavior | Medium | |
-| `HTTP-POI-CREATE` | `POST /api/v1/points-of-interest` | `@Valid` request and security | None | N/A | Not covered | Not covered | N/A | all behavior | High | |
-| `HTTP-POI-UPDATE` | `PUT /api/v1/points-of-interest/{id}` | `@Valid` request and security | None | N/A | Not covered | Not covered | N/A | all behavior | High | |
-| `HTTP-POI-DELETE` | `DELETE /api/v1/points-of-interest/{id}` | Delete mapping and security | None | N/A | Not covered | Not covered | N/A | all behavior | High | |
+| `HTTP-POI-GET` | `GET /api/v1/points-of-interest/{id}` | Path binding; CUSTOMER allow on ID path | `PointOfInterestSecurityTest.getPointOfInterestById_whenCustomer_reachesServiceAndIsNotRejected` | N/A | Partial | Not covered | N/A | missing not-found HTTP mapping, ADMIN GET, unauthenticated item GET | Medium | Proves `/points-of-interest/{id}` matcher with real SecurityFilterChain |
+| `HTTP-POI-CREATE` | `POST /api/v1/points-of-interest` | ADMIN allow; CUSTOMER 403 custom JSON; service short-circuit | `PointOfInterestSecurityTest.createPointOfInterest_whenCustomer_returns403WithCustomAccessDeniedJsonAndDoesNotInvokeService`, `PointOfInterestSecurityTest.createPointOfInterest_whenAdmin_reachesServiceAndIsNotForbidden` | N/A | Partial | Not covered | N/A | missing bean-validation HTTP cases, duplicate/Google error mapping | High | Write-rule proof uses production SecurityConfig, not a test-only chain |
+| `HTTP-POI-UPDATE` | `PUT /api/v1/points-of-interest/{id}` | CUSTOMER forbidden on item PUT | `PointOfInterestSecurityTest.updatePointOfInterest_whenCustomer_returns403AndDoesNotInvokeService` | N/A | Partial | Not covered | N/A | missing ADMIN PUT allow, validation, not-found | High | CUSTOMER deny only; ADMIN PUT not separately proven |
+| `HTTP-POI-DELETE` | `DELETE /api/v1/points-of-interest/{id}` | CUSTOMER forbidden on item DELETE | `PointOfInterestSecurityTest.deletePointOfInterest_whenCustomer_returns403AndDoesNotInvokeService` | N/A | Partial | Not covered | N/A | missing ADMIN DELETE allow, not-found semantics | High | CUSTOMER deny only; ADMIN DELETE not separately proven |
 | `HTTP-ITINERARY-GENERATE` | `POST /api/v1/vacations/{vacationId}/itineraries` | Endpoint mapping for itinerary generation | None | N/A | Not covered | Not covered | N/A | all behavior and security | Critical | |
 
 ### Exception handling
 
 | Coverage ID | Production flow | Main behavior and important branches | Exact existing test methods | Service unit status | HTTP status | DB status | External integration status | Missing behavior | Priority | Notes or production concerns |
 |---|---|---|---|---|---|---|---|---|---|
-| `ERR-HANDLER-VALIDATION` | `GlobalExceptionHandler.handleValidationExceptions` | 400 with `Validation failed`, path, status, field errors | `VacationControllerValidationTest.createVacation_whenRequiredFieldsAreMissing_returns400WithFieldErrors` | N/A | Good at HTTP level | Not covered | N/A | more validation cases and controllers | Medium | |
+| `ERR-HANDLER-VALIDATION` | `GlobalExceptionHandler.handleValidationExceptions` | 400 with `Validation failed`, path, status, field errors | `VacationControllerValidationTest.createVacation_whenRequiredFieldsAreMissing_returns400WithFieldErrors`, `VacationControllerPatchValidationTest.patchVacation_whenBudgetIsZero_returns400AndDoesNotInvokeService` | N/A | Good at HTTP level | Not covered | N/A | more validation cases and controllers | Medium | Proven for create required-field and PATCH budget `@Positive` failures with filters disabled |
 | `ERR-HANDLER-NOT-FOUND` | `handleResourceNotFoundException` | 404 API error shape | None | N/A | Not covered | Not covered | N/A | missing handler proof | High | |
 | `ERR-HANDLER-DUPLICATE` | `handleDuplicateResourceException` | 409 API error shape | None | N/A | Not covered | Not covered | N/A | missing handler proof | High | |
 | `ERR-HANDLER-ILLEGAL-ARG` | `handleIllegalArgumentException` | 400 API error shape | None | N/A | Not covered | Not covered | N/A | missing handler proof | High | |
@@ -162,8 +167,8 @@
 | `DB-DAY-FIND-BY-VACATION-ID` | `VacationDayRepository.findByVacation_Id` | Day list by id | None | Not covered | Not covered | Not covered | N/A | real query behavior | Medium | |
 | `DB-DAY-FIND-BY-VACATION-AND-ID` | `VacationDayRepository.findByVacationAndId` | Parent-child scoped lookup | `AuthorizationServiceTest.getVacationDayForCurrentUser_whenDayDoesNotBelongToVacation_throwsResourceNotFoundException` | Partial | Not covered | Not covered | N/A | real DB proof of scope | High | |
 | `DB-DAY-FIND-BY-VACATION-AND-DATE` | `VacationDayRepository.findByVacationAndDate` | Day-by-date scoped lookup | None | Not covered | Not covered | Not covered | N/A | all behavior | High | |
-| `DB-DAY-EXISTS-DAY-NUMBER` | `VacationDayRepository.existsByVacationIdAndDayNumber` | Duplicate day-number protection | Indirect via unit mocks in `VacationDayServiceImplTest` | Partial | Not covered | Not covered | N/A | real uniqueness proof | High | |
-| `DB-DAY-EXISTS-DATE` | `VacationDayRepository.existsByVacationIdAndDate` | Duplicate date protection | Indirect via unit mocks in `VacationDayServiceImplTest` | Partial | Not covered | Not covered | N/A | real uniqueness proof | High | |
+| `DB-DAY-EXISTS-DAY-NUMBER` | `VacationDayRepository.existsByVacationIdAndDayNumber` | Duplicate day-number protection | Indirect via unit mocks in `VacationDayServiceImplTest` | Partial | Not covered | Not covered | N/A | real uniqueness proof | High | Service-unit tests also prove this query is not invoked when local VacationDay validation fails; not real DB coverage |
+| `DB-DAY-EXISTS-DATE` | `VacationDayRepository.existsByVacationIdAndDate` | Duplicate date protection | Indirect via unit mocks in `VacationDayServiceImplTest` | Partial | Not covered | Not covered | N/A | real uniqueness proof | High | Service-unit tests also prove this query is not invoked when local VacationDay validation fails; not real DB coverage |
 | `DB-DAY-FIND-BY-VACATION-ID-DAY-TYPE` | `VacationDayRepository.findByVacation_IdAndDayType` | Day-type list | None | Not covered | Not covered | Not covered | N/A | all behavior | Low | |
 | `DB-DAY-SEARCH` | `VacationDayRepository.searchVacationDays` | Filtered search | None | Not covered | Not covered | Not covered | N/A | all behavior | High | |
 | `DB-POI-FIND-BY-PLACE-NAME-IGNORE-CASE` | `PointOfInterestRepository.findByPlace_PlaceNameIgnoreCase` | Name dedup | Indirect via unit mocks in `PointOfInterestServiceImplTest` | Partial | Not covered | Not covered | N/A | real DB collation/ignore-case proof | High | |
@@ -226,15 +231,15 @@ publish as a percentage.
 
 ### 3. Controller endpoints with meaningful HTTP coverage
 
-- Numerator: `1`
+- Numerator: `8`
 - Denominator: `26`
-- Percentage: `3.8%`
+- Percentage: `30.8%`
 - Counted item set:
-  - Covered endpoint: `HTTP-VAC-CREATE`
-  - Validation-only support on same endpoint: `HTTP-VAC-CREATE-VALIDATION`
+  - Covered endpoints: `HTTP-VAC-CREATE`, `HTTP-VAC-PATCH`, `HTTP-DAY-GET`, `HTTP-POI-LIST`, `HTTP-POI-GET`, `HTTP-POI-CREATE`, `HTTP-POI-UPDATE`, `HTTP-POI-DELETE`
+  - Validation-only support on same endpoints: `HTTP-VAC-CREATE-VALIDATION`, `HTTP-VAC-PATCH-VALIDATION` (not counted as additional unique endpoints)
   - Remaining endpoint Coverage IDs: every other `HTTP-*` row in the controller matrix
 - Level represented: MockMvc controller-slice coverage
-- Note: one endpoint can have multiple HTTP tests; the denominator counts unique endpoint flows, not test methods.
+- Note: one endpoint can have multiple HTTP tests; the denominator counts unique endpoint flows, not test methods. Vacation and VacationDay controller slices intentionally disable security filters; POI security coverage uses the real `SecurityFilterChain`. Shared `toResponse` reuse does not count as additional endpoints.
 
 ### 4. Repository queries and database constraints with real DB coverage
 
@@ -269,9 +274,9 @@ publish as a percentage.
 - No tests for itinerary service or controller (`ITINERARY-GENERATE` and related helper flows)
 - No tests for `VacationServiceImpl` list/search/patch/delete/get-by-id/getVacationDays`
 - No tests for `VacationDayServiceImpl` update/patch/delete/list/search/get-by-id/list-activities
-- No tests for `PointOfInterestController`, `VacationDayController`, `VacationDayActivityController`, or `ItineraryController`
+- No non-security `PointOfInterestController` mapping/validation tests beyond `PointOfInterestSecurityTest`; VacationDay controller coverage is limited to GET-by-ID response mapping (`VacationDayControllerResponseMappingTest`); no tests for `VacationDayActivityController` or `ItineraryController`
 - No real database tests for custom queries, unique constraints, parent-child scoping, cascades, embedded `Place`, or MySQL compatibility
-- No real `SecurityConfig` filter-chain tests
+- No real `SecurityConfig` filter-chain tests beyond the POI path proofs in `PointOfInterestSecurityTest`
 - No direct `GooglePlacesClient` tests
 
 ### Behavior covered only through mocks
@@ -287,19 +292,21 @@ publish as a percentage.
 - Vacation create/update enforce `endDate >= startDate`
 - Vacation name-unchanged update skips duplicate-name repository lookup
 - VacationDay create enforces vacation-range and day-number bounds
+- VacationDay create local validation short-circuits before duplicate repository queries and Google Places lookup
 - Unauthorized VacationDay create short-circuits before duplicate disclosure
+- Vacation PATCH `@Valid` activates `PatchVacationRequest` `@Positive` budget validation before service invocation
+- PointOfInterest GET collection and GET by id allow CUSTOMER (and ADMIN) through production SecurityFilterChain matchers on `/api/v1/points-of-interest` and `/api/v1/points-of-interest/{id}`
+- PointOfInterest POST/PUT/DELETE require ADMIN; CUSTOMER receives SecurityConfig custom 403 JSON (`message` / `status`)
+- Unauthenticated PointOfInterest GET returns 401 and does not invoke the service
 - PointOfInterest create trims the request place name for the initial name lookup
 - Finding an existing POI by name or by placeId returns the stored entity without merging metadata from the new request
 - PointOfInterest update preserves embedded `Place`
 - PointOfInterest update sets `notes` directly from the request, including `null`
 - VacationDayActivity update preserves scheduling fields
+- `VacationDayController.toResponse` populates `VacationDayResponse.hotelPlaceName` from embedded `hotelPlace.placeName` when present; when `hotelPlace` is null, Jackson serializes `hotelPlaceName` as JSON `null`
 
 ### Possible production bugs or risky behavior
 
-- `SecurityConfig` POI matcher path uses `/api/v1/points-of-interests/**`, but controller uses `/api/v1/points-of-interest/**`
-- `VacationController.patchVacation` lacks `@Valid`
-- `VacationDayController.searchVacationDays` accepts `hotelPlaceName`, but service/repository ignore it
-- `VacationDayServiceImpl.createVacationDay` performs the Google Places lookup before simple validation failures such as out-of-range dates and invalid day numbers, so invalid requests may trigger an avoidable external call
 - `PointOfInterestServiceImpl.deletePointOfInterest` deletes by id without explicit existence check
 - `PointOfInterestServiceImpl.createPointOfInterest` checks normalized name before Google placeId resolution, so distinct real places with the same name may collapse into one stored POI
 - `PointOfInterestServiceImpl` trims the request only for the first name lookup, but persists `request.getPlaceName()` unchanged, so lookup and stored value normalization are asymmetric
@@ -319,9 +326,9 @@ publish as a percentage.
 | Priority | Production flow / Coverage IDs | Missing testing level | Recommended test type | Why it matters | Expected implementation size | Dependencies |
 |---|---|---|---|---|---|---|
 | Critical | `ITINERARY-GENERATE`, `ITN-GET-*` | Unit + DB | focused unit tests first, later DB/integration | highest scheduling complexity; currently fully untested | Large | may need stable fixture graph; DB tests later |
-| Critical | `SECURITY-FILTER-CHAIN`, `HTTP-VAC-DELETE`, POI write endpoints | HTTP/security | Spring MVC + real `SecurityConfig` | current authz rules and POI path mismatch are unproven | Medium-Large | DB-backed auth fixture strategy |
+| Critical | `SECURITY-FILTER-CHAIN` remaining paths, `HTTP-VAC-DELETE` | HTTP/security | Spring MVC + real `SecurityConfig` | vacation/day/activity/itinerary authz rules still unproven | Medium-Large | none for MockMvc+WithMockUser; JDBC login still separate |
 | Critical | `DAY-UPDATE`, `DAY-PATCH`, `DAY-DELETE` | Unit + HTTP | service unit + controller tests | core mutable day flows completely uncovered | Medium | none |
-| High | `POI-CREATE`, `POI-UPDATE`, `POI-DELETE`, `HTTP-POI-*` | HTTP + DB | controller slice + repository/DB tests | write security and uniqueness rules not proven | Medium | DB tests for uniqueness |
+| High | `POI-CREATE`, `POI-UPDATE`, `POI-DELETE`, remaining `HTTP-POI-*` gaps | HTTP + DB | controller validation/DB tests; ADMIN PUT/DELETE allow | write uniqueness and non-security HTTP contracts not proven | Medium | DB tests for uniqueness |
 | High | `DB-*` repository and constraint rows | DB | `@DataJpaTest` or approved integration setup | all custom queries/constraints currently mocked-only | Large | product approval if infrastructure expands |
 | High | `GOOGLE-*` | External integration | focused client tests with mocked transport | request construction and parsing entirely unproven | Medium | no new dependency required if existing `RestClient` can be stubbed |
 | High | `VAC-PATCH`, `VAC-DELETE`, `VAC-LIST-ALL`, `VAC-SEARCH` | Unit + HTTP | service + controller tests | common vacation flows missing | Medium | none |
@@ -406,8 +413,9 @@ Unique endpoint count:
 - `HTTP-ITINERARY-GENERATE`
 
 HTTP behavior-row count is larger than the unique endpoint count because
-`HTTP-VAC-CREATE-VALIDATION` is documented as a separate behavior row for the same
-`POST /api/v1/vacations` endpoint and is not counted as an additional unique endpoint.
+`HTTP-VAC-CREATE-VALIDATION` and `HTTP-VAC-PATCH-VALIDATION` are documented as separate
+behavior rows for the same vacation endpoints and are not counted as additional unique
+endpoints.
 
 ### Repository-query and database-constraint denominator (`27`)
 
@@ -452,6 +460,58 @@ HTTP behavior-row count is larger than the unique endpoint count because
 
 ## Coverage change log
 
+- `2026-07-30` — New HTTP response-mapping coverage for VacationDay GET-by-ID (`hotelPlaceName` contract).
+  - Added `VacationDayControllerResponseMappingTest` (hotel present → `hotelPlaceName`; hotel null → 200 with JSON null `hotelPlaceName`).
+  - Production already contained the `toResponse` hotelPlaceName mapping; no production code changed.
+  - Stale documentation concern removed (claim that `toResponse` does not populate `hotelPlaceName`); corresponding backlog row closed/removed.
+  - Coverage IDs updated: `HTTP-DAY-GET` → Partial; notes only on `HTTP-DAY-LIST`, `DAY-LIST`, `DAY-GET-BY-ID` about shared mapper (statuses remain Not covered). List/create/update endpoints not claimed as HTTP-tested.
+  - Unique HTTP-endpoint metric: `7/26` (`26.9%`) → `8/26` (`30.8%`). Service-unit, DB, and Google metrics unchanged.
+  - Focused: `.\mvnw.cmd test "-Dtest=VacationDayControllerResponseMappingTest"` → `2` run, `0` failures, `0` errors, `0` skipped.
+  - Full: `.\mvnw.cmd test` → `48` run, `0` failures, `0` errors, `1` skipped (`SmartvacationplannerApplicationTests`; missing `DB_USERNAME` / `DB_PASSWORD`).
+- `2026-07-30` — Docs-only cleanup after hotel-related VacationDay API audit.
+  - Removed stale claim that `VacationDayController.searchVacationDays` accepts unused `hotelPlaceName` search filter (not present in current production code).
+  - Clarified `DAY-SEARCH` / `HTTP-DAY-SEARCH` supported filters: `dayType`, `date`, `dayNumber`, `pageable` only; hotel-name filtering is not part of the contract.
+  - Noted `/days/page` is not currently called by the frontend; no production removal approved.
+  - Previously identified response-contract mapping gap for `hotelPlaceName` was later disproven by production inspection and closed by HTTP GET-by-ID response-mapping coverage (see newer change-log entry).
+  - No production code changed; no tests added in that docs-only slice; no coverage metrics or `DAY-SEARCH` / `HTTP-DAY-SEARCH` statuses changed.
+- `2026-07-30` — New HTTP behavior coverage for the existing Vacation PATCH validation contract.
+  - Added `VacationControllerPatchValidationTest` (budget zero -> 400; positive budget -> 200; omitted budget allowed).
+  - Production already had `@Valid` on `VacationController.patchVacation`; no production code changed in this slice.
+  - Added Coverage ID row `HTTP-VAC-PATCH-VALIDATION`; updated `HTTP-VAC-PATCH`, `ERR-HANDLER-VALIDATION`, `VAC-PATCH` notes.
+  - Removed stale concern claiming `VacationController.patchVacation` lacks `@Valid`.
+  - `SECURITY-FILTER-CHAIN` unchanged (filters disabled in this controller-slice class).
+  - Unique HTTP-endpoint metric: `6/26` (`23.1%`) → `7/26` (`26.9%`). Service-unit, DB, and Google metrics unchanged.
+  - Focused: `.\mvnw.cmd test "-Dtest=VacationControllerPatchValidationTest"` → `3` run, `0` failures, `0` errors, `0` skipped.
+  - Full: `.\mvnw.cmd test` → `46` run, `0` failures, `0` errors, `1` skipped (`SmartvacationplannerApplicationTests`; missing `DB_USERNAME` / `DB_PASSWORD`).
+- `2026-07-30` — Vacation controller-slice infrastructure alignment after security-test starter activation; finalize green full suite and HTTP metric.
+  - Pure test-infrastructure alignment: added `@AutoConfigureMockMvc(addFilters = false)` to `VacationControllerHappyPathTest` and `VacationControllerValidationTest` so they remain mapping/validation tests, not security-contract tests.
+  - No production code changed; no security rules changed; filters remain enabled in `PointOfInterestSecurityTest`.
+  - New POI HTTP/security coverage from `PointOfInterestSecurityTest` remains in place (`SECURITY-FILTER-CHAIN`, `HTTP-POI-LIST`, `HTTP-POI-GET`, `HTTP-POI-CREATE`, `HTTP-POI-UPDATE`, `HTTP-POI-DELETE` stay Partial).
+  - Restored Vacation/ERR statuses after temporary blocked notes: `HTTP-VAC-CREATE` Partial; `HTTP-VAC-CREATE-VALIDATION` and `ERR-HANDLER-VALIDATION` Good at HTTP level.
+  - Unique HTTP-endpoint metric recovered from intermediate recorded `5/26` (`19.2%`) to final `6/26` (`23.1%`) once vacation create coverage is again verified by a green suite.
+  - Service-unit, DB, and Google metrics unchanged.
+  - Focused Vacation: `.\mvnw.cmd test "-Dtest=VacationControllerHappyPathTest,VacationControllerValidationTest"` → `2` run, `0` failures, `0` errors, `0` skipped.
+  - Focused POI: `.\mvnw.cmd test "-Dtest=PointOfInterestSecurityTest"` → `7` run, `0` failures, `0` errors, `0` skipped.
+  - Full: `.\mvnw.cmd test` → `43` run, `0` failures, `0` errors, `1` skipped (`SmartvacationplannerApplicationTests`; missing `DB_USERNAME` / `DB_PASSWORD`).
+- `2026-07-30` — Added POI HTTP/security behavior coverage against the real production `SecurityFilterChain`.
+  - New test class: `PointOfInterestSecurityTest` (7 scenarios: CUSTOMER GET collection/item allow, CUSTOMER POST/PUT/DELETE deny, ADMIN POST allow, unauthenticated GET 401).
+  - Test-scoped dependency added: `spring-boot-starter-security-test` (no explicit version; Boot 4.0.6 BOM-managed).
+  - No production code changed.
+  - Affected Coverage IDs: `SECURITY-FILTER-CHAIN`, `HTTP-POI-LIST`, `HTTP-POI-GET`, `HTTP-POI-CREATE`, `HTTP-POI-UPDATE`, `HTTP-POI-DELETE` (all Partial). `ERR-HANDLER-ACCESS-DENIED` unchanged.
+  - Removed stale POI path-mismatch production concern after collection and ID path proofs.
+  - Unique HTTP-endpoint metric: `1/26` (`3.8%`) → `5/26` (`19.2%`); previous `HTTP-VAC-CREATE` excluded from numerator while its WebMvcTests fail under security-test auto-config.
+  - Service-unit, DB, and Google metrics unchanged.
+  - Focused command: `.\mvnw.cmd test "-Dtest=PointOfInterestSecurityTest"` → `7` run, `0` failures, `0` errors, `0` skipped.
+  - Full command: `.\mvnw.cmd test` → `43` run, `2` failures, `0` errors, `1` skipped. Failures: `VacationControllerHappyPathTest` (expected 200, actual 403) and `VacationControllerValidationTest` (expected 400, actual 403). Follow-up approval required; those files were not modified.
+- `2026-07-30` — `VacationDayServiceImplTest` alignment for previously implemented `createVacationDay` production-order change.
+  - Test alignment only: local validation now runs before duplicate checks and Google lookup; four validation-failure tests stopped stubbing unreachable collaborators.
+  - Strengthened short-circuit interaction assertions (`existsByVacationIdAndDayNumber`, `existsByVacationIdAndDate`, `searchPlace`, `save` never called on local validation failure).
+  - No production code changed in this implementation slice.
+  - Affected Coverage IDs: `DAY-CREATE`, `DB-DAY-EXISTS-DAY-NUMBER`, `DB-DAY-EXISTS-DATE`.
+  - Coverage statuses and inventory-based percentages remained unchanged.
+  - Removed stale concern that Google Places ran before simple VacationDay validation.
+  - Focused command: `.\mvnw.cmd test "-Dtest=VacationDayServiceImplTest"` → `10` run, `0` failures, `0` errors, `0` skipped.
+  - Full command: `.\mvnw.cmd test` → `36` run, `0` failures, `0` errors, `1` skipped (`SmartvacationplannerApplicationTests`; missing `DB_USERNAME` / `DB_PASSWORD`).
 - `2026-07-28` — Initial coverage map created from the current repository state.
   - Documentation and workflow-governance slice only.
   - Existing production and automated-test coverage documented.

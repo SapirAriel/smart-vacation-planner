@@ -171,7 +171,7 @@ class VacationDayServiceImplTest {
         Vacation vacation = createVacation(VACATION_ID, VACATION_START, VACATION_END);
         LocalDate dateBeforeStart = LocalDate.of(2026, 6, 30);
         CreateVacationDayRequest request = createRequest(dateBeforeStart, 1);
-        stubSuccessfulPreconditions(vacation, request);
+        Mockito.when(authService.getVacationForCurrentUser(VACATION_ID)).thenReturn(vacation);
 
         // Act + Assert
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
@@ -179,6 +179,9 @@ class VacationDayServiceImplTest {
         });
 
         assertEquals("Date must be on or after vacation startDate", ex.getMessage());
+        Mockito.verify(dayRepo, Mockito.never()).existsByVacationIdAndDayNumber(anyInt(), anyInt());
+        Mockito.verify(dayRepo, Mockito.never()).existsByVacationIdAndDate(anyInt(), any(LocalDate.class));
+        Mockito.verify(googlePlacesClient, Mockito.never()).searchPlace(anyString());
         Mockito.verify(dayRepo, Mockito.never()).save(any(VacationDay.class));
     }
 
@@ -188,7 +191,7 @@ class VacationDayServiceImplTest {
         Vacation vacation = createVacation(VACATION_ID, VACATION_START, VACATION_END);
         LocalDate dateAfterEnd = LocalDate.of(2026, 7, 6);
         CreateVacationDayRequest request = createRequest(dateAfterEnd, 1);
-        stubSuccessfulPreconditions(vacation, request);
+        Mockito.when(authService.getVacationForCurrentUser(VACATION_ID)).thenReturn(vacation);
 
         // Act + Assert
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
@@ -196,6 +199,9 @@ class VacationDayServiceImplTest {
         });
 
         assertEquals("Date must be on or before vacation endDate", ex.getMessage());
+        Mockito.verify(dayRepo, Mockito.never()).existsByVacationIdAndDayNumber(anyInt(), anyInt());
+        Mockito.verify(dayRepo, Mockito.never()).existsByVacationIdAndDate(anyInt(), any(LocalDate.class));
+        Mockito.verify(googlePlacesClient, Mockito.never()).searchPlace(anyString());
         Mockito.verify(dayRepo, Mockito.never()).save(any(VacationDay.class));
     }
 
@@ -248,7 +254,7 @@ class VacationDayServiceImplTest {
         Vacation vacation = createVacation(VACATION_ID, VACATION_START, VACATION_END);
         LocalDate inRangeDate = LocalDate.of(2026, 7, 2);
         CreateVacationDayRequest request = createRequest(inRangeDate, 0);
-        stubSuccessfulPreconditions(vacation, request);
+        Mockito.when(authService.getVacationForCurrentUser(VACATION_ID)).thenReturn(vacation);
 
         // Act + Assert
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
@@ -256,6 +262,9 @@ class VacationDayServiceImplTest {
         });
 
         assertEquals("Day number must be greater than 0", ex.getMessage());
+        Mockito.verify(dayRepo, Mockito.never()).existsByVacationIdAndDayNumber(anyInt(), anyInt());
+        Mockito.verify(dayRepo, Mockito.never()).existsByVacationIdAndDate(anyInt(), any(LocalDate.class));
+        Mockito.verify(googlePlacesClient, Mockito.never()).searchPlace(anyString());
         Mockito.verify(dayRepo, Mockito.never()).save(any(VacationDay.class));
     }
 
@@ -265,7 +274,7 @@ class VacationDayServiceImplTest {
         Vacation vacation = createVacation(VACATION_ID, VACATION_START, VACATION_END);
         LocalDate inRangeDate = VACATION_START.plusDays(1);
         CreateVacationDayRequest request = createRequest(inRangeDate, 6);
-        stubSuccessfulPreconditions(vacation, request);
+        Mockito.when(authService.getVacationForCurrentUser(VACATION_ID)).thenReturn(vacation);
 
         // Act + Assert
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
@@ -273,6 +282,9 @@ class VacationDayServiceImplTest {
         });
 
         assertEquals("Day number must be less than or equal to vacation duration", ex.getMessage());
+        Mockito.verify(dayRepo, Mockito.never()).existsByVacationIdAndDayNumber(anyInt(), anyInt());
+        Mockito.verify(dayRepo, Mockito.never()).existsByVacationIdAndDate(anyInt(), any(LocalDate.class));
+        Mockito.verify(googlePlacesClient, Mockito.never()).searchPlace(anyString());
         Mockito.verify(dayRepo, Mockito.never()).save(any(VacationDay.class));
     }
 

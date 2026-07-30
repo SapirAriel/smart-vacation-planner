@@ -3,6 +3,8 @@ import com.sapir.smartvacationplanner.exception.GlobalExceptionHandler;
 import com.sapir.smartvacationplanner.service.VacationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -10,12 +12,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 
 @WebMvcTest(VacationController.class)
+@AutoConfigureMockMvc(addFilters = false)
 // Loads only the web layer for VacationController
 // This includes request handling, JSON binding, validation, and response mapping
 // It does not load the full application context
+// Security filters are intentionally disabled; filter-chain coverage lives in PointOfInterestSecurityTest
 
 @Import(GlobalExceptionHandler.class)
 // Adds the custom global exception handler to this test context

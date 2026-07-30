@@ -48,7 +48,6 @@ public class VacationDayController {
     @GetMapping("/page")
     public Page<VacationDayResponse> searchVacationDays(@RequestParam(required = false) DayType dayType, 
     @RequestParam(required = false) LocalDate date,
-    @RequestParam(required = false) String hotelPlaceName,
     @RequestParam(required = false) Integer dayNumber,
     @PathVariable Integer vacationId, 
         @PageableDefault(page = 0, size = 5, sort = "date", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -97,7 +96,10 @@ public class VacationDayController {
         vacationDayResponse.setDate(vacationDay.getDate());
         vacationDayResponse.setDayNumber(vacationDay.getDayNumber());
         vacationDayResponse.setDayType(vacationDay.getDayType());
-        vacationDayResponse.setHotelPlaceName(vacationDay.getHotelPlace().getPlaceName());
+
+        if (vacationDay.getHotelPlace() != null) {
+            vacationDayResponse.setHotelPlaceName(vacationDay.getHotelPlace().getPlaceName());
+        }
         return vacationDayResponse;
     }
 

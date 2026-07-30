@@ -62,6 +62,8 @@ public class VacationDayServiceImpl implements VacationDayService {
     public VacationDay createVacationDay(Integer vacationId, CreateVacationDayRequest request) {
         Vacation vacation = authorizationService.getVacationForCurrentUser(vacationId);
 
+        validateVacationDayConstraints(vacation, request.getDate(), request.getDayNumber());
+
         if (vacationDayRepository.existsByVacationIdAndDayNumber(vacationId, request.getDayNumber())) {
             throw new DuplicateResourceException("Day number already exists for this vacation");}
         
@@ -72,7 +74,6 @@ public class VacationDayServiceImpl implements VacationDayService {
         Place hotelPlace = new Place(request.getHotelPlaceName(), hotelPlaceResult.placeId(), hotelPlaceResult.formattedAddress(), hotelPlaceResult.city(), hotelPlaceResult.country(), hotelPlaceResult.latitude(), hotelPlaceResult.longitude());
 
         VacationDay vacationDay = new VacationDay(vacation, request.getDate(), request.getDayNumber(), request.getDayType(), hotelPlace);
-        validateVacationDayConstraints(vacationDay);
         return vacationDayRepository.save(vacationDay);
     }
 
@@ -86,7 +87,6 @@ public class VacationDayServiceImpl implements VacationDayService {
             existing.setHotelPlace(hotelPlace);
         }
         existing.setDayType(request.getDayType());
-        validateVacationDayConstraints(existing);
         return vacationDayRepository.save(existing);
     }
 
@@ -102,7 +102,6 @@ public class VacationDayServiceImpl implements VacationDayService {
             Place hotelPlace = new Place(request.getHotelPlaceName(), placeResult.placeId(), placeResult.formattedAddress(), placeResult.city(), placeResult.country(), placeResult.latitude(), placeResult.longitude());
             existing.setHotelPlace(hotelPlace);
         }
-        validateVacationDayConstraints(existing);
         return vacationDayRepository.save(existing);
     }
 
@@ -118,21 +117,25 @@ public class VacationDayServiceImpl implements VacationDayService {
         vacationDayRepository.delete(vacationDay);
     }
 
-    private void validateVacationDayConstraints(VacationDay vacationDay) {
+    private void validateVacationDayConstraints(Vacation vacation, LocalDate date, Integer dayNumber) {
 
-        if (vacationDay.getDate() != null
-        && vacationDay.getDate().isBefore(vacationDay.getVacation().getStartDate())) {
-            throw new IllegalArgumentException("Date must be on or after vacation startDate");}
+        if (date == null) {
+            throw new IllegalArgumentException("Date is required");}
 
-        if (vacationDay.getDate() != null
-        && vacationDay.getDate().isAfter(vacationDay.getVacation().getEndDate())) {
-            throw new IllegalArgumentException("Date must be on or before vacation endDate");}
+        if (dayNumber == null) {
+            throw new IllegalArgumentException("Day number is required");}
 
-        if (vacationDay.getDayNumber() < 1) {
+        if (dayNumber < 1) {
             throw new IllegalArgumentException("Day number must be greater than 0");}
 
-        long vacationDuration = 1+ChronoUnit.DAYS.between(vacationDay.getVacation().getStartDate(), vacationDay.getVacation().getEndDate());
-        if (vacationDay.getDayNumber() > vacationDuration) {
+        if (date.isBefore(vacation.getStartDate())) {
+            throw new IllegalArgumentException("Date must be on or after vacation startDate");}
+
+        if (date.isAfter(vacation.getEndDate())) {
+            throw new IllegalArgumentException("Date must be on or before vacation endDate");}
+
+        long vacationDuration = 1+ChronoUnit.DAYS.between(vacation.getStartDate(), vacation.getEndDate());
+        if (dayNumber > vacationDuration) {
             throw new IllegalArgumentException("Day number must be less than or equal to vacation duration");}
 
     }

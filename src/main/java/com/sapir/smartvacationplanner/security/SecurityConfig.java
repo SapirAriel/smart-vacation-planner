@@ -92,15 +92,13 @@ public class SecurityConfig {
                 .hasRole("ADMIN")
 
                 // point of interests - admin can manage all point of interests
-                .requestMatchers(HttpMethod.GET, "/api/v1/points-of-interests/**")
+                .requestMatchers(HttpMethod.GET, "/api/v1/points-of-interest/**")
                 .hasAnyRole("CUSTOMER", "ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/v1/points-of-interests/**")
+                .requestMatchers(HttpMethod.POST, "/api/v1/points-of-interest/**")
                 .hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/points-of-interests/**")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/points-of-interest/**")
                 .hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PATCH, "/api/v1/points-of-interests/**")
-                .hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/points-of-interests/**")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/points-of-interest/**")
                 .hasRole("ADMIN")
 
                 .anyRequest().authenticated()
