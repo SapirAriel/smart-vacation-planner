@@ -104,6 +104,15 @@ public class VacationDayActivity {
             ", distanceKmFromPrevious=" + distanceKmFromPrevious +
             '}';
     }
+
+    public void clearPlanningData() {
+        this.plannedStartTime = null;
+        this.plannedEndTime = null;
+        this.travelMinutesFromPrevious = 0;
+        this.distanceKmFromPrevious = 0.0;
+    }
+
+    
 }
     
 

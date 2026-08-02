@@ -15,6 +15,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import com.sapir.smartvacationplanner.dto.vacationDay.CreateVacationDayRequest;
+import com.sapir.smartvacationplanner.dto.vacationDay.PatchVacationDayRequest;
+import com.sapir.smartvacationplanner.dto.vacationDay.UpdateVacationDayRequest;
+import com.sapir.smartvacationplanner.common.place.Place;
 import com.sapir.smartvacationplanner.entity.Vacation;
 import com.sapir.smartvacationplanner.entity.VacationDay;
 import com.sapir.smartvacationplanner.entity.enums.DayType;
@@ -25,6 +28,9 @@ import com.sapir.smartvacationplanner.repository.VacationDayActivityRepository;
 import com.sapir.smartvacationplanner.repository.VacationDayRepository;
 import org.springframework.security.access.AccessDeniedException;
 
+import java.util.Optional;
+
+import static org.mockito.Mockito.never;
 @ExtendWith(MockitoExtension.class)
 class VacationDayServiceImplTest {
 
@@ -326,5 +332,220 @@ class VacationDayServiceImplTest {
         Mockito.verify(dayRepo, Mockito.never()).existsByVacationIdAndDate(anyInt(), any(LocalDate.class));
         Mockito.verify(googlePlacesClient, Mockito.never()).searchPlace(anyString());
         Mockito.verify(dayRepo, Mockito.never()).save(any(VacationDay.class));
+    }
+
+    private static final Integer DAY_ID = 20;
+    private static final String NEW_HOTEL_NAME = "New Hotel";
+
+    private VacationDay existingDayWithHotel(String hotelName, DayType dayType) {
+        Vacation vacation = createVacation(VACATION_ID, VACATION_START, VACATION_END);
+        Place hotel = new Place(hotelName);
+        VacationDay day = new VacationDay(vacation, VACATION_START, 1, dayType, hotel);
+        day.setId(DAY_ID);
+        return day;
+    }
+
+    private void stubAuthorizedDay(VacationDay day) {
+        Mockito.when(authService.getVacationForCurrentUser(VACATION_ID)).thenReturn(day.getVacation());
+        Mockito.when(dayRepo.findByVacationAndId(day.getVacation(), DAY_ID)).thenReturn(Optional.of(day));
+    }
+
+    @Test
+    void updateVacationDay_whenHotelChanges_invalidatesPlanning() {
+        // Arrange
+        VacationDay existing = existingDayWithHotel(HOTEL_NAME, DayType.DAY);
+        stubAuthorizedDay(existing);
+
+        UpdateVacationDayRequest request = new UpdateVacationDayRequest();
+        request.setHotelPlaceName(NEW_HOTEL_NAME);
+        request.setDayType(DayType.DAY);
+
+        PlaceResult newPlace = new PlaceResult(
+                "place-2", "2 New Street", 3.0, 4.0, "New City", "New Country");
+        Mockito.when(googlePlacesClient.searchPlace(NEW_HOTEL_NAME)).thenReturn(newPlace);
+        Mockito.when(dayRepo.save(existing)).thenReturn(existing);
+        Mockito.when(activityRepo.clearPlanningDataByVacationDayId(DAY_ID)).thenReturn(1);
+
+        // Act
+        VacationDay result = service.updateVacationDay(VACATION_ID, DAY_ID, request);
+
+        // Assert
+        assertAll(
+                () -> assertSame(existing, result),
+                () -> assertEquals(NEW_HOTEL_NAME, result.getHotelPlace().getPlaceName()),
+                () -> assertEquals("place-2", result.getHotelPlace().getPlaceId()),
+                () -> assertEquals(DayType.DAY, result.getDayType())
+        );
+        Mockito.verify(googlePlacesClient).searchPlace(NEW_HOTEL_NAME);
+        Mockito.verify(dayRepo, Mockito.times(1)).save(existing);
+        Mockito.verify(activityRepo, Mockito.times(1)).clearPlanningDataByVacationDayId(DAY_ID);
+    }
+
+    @Test
+    void updateVacationDay_whenHotelUnchanged_doesNotInvalidatePlanning() {
+        // Arrange
+        VacationDay existing = existingDayWithHotel(HOTEL_NAME, DayType.DAY);
+        stubAuthorizedDay(existing);
+
+        UpdateVacationDayRequest request = new UpdateVacationDayRequest();
+        request.setHotelPlaceName(HOTEL_NAME);
+        request.setDayType(DayType.NIGHT);
+
+        Mockito.when(dayRepo.save(existing)).thenReturn(existing);
+
+        // Act
+        VacationDay result = service.updateVacationDay(VACATION_ID, DAY_ID, request);
+
+        // Assert
+        assertAll(
+                () -> assertSame(existing, result),
+                () -> assertEquals(HOTEL_NAME, result.getHotelPlace().getPlaceName()),
+                () -> assertEquals(DayType.NIGHT, result.getDayType())
+        );
+        Mockito.verify(googlePlacesClient, never()).searchPlace(anyString());
+        Mockito.verify(dayRepo, Mockito.times(1)).save(existing);
+        Mockito.verify(activityRepo, never()).clearPlanningDataByVacationDayId(anyInt());
+    }
+
+    @Test
+    void updateVacationDay_whenGoogleLookupFails_doesNotInvalidatePlanning() {
+        // Arrange
+        VacationDay existing = existingDayWithHotel(HOTEL_NAME, DayType.DAY);
+        stubAuthorizedDay(existing);
+
+        UpdateVacationDayRequest request = new UpdateVacationDayRequest();
+        request.setHotelPlaceName(NEW_HOTEL_NAME);
+        request.setDayType(DayType.DAY);
+
+        Mockito.when(googlePlacesClient.searchPlace(NEW_HOTEL_NAME))
+                .thenThrow(new IllegalArgumentException("No place found for query: " + NEW_HOTEL_NAME));
+
+        // Act & Assert
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.updateVacationDay(VACATION_ID, DAY_ID, request)
+        );
+        assertEquals("No place found for query: " + NEW_HOTEL_NAME, ex.getMessage());
+        Mockito.verify(dayRepo, never()).save(any(VacationDay.class));
+        Mockito.verify(activityRepo, never()).clearPlanningDataByVacationDayId(anyInt());
+    }
+
+    @Test
+    void updateVacationDay_whenClearPlanningDataThrows_propagatesException() {
+        // Arrange
+        VacationDay existing = existingDayWithHotel(HOTEL_NAME, DayType.DAY);
+        stubAuthorizedDay(existing);
+
+        UpdateVacationDayRequest request = new UpdateVacationDayRequest();
+        request.setHotelPlaceName(NEW_HOTEL_NAME);
+        request.setDayType(DayType.DAY);
+
+        Mockito.when(googlePlacesClient.searchPlace(NEW_HOTEL_NAME)).thenReturn(placeResult());
+        Mockito.when(dayRepo.save(existing)).thenReturn(existing);
+        Mockito.when(activityRepo.clearPlanningDataByVacationDayId(DAY_ID))
+                .thenThrow(new RuntimeException("clear planning data failed"));
+
+        // Act & Assert
+        RuntimeException ex = assertThrows(
+                RuntimeException.class,
+                () -> service.updateVacationDay(VACATION_ID, DAY_ID, request)
+        );
+        assertEquals("clear planning data failed", ex.getMessage());
+        Mockito.verify(dayRepo, Mockito.times(1)).save(existing);
+        Mockito.verify(activityRepo, Mockito.times(1)).clearPlanningDataByVacationDayId(DAY_ID);
+    }
+
+    @Test
+    void patchVacationDay_whenHotelChanges_invalidatesPlanning() {
+        // Arrange
+        VacationDay existing = existingDayWithHotel(HOTEL_NAME, DayType.DAY);
+        stubAuthorizedDay(existing);
+
+        PatchVacationDayRequest request = new PatchVacationDayRequest();
+        request.setHotelPlaceName(NEW_HOTEL_NAME);
+
+        PlaceResult newPlace = new PlaceResult(
+                "place-2", "2 New Street", 3.0, 4.0, "New City", "New Country");
+        Mockito.when(googlePlacesClient.searchPlace(NEW_HOTEL_NAME)).thenReturn(newPlace);
+        Mockito.when(dayRepo.save(existing)).thenReturn(existing);
+        Mockito.when(activityRepo.clearPlanningDataByVacationDayId(DAY_ID)).thenReturn(1);
+
+        // Act
+        VacationDay result = service.patchVacationDay(VACATION_ID, DAY_ID, request);
+
+        // Assert
+        assertEquals(NEW_HOTEL_NAME, result.getHotelPlace().getPlaceName());
+        assertEquals(DayType.DAY, result.getDayType());
+        Mockito.verify(googlePlacesClient).searchPlace(NEW_HOTEL_NAME);
+        Mockito.verify(dayRepo, Mockito.times(1)).save(existing);
+        Mockito.verify(activityRepo, Mockito.times(1)).clearPlanningDataByVacationDayId(DAY_ID);
+    }
+
+    @Test
+    void patchVacationDay_whenOnlyDayTypeChanges_doesNotInvalidatePlanning() {
+        // Arrange
+        VacationDay existing = existingDayWithHotel(HOTEL_NAME, DayType.DAY);
+        stubAuthorizedDay(existing);
+
+        PatchVacationDayRequest request = new PatchVacationDayRequest();
+        request.setDayType(DayType.HALF_DAY);
+
+        Mockito.when(dayRepo.save(existing)).thenReturn(existing);
+
+        // Act
+        VacationDay result = service.patchVacationDay(VACATION_ID, DAY_ID, request);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(DayType.HALF_DAY, result.getDayType()),
+                () -> assertEquals(HOTEL_NAME, result.getHotelPlace().getPlaceName())
+        );
+        Mockito.verify(googlePlacesClient, never()).searchPlace(anyString());
+        Mockito.verify(dayRepo, Mockito.times(1)).save(existing);
+        Mockito.verify(activityRepo, never()).clearPlanningDataByVacationDayId(anyInt());
+    }
+
+    @Test
+    void patchVacationDay_whenHotelUnchanged_doesNotInvalidatePlanning() {
+        // Arrange
+        VacationDay existing = existingDayWithHotel(HOTEL_NAME, DayType.DAY);
+        String originalPlaceId = existing.getHotelPlace().getPlaceId();
+        stubAuthorizedDay(existing);
+
+        PatchVacationDayRequest request = new PatchVacationDayRequest();
+        request.setHotelPlaceName(HOTEL_NAME);
+
+        Mockito.when(dayRepo.save(existing)).thenReturn(existing);
+
+        // Act
+        VacationDay result = service.patchVacationDay(VACATION_ID, DAY_ID, request);
+
+        // Assert
+        assertEquals(HOTEL_NAME, result.getHotelPlace().getPlaceName());
+        assertEquals(originalPlaceId, result.getHotelPlace().getPlaceId());
+        Mockito.verify(googlePlacesClient, never()).searchPlace(anyString());
+        Mockito.verify(dayRepo, Mockito.times(1)).save(existing);
+        Mockito.verify(activityRepo, never()).clearPlanningDataByVacationDayId(anyInt());
+    }
+
+    @Test
+    void patchVacationDay_whenGoogleLookupFails_doesNotInvalidatePlanning() {
+        // Arrange
+        VacationDay existing = existingDayWithHotel(HOTEL_NAME, DayType.DAY);
+        stubAuthorizedDay(existing);
+
+        PatchVacationDayRequest request = new PatchVacationDayRequest();
+        request.setHotelPlaceName(NEW_HOTEL_NAME);
+
+        Mockito.when(googlePlacesClient.searchPlace(NEW_HOTEL_NAME))
+                .thenThrow(new IllegalArgumentException("No place found for query: " + NEW_HOTEL_NAME));
+
+        // Act & Assert
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.patchVacationDay(VACATION_ID, DAY_ID, request)
+        );
+        Mockito.verify(dayRepo, never()).save(any(VacationDay.class));
+        Mockito.verify(activityRepo, never()).clearPlanningDataByVacationDayId(anyInt());
     }
 }

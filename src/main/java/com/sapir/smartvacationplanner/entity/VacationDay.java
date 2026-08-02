@@ -133,4 +133,13 @@ public String toString() {
         '}';
 }
 
+public void addActivity(VacationDayActivity activity) {
+    this.vacationDayActivities.add(activity);
+    activity.setVacationDay(this);
+}
+
+public void removeActivity(VacationDayActivity activity) {
+    this.vacationDayActivities.remove(activity);
+}
+
 }

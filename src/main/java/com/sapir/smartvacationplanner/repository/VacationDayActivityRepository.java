@@ -1,5 +1,8 @@
 package com.sapir.smartvacationplanner.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import com.sapir.smartvacationplanner.entity.VacationDayActivity;
 import com.sapir.smartvacationplanner.entity.VacationDay;
 import java.util.List;
@@ -19,5 +22,21 @@ public interface VacationDayActivityRepository extends JpaRepository<VacationDay
     List<VacationDayActivity> findByVacationDay_Id(Integer vacationDayId);
 
     Optional<VacationDayActivity> findByVacationDayAndId(VacationDay vacationDay, Integer vacationDayActivityId);
+
+    boolean existsByVacationDay_IdAndPointOfInterest_Id(Integer vacationDayId, Integer pointOfInterestId);
+
+    boolean existsByVacationDay_IdAndPointOfInterest_IdAndIdNot(
+            Integer vacationDayId, Integer pointOfInterestId, Integer activityId);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+        UPDATE VacationDayActivity a
+        SET a.plannedStartTime = null,
+            a.plannedEndTime = null,
+            a.travelMinutesFromPrevious = 0,
+            a.distanceKmFromPrevious = 0.0
+        WHERE a.vacationDay.id = :vacationDayId
+        """)
+    int clearPlanningDataByVacationDayId(@Param("vacationDayId") Integer vacationDayId);
 
 }

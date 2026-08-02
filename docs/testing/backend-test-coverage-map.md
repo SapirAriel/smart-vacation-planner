@@ -2,12 +2,14 @@
 
 ## Verification metadata
 
-- Last verified: `2026-07-30 19:08 UTC+03:00`
+- Last verified: `2026-08-02 17:46 UTC+03:00`
 - Verification source: actual Maven run plus repository inspection
-- Last focused VacationDay response-mapping command: `.\mvnw.cmd test "-Dtest=VacationDayControllerResponseMappingTest"`
-- Last focused VacationDay response-mapping result: `2` tests run, `0` failures, `0` errors, `0` skipped
+- Last focused VacationDay command: `.\mvnw.cmd test "-Dtest=VacationDayServiceImplTest"`
+- Last focused VacationDay result: `18` tests run, `0` failures, `0` errors, `0` skipped
+- Last focused VacationDayActivity command: `.\mvnw.cmd test "-Dtest=VacationDayActivityServiceImplTest"`
+- Last focused VacationDayActivity result: `10` tests run, `0` failures, `0` errors, `0` skipped
 - Last full test run command: `.\mvnw.cmd test`
-- Total tests run: `48`
+- Total tests run: `59`
 - Failures: `0`
 - Errors: `0`
 - Skipped: `1`
@@ -27,6 +29,7 @@
   - current suite includes mocked service-unit tests, vacation and VacationDay `@WebMvcTest` with `@AutoConfigureMockMvc(addFilters = false)`, POI security `@WebMvcTest` importing production `SecurityConfig`, and one skipped `@SpringBootTest`
   - full suite is green
   - null `hotelPlace` serializes `hotelPlaceName` as JSON `null` (`jsonPath("$.hotelPlaceName").value(nullValue())`)
+  - activity and VacationDay hotel-change planning invalidation are covered at mocked unit level only; real JPQL bulk UPDATE SQL and Spring transaction rollback remain unproven
 
 ## Coverage status definitions
 
@@ -73,8 +76,8 @@
 | `DAY-SEARCH` | `VacationDayServiceImpl.searchVacationDays(...)` | `GET /api/v1/vacations/{vacationId}/days/page` | Optional filters: `dayType`, `date`, `dayNumber`, plus `pageable` | None | Not covered | Not covered | Not covered | N/A | missing filter behavior and repo query proof | High | Frontend does not currently call `/page`; endpoint is not defective for that reason. Hotel-name search is not part of this contract |
 | `DAY-GET-BY-ID` | `VacationDayServiceImpl.getVacationDayById(Integer, Integer)` | `GET /api/v1/vacations/{vacationId}/days/{id}` | Delegates to scoped auth helper | None | Not covered | Not covered | Not covered | N/A | missing service-unit and auth propagation; HTTP response mapping covered under `HTTP-DAY-GET` | High | Service method itself remains untested; controller `toResponse` hotelPlaceName contract proven via shared mapper on GET-by-ID |
 | `DAY-CREATE` | `VacationDayServiceImpl.createVacationDay(Integer, CreateVacationDayRequest)` | `POST /api/v1/vacations/{vacationId}/days` | Authorization → local date/dayNumber validation → duplicate day-number check → duplicate date check → Google hotel lookup → entity creation → save; invalid date/dayNumber short-circuits before duplicate queries, Google, and save | `VacationDayServiceImplTest.createVacationDay_whenDateEqualsVacationStartDate_createsVacationDay`, `VacationDayServiceImplTest.createVacationDay_whenDateEqualsVacationEndDate_createsVacationDay`, `VacationDayServiceImplTest.createVacationDay_whenDateBeforeVacationStartDate_throwsIllegalArgumentException`, `VacationDayServiceImplTest.createVacationDay_whenDateAfterVacationEndDate_throwsIllegalArgumentException`, `VacationDayServiceImplTest.createVacationDay_whenDayNumberAlreadyExists_throwsDuplicateResourceException`, `VacationDayServiceImplTest.createVacationDay_whenDateAlreadyExists_throwsDuplicateResourceException`, `VacationDayServiceImplTest.createVacationDay_whenDayNumberIsZero_throwsIllegalArgumentException`, `VacationDayServiceImplTest.createVacationDay_whenDayNumberExceedsVacationDuration_throwsIllegalArgumentException`, `VacationDayServiceImplTest.createVacationDay_whenVacationBelongsToAnotherUser_throwsAccessDeniedException`, `VacationDayServiceImplTest.createVacationDay_whenUnauthorizedAndDuplicateDataExists_throwsAccessDeniedException` | Good at unit level | Not covered | Not covered | Not covered | missing HTTP mapping/validation/security, missing DB uniqueness proof, missing real Google integration, missing save-to-DB semantics | Critical | Google-dependent service behavior is exercised only through a mocked `GooglePlacesClient`; validation short-circuit before duplicates/Google/save is proven at unit level |
-| `DAY-UPDATE` | `VacationDayServiceImpl.updateVacationDay(Integer, Integer, UpdateVacationDayRequest)` | `PUT /api/v1/vacations/{vacationId}/days/{id}` | Replaces hotel Place only when name changes; updates dayType; validates constraints; saves | None | Not covered | Not covered | Not covered | Not covered | missing all behavior | Critical | Important immutable/mutable field contract currently untested |
-| `DAY-PATCH` | `VacationDayServiceImpl.patchVacationDay(Integer, Integer, PatchVacationDayRequest)` | `PATCH /api/v1/vacations/{vacationId}/days/{id}` | Partial dayType/hotel changes; validates after patch | None | Not covered | Not covered | Not covered | Not covered | missing all behavior | High | |
+| `DAY-UPDATE` | `VacationDayServiceImpl.updateVacationDay(Integer, Integer, UpdateVacationDayRequest)` | `PUT /api/v1/vacations/{vacationId}/days/{id}` | Auth → null-safe hotel compare → Google only when hotel changes → set dayType → save → `clearPlanningDataByVacationDayId` only when hotel changed (`@Transactional`) | `VacationDayServiceImplTest.updateVacationDay_whenHotelChanges_invalidatesPlanning`, `VacationDayServiceImplTest.updateVacationDay_whenHotelUnchanged_doesNotInvalidatePlanning`, `VacationDayServiceImplTest.updateVacationDay_whenGoogleLookupFails_doesNotInvalidatePlanning`, `VacationDayServiceImplTest.updateVacationDay_whenClearPlanningDataThrows_propagatesException` | Partial | Not covered | Not covered | Not covered | missing HTTP/security; date/dayNumber remain immutable; real bulk UPDATE/rollback unproven | Critical | dayType-only change does not invalidate; hotel change uses repository bulk clear, not in-memory collection |
+| `DAY-PATCH` | `VacationDayServiceImpl.patchVacationDay(Integer, Integer, PatchVacationDayRequest)` | `PATCH /api/v1/vacations/{vacationId}/days/{id}` | Auth → optional dayType; hotel only when supplied and changed → save → bulk clear only when hotel changed (`@Transactional`); null hotel means omit | `VacationDayServiceImplTest.patchVacationDay_whenHotelChanges_invalidatesPlanning`, `VacationDayServiceImplTest.patchVacationDay_whenOnlyDayTypeChanges_doesNotInvalidatePlanning`, `VacationDayServiceImplTest.patchVacationDay_whenHotelUnchanged_doesNotInvalidatePlanning`, `VacationDayServiceImplTest.patchVacationDay_whenGoogleLookupFails_doesNotInvalidatePlanning` | Partial | Not covered | Not covered | Not covered | missing HTTP/security; real bulk UPDATE/rollback unproven | High | Absent/null hotelPlaceName is not a change under current DTO contract |
 | `DAY-LIST-ACTIVITIES` | `VacationDayServiceImpl.getAllVacationDayActivities(Integer, Integer)` | None directly; activities have own controller | Authorized day then list activities | None | Not covered | Not covered | Not covered | N/A | missing all behavior | Medium | |
 | `DAY-DELETE` | `VacationDayServiceImpl.deleteVacationDay(Integer, Integer)` | `DELETE /api/v1/vacations/{vacationId}/days/{id}` | Authorized delete; cascade/orphan removal expected | None | Not covered | Not covered | Not covered | N/A | missing all behavior and persistence semantics | High | |
 
@@ -95,9 +98,9 @@
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | `ACT-LIST` | `VacationDayActivityServiceImpl.getAllVacationDayActivities(Integer, Integer)` | `GET /api/v1/vacations/{vacationId}/days/{vacationDayId}/activities` | Authorized list of activities for a day | None | Not covered | Not covered | Not covered | N/A | missing all behavior | Medium | |
 | `ACT-GET-BY-ID` | `VacationDayActivityServiceImpl.getVacationDayActivityById(Integer, Integer, Integer)` | `GET /api/v1/vacations/{vacationId}/days/{vacationDayId}/activities/{id}` | Authorized scoped get | None | Not covered | Not covered | Not covered | N/A | missing all behavior | High | |
-| `ACT-CREATE` | `VacationDayActivityServiceImpl.createVacationDayActivity(...)` | `POST /api/v1/vacations/{vacationId}/days/{vacationDayId}/activities` | Link day and POI; scheduling fields initially null; short-circuit on auth or missing POI | `VacationDayActivityServiceImplTest.createVacationDayActivity_whenOwnedDayAndExistingPointOfInterest_savesActivityWithNullSchedulingFields`, `VacationDayActivityServiceImplTest.createVacationDayActivity_whenPointOfInterestDoesNotExist_throwsResourceNotFoundExceptionAndDoesNotSave`, `VacationDayActivityServiceImplTest.createVacationDayActivity_whenVacationBelongsToAnotherUser_throwsAccessDeniedExceptionAndDoesNotLookupPointOfInterest` | Good at unit level | Not covered | Not covered | N/A | missing HTTP/security/DB proof | High | Null scheduling fields are explicitly covered |
-| `ACT-UPDATE` | `VacationDayActivityServiceImpl.updateVacationDayActivity(...)` | `PUT /api/v1/vacations/{vacationId}/days/{vacationDayId}/activities/{id}` | Replace POI; keep day/id/scheduling fields unchanged; short-circuit on missing access | `VacationDayActivityServiceImplTest.updateVacationDayActivity_whenAccessibleActivityAndExistingPointOfInterest_replacesPointOfInterestAndLeavesSchedulingUnchanged`, `VacationDayActivityServiceImplTest.updateVacationDayActivity_whenActivityCannotBeAccessed_throwsResourceNotFoundExceptionAndDoesNotLookupPointOfInterest` | Partial | Not covered | Not covered | N/A | missing update-with-missing-POI path, HTTP/security/DB proof | High | Possible production concern: existing itinerary schedule remains stale after POI replacement |
-| `ACT-DELETE` | `VacationDayActivityServiceImpl.deleteVacationDayActivity(...)` | `DELETE /api/v1/vacations/{vacationId}/days/{vacationDayId}/activities/{id}` | Authorized delete; no delete on missing access | `VacationDayActivityServiceImplTest.deleteVacationDayActivity_whenActivityIsAccessible_deletesExistingActivity`, `VacationDayActivityServiceImplTest.deleteVacationDayActivity_whenActivityCannotBeAccessed_throwsResourceNotFoundExceptionAndDoesNotDelete` | Good at unit level | Not covered | Not covered | N/A | missing HTTP/security/DB proof | Medium | |
+| `ACT-CREATE` | `VacationDayActivityServiceImpl.createVacationDayActivity(...)` | `POST /api/v1/vacations/{vacationId}/days/{vacationDayId}/activities` | Auth → POI load → duplicate POI check → `addActivity` + save → atomic `clearPlanningDataByVacationDayId` + in-memory `clearPlanningData`; short-circuit on auth/missing POI/duplicate | `VacationDayActivityServiceImplTest.createVacationDayActivity_whenOwnedDayAndExistingPointOfInterest_savesActivityAndInvalidatesScheduling`, `VacationDayActivityServiceImplTest.createVacationDayActivity_whenPointOfInterestAlreadyAssignedToDay_throwsDuplicateResourceExceptionAndDoesNotSaveOrInvalidate`, `VacationDayActivityServiceImplTest.createVacationDayActivity_whenPointOfInterestDoesNotExist_throwsResourceNotFoundExceptionAndDoesNotSave`, `VacationDayActivityServiceImplTest.createVacationDayActivity_whenVacationBelongsToAnotherUser_throwsAccessDeniedExceptionAndDoesNotLookupPointOfInterest`, `VacationDayActivityServiceImplTest.createVacationDayActivity_whenClearPlanningDataThrows_propagatesException` | Good at unit level | Not covered | Not covered | N/A | missing HTTP/security/DB proof; real bulk UPDATE and transaction rollback unproven | High | Service-level duplicate prevention and schedule invalidation covered; Mockito clear-failure test does not prove rollback |
+| `ACT-UPDATE` | `VacationDayActivityServiceImpl.updateVacationDayActivity(...)` | `PUT /api/v1/vacations/{vacationId}/days/{vacationDayId}/activities/{id}` | Auth → POI load → duplicate check excluding current activity via day entity id → replace POI → save → atomic invalidate; does not re-add to inverse collection | `VacationDayActivityServiceImplTest.updateVacationDayActivity_whenAccessibleActivityAndExistingPointOfInterest_replacesPointOfInterestAndInvalidatesScheduling`, `VacationDayActivityServiceImplTest.updateVacationDayActivity_whenPointOfInterestAlreadyUsedByAnotherActivity_throwsDuplicateResourceExceptionAndDoesNotMutate`, `VacationDayActivityServiceImplTest.updateVacationDayActivity_whenActivityCannotBeAccessed_throwsResourceNotFoundExceptionAndDoesNotLookupPointOfInterest` | Partial | Not covered | Not covered | N/A | missing update-with-missing-POI path, HTTP/security/DB proof | High | Same-POI update allowed via `IdNot`; scheduling cleared after successful update; itinerary is not auto-regenerated |
+| `ACT-DELETE` | `VacationDayActivityServiceImpl.deleteVacationDayActivity(...)` | `DELETE /api/v1/vacations/{vacationId}/days/{vacationDayId}/activities/{id}` | Auth → remove from inverse collection (no FK null) → orphanRemoval delete on flush → atomic `clearPlanningDataByVacationDayId`; no explicit `repository.delete` | `VacationDayActivityServiceImplTest.deleteVacationDayActivity_whenActivityIsAccessible_removesFromCollectionAndInvalidatesScheduling`, `VacationDayActivityServiceImplTest.deleteVacationDayActivity_whenActivityCannotBeAccessed_throwsResourceNotFoundExceptionAndDoesNotDelete` | Good at unit level | Not covered | Not covered | N/A | missing HTTP/security/DB proof; real orphanRemoval flush + bulk UPDATE interaction unproven | Medium | Explicit child delete removed to avoid double-delete under `@Transactional` |
 
 ### Itinerary and Scheduling
 
@@ -183,8 +186,9 @@
 | `DB-CONSTRAINT-DAY-VACATION-DAYNUM-UNIQUE` | `vacation_days unique(vacation_id, day_number)` | Duplicate day-number enforcement | None | Not covered | Not covered | Not covered | N/A | real DB constraint proof | High | |
 | `DB-CONSTRAINT-POI-PLACE-ID-UNIQUE` | `points_of_interest.place_id unique` | Place-id uniqueness | None | Not covered | Not covered | Not covered | N/A | real DB constraint proof | High | |
 | `DB-CONSTRAINT-POI-PLACE-NAME-UNIQUE` | `points_of_interest.place_name unique` | Place-name uniqueness | None | Not covered | Not covered | Not covered | N/A | real DB constraint proof | High | |
-| `DB-CONSTRAINT-ACTIVITY-VACATIONDAY-FK` | `vacation_day_activities.vacation_day_id not null FK` | Parent relationship required | None | Not covered | Not covered | Not covered | N/A | all behavior | Medium | |
+| `DB-CONSTRAINT-ACTIVITY-VACATIONDAY-FK` | `vacation_day_activities.vacation_day_id not null FK` | Required parent VacationDay foreign key only | None | Not covered | Not covered | Not covered | N/A | real NOT NULL / FK proof | Medium | Does not represent day+POI uniqueness; delete avoids nulling the owning side before orphanRemoval flush |
 | `DB-CONSTRAINT-ACTIVITY-POI-FK` | `vacation_day_activities.point_of_interest_id not null FK` | POI relationship required | None | Not covered | Not covered | Not covered | N/A | all behavior | Medium | |
+| `DB-CONSTRAINT-ACTIVITY-DAY-POI-UNIQUE` | Potential unique `(vacation_day_id, point_of_interest_id)` | Prevent duplicate POI assignment per VacationDay at DB level | None | Not covered | Not covered | Not covered | N/A | no unique constraint exists; no real DB uniqueness test | High | Service-level duplicate prevention exists on create/update; concurrent or out-of-service writes remain unprotected; no migration added |
 
 ### Google Places Integration
 
@@ -212,11 +216,11 @@ These are inventory-based counts from current source and tests. They are **not**
 
 ### 1. Public service methods with meaningful unit coverage
 
-- Numerator: `10`
+- Numerator: `12`
 - Denominator: `39`
-- Percentage: `25.6%`
+- Percentage: `30.8%`
 - Counted item set:
-  - Covered: `AUTH-VACATION-ACCESS`, `AUTH-DAY-ACCESS-BY-ID`, `VAC-CREATE`, `VAC-UPDATE`, `DAY-CREATE`, `POI-CREATE`, `POI-UPDATE`, `ACT-CREATE`, `ACT-UPDATE`, `ACT-DELETE`
+  - Covered: `AUTH-VACATION-ACCESS`, `AUTH-DAY-ACCESS-BY-ID`, `VAC-CREATE`, `VAC-UPDATE`, `DAY-CREATE`, `DAY-UPDATE`, `DAY-PATCH`, `POI-CREATE`, `POI-UPDATE`, `ACT-CREATE`, `ACT-UPDATE`, `ACT-DELETE`
   - Not yet meaningfully covered: all remaining service Coverage IDs in the service-domain tables above
 - Level represented: unit tests with mocks
 
@@ -244,11 +248,11 @@ publish as a percentage.
 ### 4. Repository queries and database constraints with real DB coverage
 
 - Numerator: `0`
-- Denominator: `27`
+- Denominator: `28`
 - Percentage: `0.0%`
 - Counted item set:
   - Repository query behaviors: `DB-USER-FIND-BY-EMAIL`, `DB-VAC-FIND-BY-USER-ID`, `DB-VAC-EXISTS-BY-USER-ID-NAME`, `DB-VAC-SEARCH-ALL`, `DB-VAC-SEARCH-BY-USER`, `DB-DAY-FIND-BY-VACATION`, `DB-DAY-FIND-BY-VACATION-ID`, `DB-DAY-FIND-BY-VACATION-AND-ID`, `DB-DAY-FIND-BY-VACATION-AND-DATE`, `DB-DAY-EXISTS-DAY-NUMBER`, `DB-DAY-EXISTS-DATE`, `DB-DAY-FIND-BY-VACATION-ID-DAY-TYPE`, `DB-DAY-SEARCH`, `DB-POI-FIND-BY-PLACE-NAME-IGNORE-CASE`, `DB-POI-FIND-BY-PLACE-ID`, `DB-POI-SEARCH`, `DB-ACT-FIND-BY-DAY`, `DB-ACT-FIND-BY-DAY-ID`, `DB-ACT-FIND-BY-DAY-AND-ID`
-  - Database constraints: `DB-CONSTRAINT-USER-EMAIL-UNIQUE`, `DB-CONSTRAINT-VAC-USER-NAME-UNIQUE`, `DB-CONSTRAINT-DAY-VACATION-DATE-UNIQUE`, `DB-CONSTRAINT-DAY-VACATION-DAYNUM-UNIQUE`, `DB-CONSTRAINT-POI-PLACE-ID-UNIQUE`, `DB-CONSTRAINT-POI-PLACE-NAME-UNIQUE`, `DB-CONSTRAINT-ACTIVITY-VACATIONDAY-FK`, `DB-CONSTRAINT-ACTIVITY-POI-FK`
+  - Database constraints: `DB-CONSTRAINT-USER-EMAIL-UNIQUE`, `DB-CONSTRAINT-VAC-USER-NAME-UNIQUE`, `DB-CONSTRAINT-DAY-VACATION-DATE-UNIQUE`, `DB-CONSTRAINT-DAY-VACATION-DAYNUM-UNIQUE`, `DB-CONSTRAINT-POI-PLACE-ID-UNIQUE`, `DB-CONSTRAINT-POI-PLACE-NAME-UNIQUE`, `DB-CONSTRAINT-ACTIVITY-VACATIONDAY-FK`, `DB-CONSTRAINT-ACTIVITY-POI-FK`, `DB-CONSTRAINT-ACTIVITY-DAY-POI-UNIQUE`
 - Level represented: real DB behavior only
 
 ### 5. External-integration behaviors covered beyond mocks
@@ -281,11 +285,12 @@ publish as a percentage.
 
 ### Behavior covered only through mocks
 
-- Duplicate checks in vacation/day/POI services
+- Duplicate checks in vacation/day/POI/activity services
+- Activity and VacationDay hotel-change schedule invalidation via mocked `clearPlanningDataByVacationDayId`
 - Parent-child repository scope (`findByVacationAndId`) in authorization/day/activity flows
-- Google failure and success effects in POI/day creation
+- Google failure and success effects in POI/day creation and day hotel update/patch
 - Authorization short-circuit behavior in day/activity services
-- Save/delete calls across all service unit tests
+- Save/delete/orphanRemoval-collection calls across all service unit tests
 
 ### Confirmed production behavior
 
@@ -302,24 +307,31 @@ publish as a percentage.
 - Finding an existing POI by name or by placeId returns the stored entity without merging metadata from the new request
 - PointOfInterest update preserves embedded `Place`
 - PointOfInterest update sets `notes` directly from the request, including `null`
-- VacationDayActivity update preserves scheduling fields
 - `VacationDayController.toResponse` populates `VacationDayResponse.hotelPlaceName` from embedded `hotelPlace.placeName` when present; when `hotelPlace` is null, Jackson serializes `hotelPlaceName` as JSON `null`
+- VacationDayActivity create synchronizes `VacationDay.vacationDayActivities` via `addActivity` and sets the owning `vacationDay` reference
+- VacationDayActivity update replaces PointOfInterest only and does not re-add the activity to the inverse collection
+- VacationDayActivity create and update reject duplicate PointOfInterest assignment on the same VacationDay with `DuplicateResourceException` (`Point of interest is already assigned to this vacation day`)
+- VacationDayActivity create, update, and delete run under method-level `@Transactional` and clear day scheduling fields via `clearPlanningDataByVacationDayId` after successful mutation; returned create/update entities also call `clearPlanningData()`
+- VacationDayActivity delete removes from the inverse collection without nulling the owning FK and relies on `orphanRemoval` (no explicit `repository.delete`)
+- VacationDay update/patch run under method-level `@Transactional` and call `clearPlanningDataByVacationDayId` only when the hotel place name actually changes; dayType-only changes do not invalidate under the current itinerary algorithm
+- `VacationDay.invalidateItinerary()` was removed; durable invalidation uses the repository bulk UPDATE only
 
 ### Possible production bugs or risky behavior
 
 - `PointOfInterestServiceImpl.deletePointOfInterest` deletes by id without explicit existence check
 - `PointOfInterestServiceImpl.createPointOfInterest` checks normalized name before Google placeId resolution, so distinct real places with the same name may collapse into one stored POI
 - `PointOfInterestServiceImpl` trims the request only for the first name lookup, but persists `request.getPlaceName()` unchanged, so lookup and stored value normalization are asymmetric
-- `VacationDayActivityServiceImpl.createVacationDayActivity` and `deleteVacationDayActivity` operate on the owning side only and do not synchronize the in-memory `VacationDay.activities` inverse collection
-- `VacationDayActivityServiceImpl` create, update, and delete do not clear persisted itinerary scheduling fields or regenerate the itinerary, so stored planning data can become stale after activity changes
+- No database unique constraint on `(vacation_day_id, point_of_interest_id)`; concurrent or non-service writers can still create duplicate POI assignments (`DB-CONSTRAINT-ACTIVITY-DAY-POI-UNIQUE`)
+- Real orphanRemoval flush + JPQL bulk schedule invalidation under a managed persistence context remains unproven without DB/integration tests
+- No explicit VacationDay scheduling-status field; clients must treat cleared planning fields as “needs regeneration” until `generateItinerary` is run again
 
 ### Unresolved business decisions
 
 - Whether some ownership failures should remain `403` vs `404` in future HTTP/security tests
 - Expected HTTP contract for delete-not-found behaviors that currently depend on repository/JPA behavior rather than explicit service exceptions
-- Whether assigning the same `PointOfInterest` to the same `VacationDay` more than once should be allowed; no service-level duplicate check or database unique constraint currently prevents it
 - Whether reusing an existing POI by name or placeId should preserve stored metadata or merge newer request metadata
 - Whether clearing POI notes by sending `null` in update is an intended contract
+- Whether to add an explicit VacationDay / activity scheduling-status model and selective itinerary regeneration after activity mutations
 
 ## Prioritized testing backlog
 
@@ -327,15 +339,16 @@ publish as a percentage.
 |---|---|---|---|---|---|---|
 | Critical | `ITINERARY-GENERATE`, `ITN-GET-*` | Unit + DB | focused unit tests first, later DB/integration | highest scheduling complexity; currently fully untested | Large | may need stable fixture graph; DB tests later |
 | Critical | `SECURITY-FILTER-CHAIN` remaining paths, `HTTP-VAC-DELETE` | HTTP/security | Spring MVC + real `SecurityConfig` | vacation/day/activity/itinerary authz rules still unproven | Medium-Large | none for MockMvc+WithMockUser; JDBC login still separate |
-| Critical | `DAY-UPDATE`, `DAY-PATCH`, `DAY-DELETE` | Unit + HTTP | service unit + controller tests | core mutable day flows completely uncovered | Medium | none |
+| Critical | `DAY-DELETE` remaining gaps; `DAY-UPDATE` / `DAY-PATCH` HTTP and DB proof | Unit + HTTP | controller / DB tests | day mutate HTTP/security and persistence still unproven beyond hotel-invalidation unit coverage | Medium | none |
 | High | `POI-CREATE`, `POI-UPDATE`, `POI-DELETE`, remaining `HTTP-POI-*` gaps | HTTP + DB | controller validation/DB tests; ADMIN PUT/DELETE allow | write uniqueness and non-security HTTP contracts not proven | Medium | DB tests for uniqueness |
-| High | `DB-*` repository and constraint rows | DB | `@DataJpaTest` or approved integration setup | all custom queries/constraints currently mocked-only | Large | product approval if infrastructure expands |
+| High | `DB-*` repository and constraint rows incl. `DB-CONSTRAINT-ACTIVITY-DAY-POI-UNIQUE` | DB | `@DataJpaTest` or approved integration setup | all custom queries/constraints currently mocked-only; day+POI unique constraint absent | Large | product approval if infrastructure expands |
+| High | Activity/day mutation integration: save + `clearPlanningDataByVacationDayId` rollback and real JPQL bulk UPDATE | DB/integration | Spring transactional integration tests | unit tests cannot prove rollback or bulk SQL | Medium | reachable DB / testcontainers approval |
 | High | `GOOGLE-*` | External integration | focused client tests with mocked transport | request construction and parsing entirely unproven | Medium | no new dependency required if existing `RestClient` can be stubbed |
 | High | `VAC-PATCH`, `VAC-DELETE`, `VAC-LIST-ALL`, `VAC-SEARCH` | Unit + HTTP | service + controller tests | common vacation flows missing | Medium | none |
 | High | `AUTH-CURRENT-USER`, `AUTH-DAY-ACCESS-BY-DATE`, `AUTH-ACTIVITY-*` | Unit | authorization service tests | core scoped auth helpers under-covered | Small-Medium | none |
 | Medium | `HTTP-DAY-*`, `HTTP-ACT-*` | HTTP | controller slice tests | mapping/validation/security gaps | Medium | may later need security fixtures |
 | Medium | `CTX-BOOTSTRAP` | Full context | environment-backed smoke | currently skipped in default local baseline | Small | `DB_USERNAME`, `DB_PASSWORD`, reachable MySQL |
-| Decision required | `ACT-CREATE`, `ACT-UPDATE`, `ACT-DELETE` — itinerary invalidation after activity mutations | Product + behavior | clarify contract before tests | Adding, replacing, or deleting an activity may leave stored itinerary scheduling data inconsistent with the current activity set. | Small once decided | product decision |
+| Decision required | Explicit scheduling-status model + selective regeneration after activity mutations | Product + behavior | clarify contract before tests | Planning fields are cleared after mutations, but `generateItinerary` is not auto-run and no day-level status flag exists | Medium once decided | product decision |
 
 ## Inventory denominator appendix
 
@@ -417,7 +430,7 @@ HTTP behavior-row count is larger than the unique endpoint count because
 behavior rows for the same vacation endpoints and are not counted as additional unique
 endpoints.
 
-### Repository-query and database-constraint denominator (`27`)
+### Repository-query and database-constraint denominator (`28`)
 
 - `DB-USER-FIND-BY-EMAIL`
 - `DB-VAC-FIND-BY-USER-ID`
@@ -446,6 +459,7 @@ endpoints.
 - `DB-CONSTRAINT-POI-PLACE-NAME-UNIQUE`
 - `DB-CONSTRAINT-ACTIVITY-VACATIONDAY-FK`
 - `DB-CONSTRAINT-ACTIVITY-POI-FK`
+- `DB-CONSTRAINT-ACTIVITY-DAY-POI-UNIQUE`
 
 ### External-integration denominator (`8`)
 
@@ -460,6 +474,38 @@ endpoints.
 
 ## Coverage change log
 
+- `2026-08-02` — Production: VacationDay update/patch hotel-change planning invalidation (expanded slice).
+  - `updateVacationDay` / `patchVacationDay` are `@Transactional`; remove early in-memory `invalidateItinerary()`; invalidate via `clearPlanningDataByVacationDayId` only when hotel name actually changes (null-safe `Objects.equals`).
+  - dayType-only changes save but do not invalidate; Google/auth failures do not clear planning.
+  - Removed unused `VacationDay.invalidateItinerary()`; kept `addActivity` / `removeActivity` and `VacationDayActivity.clearPlanningData`.
+  - Added 8 `VacationDayServiceImplTest` scenarios for update/patch invalidation branching.
+  - Coverage IDs: `DAY-UPDATE` and `DAY-PATCH` → Partial; `ACT-*` and `DB-CONSTRAINT-ACTIVITY-DAY-POI-UNIQUE` notes retained.
+  - Service-unit metric: `10/39` (`25.6%`) → `12/39` (`30.8%`). HTTP `8/26`, DB `0/28` (`0.0%`), Google unchanged.
+  - Focused day: `.\mvnw.cmd test "-Dtest=VacationDayServiceImplTest"` → `18` run, `0` failures, `0` errors, `0` skipped.
+  - Focused activity: `.\mvnw.cmd test "-Dtest=VacationDayActivityServiceImplTest"` → `10` run, `0` failures, `0` errors, `0` skipped.
+  - Full: `.\mvnw.cmd test` → `59` run, `0` failures, `0` errors, `1` skipped (`SmartvacationplannerApplicationTests`; missing `DB_USERNAME` / `DB_PASSWORD`).
+- `2026-08-02` — Production: atomic duplicate-POI prevention + day schedule invalidation for VacationDayActivity.
+  - Added repository `existsByVacationDay_IdAndPointOfInterest_Id`, `existsByVacationDay_IdAndPointOfInterest_IdAndIdNot`, and `clearPlanningDataByVacationDayId` (`@Modifying(flushAutomatically = true, clearAutomatically = true)`).
+  - Create/update/delete are `@Transactional`; mutation and schedule invalidation share one transaction.
+  - Delete uses orphanRemoval via `removeActivity` only (no explicit `repository.delete`); owning FK is not nulled.
+  - Returned create/update entities call `clearPlanningData()` because JPQL bulk updates bypass managed object state.
+  - Strengthened `VacationDayActivityServiceImplTest` (10 tests) for success, duplicate, auth short-circuit, and clear-failure propagation (does not prove real rollback).
+  - Coverage IDs: `ACT-CREATE`, `ACT-UPDATE`, `ACT-DELETE` notes updated (statuses unchanged: Good / Partial / Good).
+  - Added `DB-CONSTRAINT-ACTIVITY-DAY-POI-UNIQUE` (Not covered); DB denominator `27` → `28`, numerator still `0` (`0.0%`).
+  - Closed stale-scheduling concern after successful activity mutation; service-level duplicate decided; DB unique still absent; `generateItinerary` unchanged.
+  - Service-unit, HTTP, and Google metrics unchanged.
+  - Focused: `.\mvnw.cmd test "-Dtest=VacationDayActivityServiceImplTest"` → `10` run, `0` failures, `0` errors, `0` skipped.
+  - Full: `.\mvnw.cmd test` → `51` run, `0` failures, `0` errors, `1` skipped (`SmartvacationplannerApplicationTests`; missing `DB_USERNAME` / `DB_PASSWORD`).
+- `2026-08-02` — Production bidirectional sync correction for VacationDay ↔ VacationDayActivity.
+  - `VacationDay.removeActivity` now removes from the inverse collection only (no `setVacationDay(null)`), avoiding a non-null FK nulling transition before explicit delete.
+  - `VacationDayActivityServiceImpl.updateVacationDayActivity` no longer calls `addActivity` (prevents ArrayList duplicates).
+  - Create keeps `addActivity` + repository save; delete keeps collection sync + explicit repository delete.
+  - Strengthened `VacationDayActivityServiceImplTest` create/update/delete assertions for inverse-collection consistency.
+  - Coverage IDs updated (notes only): `ACT-CREATE`, `ACT-UPDATE`, `ACT-DELETE`, `DB-CONSTRAINT-ACTIVITY-VACATIONDAY-FK`.
+  - Removed stale concern that create/delete do not synchronize the inverse collection; itinerary-invalidation concern kept.
+  - Coverage statuses and inventory-based percentages unchanged (service-unit / HTTP / DB / Google metrics unchanged).
+  - Focused: `.\mvnw.cmd test "-Dtest=VacationDayActivityServiceImplTest"` → `7` run, `0` failures, `0` errors, `0` skipped.
+  - Full: `.\mvnw.cmd test` → `48` run, `0` failures, `0` errors, `1` skipped (`SmartvacationplannerApplicationTests`; missing `DB_USERNAME` / `DB_PASSWORD`).
 - `2026-07-30` — New HTTP response-mapping coverage for VacationDay GET-by-ID (`hotelPlaceName` contract).
   - Added `VacationDayControllerResponseMappingTest` (hotel present → `hotelPlaceName`; hotel null → 200 with JSON null `hotelPlaceName`).
   - Production already contained the `toResponse` hotelPlaceName mapping; no production code changed.
