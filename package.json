@@ -1,0 +1,40 @@
+{
+  "name": "smart-vacation-planner",
+  "version": "1.0.0",
+  "description": "Smart Vacation Planner is a backend-focused vacation planning system built with Java and Spring Boot.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },"scripts": {
+  "frontend": "npm --prefix frontend run dev",
+  "frontend:setup": "npm --prefix frontend install",
+  "frontend:build": "npm --prefix frontend run build",
+
+  "backend": "dotenv -e .env.backend -- .\\mvnw.cmd spring-boot:run",
+  "backend:test": "dotenv -e .env.backend -- .\\mvnw.cmd test",
+  "backend:build": "dotenv -e .env.backend -- .\\mvnw.cmd clean package",
+  "backend:clean": ".\\mvnw.cmd clean",
+
+  "dev": "concurrently -n BACKEND,FRONTEND \"npm run backend\" \"npm run frontend\"",
+
+  "test": "npm run backend:test",
+  "build": "npm run backend:build && npm run frontend:build",
+  "setup": "npm run frontend:setup"
+},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SapirAriel/smart-vacation-planner.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SapirAriel/smart-vacation-planner/issues"
+  },
+  "homepage": "https://github.com/SapirAriel/smart-vacation-planner#readme",
+  "devDependencies": {
+    "concurrently": "^10.0.4",
+    "dotenv-cli": "^11.0.0"
+  }
+}
